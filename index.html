@@ -1,0 +1,123 @@
+<script>
+// --- UTILIDADES ---
+const $ = (id) => document.getElementById(id);
+
+// Convierte cuotas a decimal (soporta americanas)
+function toDecimalOdds(value, fmt){
+  if(fmt === 'decimal') return Math.max(parseFloat(value || 0), 1.000001);
+  const a = parseFloat(value || 0);
+  if(isNaN(a)) return 1;
+  return a > 0 ? 1 + a/100 : 1 + 100/Math.abs(a);
+}
+
+// Formatos
+const formatPct = x => (100*x).toFixed(1)+'%';
+const formatMoney = x => 'Q '+x.toFixed(2);
+
+// --- POISSON ---
+const factCache = [0,0];
+function logFactorial(n){
+  if(n<2) return 0;
+  if(factCache[n]) return factCache[n];
+  let sum=0; for(let i=2;i<=n;i++) sum+=Math.log(i);
+  factCache[n]=sum; return sum;
+}
+function poissonPMF(k, lambda){
+  if(lambda<=0) return k===0?1:0;
+  return Math.exp(-lambda + k*Math.log(lambda) - logFactorial(k));
+}
+
+// --- CLAMP ---
+const clamp = (x,a,b)=>Math.max(a, Math.min(b,x));
+
+// --- CÁLCULOS PRINCIPALES ---
+function computeProbabilities(lambdaA, lambdaB){
+  // Probabilidad BTTS (ambos anotan)
+  const pNoA = Math.exp(-lambdaA);
+  const pNoB = Math.exp(-lambdaB);
+  const pNoBoth = Math.exp(-(lambdaA+lambdaB));
+  const pBTTS = 1 - pNoA - pNoB + pNoBoth;
+
+  // Probabilidad Over 2.5
+  const lambdaT = lambdaA+lambdaB;
+  const pOver25 = 1 - (poissonPMF(0,lambdaT)+poissonPMF(1,lambdaT)+poissonPMF(2,lambdaT));
+
+  return { pBTTS, pOver25 };
+}
+
+// Valor esperado y Kelly
+function computeEV(p, odds){
+  const ev = p*(odds-1)-(1-p);
+  const kelly = clamp(( (odds-1)*p - (1-p) ) / (odds-1), 0, 1);
+  return { ev, kelly };
+}
+
+// --- ACTUALIZAR UI ---
+function updateUI(prob, evKelly, bankroll){
+  $('pBTTS').textContent = formatPct(prob.pBTTS);
+  $('pO25').textContent = formatPct(prob.pOver25);
+
+  $('evBTTS').textContent = (evKelly.evBTTS>=0?'+':'')+evKelly.evBTTS.toFixed(3)+' por unidad';
+  $('evO25').textContent  = (evKelly.evO25>=0?'+':'')+evKelly.evO25.toFixed(3)+' por unidad';
+
+  $('kellyBTTS').textContent = (evKelly.kBTTS*100).toFixed(1)+'% ('+formatMoney(bankroll*evKelly.kBTTS)+')';
+  $('kellyO25').textContent  = (evKelly.kO25*100).toFixed(1)+'% ('+formatMoney(bankroll*evKelly.kO25)+')';
+}
+
+// --- FUNCIONES PRINCIPALES ---
+function recompute(){
+  const fmt = $('oddsFmt').value;
+  const oddsBTTS = toDecimalOdds($('oddsBTTS').value, fmt);
+  const oddsO25  = toDecimalOdds($('oddsOver25').value, fmt);
+
+  let lambdaA = parseFloat($('lambdaA').value) || 0;
+  let lambdaB = parseFloat($('lambdaB').value) || 0;
+  lambdaA = Math.max(0, lambdaA); lambdaB = Math.max(0, lambdaB);
+
+  const prob = computeProbabilities(lambdaA, lambdaB);
+  const evKellyBTTS = computeEV(prob.pBTTS, oddsBTTS);
+  const evKellyO25  = computeEV(prob.pOver25, oddsO25);
+
+  const bank = parseFloat($('bankroll').value) || 0;
+  updateUI(prob, { evBTTS: evKellyBTTS.ev, kBTTS: evKellyBTTS.kelly, evO25: evKellyO25.ev, kO25: evKellyO25.kelly }, bank);
+}
+
+// --- RECALCULO LAMBDA ---
+function recalcLambda(){
+  const gfA = parseFloat($('gfA').value), gaA = parseFloat($('gaA').value);
+  const gfB = parseFloat($('gfB').value), gaB = parseFloat($('gaB').value);
+  const L = parseFloat($('leagueAvg').value), h = parseFloat($('homeAdv').value);
+
+  const lambdaA = Math.max(0, (gfA*gaB/L)*h);
+  const lambdaB = Math.max(0, (gfB*gaA/L));
+  $('lambdaA').value = lambdaA.toFixed(2);
+  $('lambdaB').value = lambdaB.toFixed(2);
+  recompute();
+}
+
+// --- EVENTOS ---
+document.addEventListener('input', (e)=>{
+  if(e.target.tagName==='INPUT' || e.target.tagName==='SELECT') recompute();
+});
+$('recalc').addEventListener('click', recalcLambda);
+$('reset').addEventListener('click', ()=>{
+  document.querySelectorAll('input').forEach(i=>i.value=i.defaultValue);
+  $('oddsFmt').value='decimal';
+  recompute();
+});
+$('shareBtn').addEventListener('click', ()=>{
+  const params = {
+    gfA:$('gfA').value, gaA:$('gaA').value, gfB:$('gfB').value, gaB:$('gaB').value,
+    L:$('leagueAvg').value, h:$('homeAdv').value,
+    lA:$('lambdaA').value, lB:$('lambdaB').value,
+    fmt:$('oddsFmt').value, bk:$('bankroll').value,
+    oBTTS:$('oddsBTTS').value, oO25:$('oddsOver25').value
+  };
+  const url = location.origin+location.pathname+'?'+new URLSearchParams(params).toString();
+  navigator.clipboard.writeText(url).catch(()=>{});
+  $('shareLink').textContent = url+' (copiado al portapapeles)';
+});
+
+// --- INICIALIZACIÓN ---
+recalcLambda();
+</script>
