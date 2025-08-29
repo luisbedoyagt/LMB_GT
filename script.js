@@ -87,7 +87,48 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// MOSTRAR PARTIDOS DE HOY - VERSIÓN MEJORADA
+// FETCH EQUIPOS (con datos de partidos de hoy)
+// ----------------------
+async function fetchTeams() {
+  const leagueSelect = $('leagueSelect');
+  if (leagueSelect) leagueSelect.innerHTML = '<option value="">Cargando ligas...</option>';
+
+  try {
+    const res = await fetch(WEBAPP_URL);
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
+    }
+    const data = await res.json();
+    console.log('Datos recibidos del servidor:', data);
+    
+    const normalized = {};
+    for (const key in data.ligas) {
+      normalized[key] = (data.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
+    }
+    teamsByLeague = normalized;
+    partidosHoy = data.partidosHoy || [];
+    
+    console.log('Partidos de hoy:', partidosHoy);
+    
+    // Mostrar partidos de hoy si existen
+    if (partidosHoy.length > 0) {
+      mostrarPartidosHoy();
+    }
+    
+    localStorage.setItem('teamsByLeague', JSON.stringify(normalized));
+    return normalized;
+  } catch (err) {
+    console.error('Error en fetchTeams:', err);
+    const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
+    $('details').innerHTML = errorMsg;
+    if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
+    return {};
+  }
+}
+
+// ----------------------
+// MOSTRAR PARTIDOS DE HOY
 // ----------------------
 function mostrarPartidosHoy() {
   const partidosHoyList = $('partidosHoyList');
@@ -96,7 +137,7 @@ function mostrarPartidosHoy() {
     return;
   }
   
-  console.log('Partidos de hoy recibidos:', partidosHoy);
+  console.log('Mostrando partidos de hoy:', partidosHoy);
   
   if (!partidosHoy || partidosHoy.length === 0) {
     partidosHoyList.innerHTML = '<div class="partido-hoy-placeholder">No hay partidos programados para hoy</div>';
@@ -120,11 +161,11 @@ function mostrarPartidosHoy() {
 }
 
 // ----------------------
-// TOGGLE PARTIDOS DE HOY - VERSIÓN MEJORADA
+// TOGGLE PARTIDOS DE HOY
 // ----------------------
 function togglePartidosHoy() {
   const container = $('partidosHoyContainer');
-  const overlay = $('partidosHoyOverlay'); // Asegúrate de que el ID coincide
+  const overlay = $('partidosHoyOverlay');
   
   if (!container || !overlay) {
     console.error('No se encontraron los elementos del modal de partidos');
@@ -143,21 +184,21 @@ function togglePartidosHoy() {
       fetchTeams().then(() => {
         mostrarPartidosHoy();
       });
+    } else {
+      mostrarPartidosHoy();
     }
   }
 }
 
 // ----------------------
-// INICIALIZACIÓN - VERSIÓN MEJORADA
+// INICIALIZACIÓN
 // ----------------------
 async function init() {
-  clearTeamData('Home');
-  clearTeamData('Away');
-  updateCalcButton();
-
+  console.log('Inicializando aplicación...');
+  
   // Crear overlay para partidos de hoy
   const overlay = document.createElement('div');
-  overlay.id = 'partidosHoyOverlay'; // Este ID debe coincidir con el usado en togglePartidosHoy
+  overlay.id = 'partidosHoyOverlay';
   overlay.className = 'partidos-hoy-overlay';
   overlay.addEventListener('click', togglePartidosHoy);
   document.body.appendChild(overlay);
@@ -168,15 +209,21 @@ async function init() {
   
   if (toggleBtn) {
     toggleBtn.addEventListener('click', togglePartidosHoy);
+    console.log('Botón togglePartidosHoy configurado');
   } else {
     console.error('Botón togglePartidosHoy no encontrado');
   }
   
   if (closeBtn) {
     closeBtn.addEventListener('click', togglePartidosHoy);
+    console.log('Botón closePartidosHoy configurado');
   } else {
     console.error('Botón closePartidosHoy no encontrado');
   }
+
+  clearTeamData('Home');
+  clearTeamData('Away');
+  updateCalcButton();
 
   // Cargar datos iniciales
   try {
@@ -184,108 +231,46 @@ async function init() {
     
     // Inicializar selects de liga
     const leagueSelect = $('leagueSelect');
-    if (leagueSelect) {
-      leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
-      Object.keys(teamsByLeague).sort().forEach(code => {
-        const opt = document.createElement('option');
-        opt.value = code;
-        opt.textContent = leagueNames[code] || code;
-        leagueSelect.appendChild(opt);
-      });
-
-      leagueSelect.addEventListener('change', onLeagueChange);
-    }
-    
-    // Configurar eventos de equipos
     const teamHomeSelect = $('teamHome');
     const teamAwaySelect = $('teamAway');
     
-    if (teamHomeSelect) {
-      teamHomeSelect.addEventListener('change', () => {
-        if (restrictSameTeam()) {
-          fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
-          updateCalcButton();
-        }
-      });
-    }
-    
-    if (teamAwaySelect) {
-      teamAwaySelect.addEventListener('change', () => {
-        if (restrictSameTeam()) {
-          fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
-          updateCalcButton();
-        }
-      });
+    if (!leagueSelect || !teamHomeSelect || !teamAwaySelect) {
+      $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema con la interfaz HTML.</div>';
+      return;
     }
 
-    // Configurar botones
-    const recalcBtn = $('recalc');
-    const resetBtn = $('reset');
+    leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
+    Object.keys(teamsByLeague).sort().forEach(code => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = leagueNames[code] || code;
+      leagueSelect.appendChild(opt);
+    });
+
+    leagueSelect.addEventListener('change', onLeagueChange);
+    teamHomeSelect.addEventListener('change', () => {
+      if (restrictSameTeam()) {
+        fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
+        updateCalcButton();
+      }
+    });
+    teamAwaySelect.addEventListener('change', () => {
+      if (restrictSameTeam()) {
+        fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
+        updateCalcButton();
+      }
+    });
+
+    $('recalc').addEventListener('click', calculateAll);
+    $('reset').addEventListener('click', clearAll);
     
-    if (recalcBtn) recalcBtn.addEventListener('click', calculateAll);
-    if (resetBtn) resetBtn.addEventListener('click', clearAll);
+    console.log('Aplicación inicializada correctamente');
     
   } catch (error) {
     console.error('Error en inicialización:', error);
     $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema al inicializar la aplicación.</div>';
   }
 }
-
-// ----------------------
-// INICIALIZACIÓN
-// ----------------------
-async function init() {
-  clearTeamData('Home');
-  clearTeamData('Away');
-  updateCalcButton();
-
-  // Crear overlay para partidos de hoy
-  const overlay = document.createElement('div');
-  overlay.id = 'partidosHoyOverlay';
-  overlay.className = 'partidosHoy-overlay';
-  overlay.addEventListener('click', togglePartidosHoy);
-  document.body.appendChild(overlay);
-
-  // Configurar eventos para partidos de hoy
-  $('togglePartidosHoy').addEventListener('click', togglePartidosHoy);
-  $('closePartidosHoy').addEventListener('click', togglePartidosHoy);
-
-  teamsByLeague = await fetchTeams();
-  const leagueSelect = $('leagueSelect');
-  const teamHomeSelect = $('teamHome');
-  const teamAwaySelect = $('teamAway');
-
-  if (!leagueSelect || !teamHomeSelect || !teamAwaySelect) {
-    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema con la interfaz HTML.</div>';
-    return;
-  }
-
-  leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
-  Object.keys(teamsByLeague).sort().forEach(code => {
-    const opt = document.createElement('option');
-    opt.value = code;
-    opt.textContent = leagueNames[code] || code;
-    leagueSelect.appendChild(opt);
-  });
-
-  leagueSelect.addEventListener('change', onLeagueChange);
-  teamHomeSelect.addEventListener('change', () => {
-    if (restrictSameTeam()) {
-      fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
-      updateCalcButton();
-    }
-  });
-  teamAwaySelect.addEventListener('change', () => {
-    if (restrictSameTeam()) {
-      fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
-      updateCalcButton();
-    }
-  });
-
-  $('recalc').addEventListener('click', calculateAll);
-  $('reset').addEventListener('click', clearAll);
-}
-document.addEventListener('DOMContentLoaded', init);
 
 // ----------------------
 // FUNCIONES AUXILIARES
@@ -626,7 +611,7 @@ function calculateAll() {
 
   let suggestionText = `<span class="star">★</span><span class="main-bet">🏆 Apuesta principal: <strong>${maxOutcome.name} (${formatPct(maxOutcome.prob)})</strong></span>`;
 
-  // Lógica de umbrales para BTTS và O25
+  // Lógica de umbrales para BTTS y O25
   const bttsText = avgBTTS > 0.55 ? `✔ Ambos anotan (${formatPct(avgBTTS)})` :
                    avgBTTS < 0.45 ? `❌ No ambos anotan (${formatPct(1 - avgBTTS)})` :
                    `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
@@ -651,5 +636,5 @@ function calculateAll() {
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
 
-
-
+// Iniciar la aplicación cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', init);
