@@ -34,7 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyPtDBKNymqL0V6MTzswHZo_fItNjzWnFQ6Pk2_gPMLTFapIknIeCYTzqZTDTj7FcvAYA/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbykdJlzO-SNapMYES6o8KQQ9gdOnoKugUgP3MZkeHfkzJw7XrkXwaFwYk74BGqA9bR15g/exec";
 let teamsByLeague = {};
 
 const leagueNames = {
@@ -90,8 +90,15 @@ function normalizeTeam(raw) {
 // ----------------------
 function displayTodayMatches(data) {
   const matchesList = $('matchesList');
+  if (!matchesList) {
+    console.error('Elemento #matchesList no encontrado en el HTML');
+    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Elemento #matchesList no encontrado en el HTML.</div>';
+    return;
+  }
+
+  console.log('Datos de partidosFuturos:', data.partidosFuturos);
   if (!data.partidosFuturos || data.partidosFuturos.length === 0) {
-    matchesList.innerHTML = '<p class="small">No hay partidos programados para hoy.</p>';
+    matchesList.innerHTML = '<p class="small">No hay partidos programados para hoy después de la hora actual.</p>';
     return;
   }
 
@@ -544,4 +551,3 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
-
