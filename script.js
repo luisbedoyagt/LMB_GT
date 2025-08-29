@@ -87,76 +87,49 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// FETCH EQUIPOS (con datos de partidos de hoy)
-// ----------------------
-async function fetchTeams() {
-  const leagueSelect = $('leagueSelect');
-  if (leagueSelect) leagueSelect.innerHTML = '<option value="">Cargando ligas...</option>';
-
-  try {
-    const res = await fetch(WEBAPP_URL);
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
-    }
-    const data = await res.json();
-    const normalized = {};
-    for (const key in data.ligas) {
-      normalized[key] = (data.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
-    }
-    teamsByLeague = normalized;
-    partidosHoy = data.partidosHoy || [];
-    
-    // Mostrar partidos de hoy si existen
-    if (partidosHoy.length > 0) {
-      mostrarPartidosHoy();
-    }
-    
-    localStorage.setItem('teamsByLeague', JSON.stringify(normalized));
-    return normalized;
-  } catch (err) {
-    console.error('Error en fetchTeams:', err);
-    const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
-    $('details').innerHTML = errorMsg;
-    if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
-    return {};
-  }
-}
-
-// ----------------------
-// MOSTRAR PARTIDOS DE HOY
+// MOSTRAR PARTIDOS DE HOY - VERSIÓN MEJORADA
 // ----------------------
 function mostrarPartidosHoy() {
   const partidosHoyList = $('partidosHoyList');
-  if (!partidosHoyList) return;
+  if (!partidosHoyList) {
+    console.error('Elemento partidosHoyList no encontrado');
+    return;
+  }
   
-  if (partidosHoy.length === 0) {
-    partidosHoyList.innerHTML = '<div class="partido-hoy-placeholder">No hay partidos para hoy</div>';
+  console.log('Partidos de hoy recibidos:', partidosHoy);
+  
+  if (!partidosHoy || partidosHoy.length === 0) {
+    partidosHoyList.innerHTML = '<div class="partido-hoy-placeholder">No hay partidos programados para hoy</div>';
     return;
   }
   
   partidosHoyList.innerHTML = partidosHoy.map(partido => `
     <div class="partido-hoy">
-      <div class="partido-hoy-liga">${partido.liga}</div>
+      <div class="partido-hoy-liga">${partido.liga || 'Liga no especificada'}</div>
       <div class="partido-hoy-equipos">
-        <div class="partido-hoy-local">${partido.local}</div>
+        <div class="partido-hoy-local">${partido.local || 'Local'}</div>
         <div class="partido-hoy-vs">vs</div>
-        <div class="partido-hoy-visitante">${partido.visitante}</div>
+        <div class="partido-hoy-visitante">${partido.visitante || 'Visitante'}</div>
       </div>
       <div class="partido-hoy-info">
-        <div class="partido-hoy-hora">${partido.hora}</div>
-        <div class="partido-hoy-estadio">${partido.estadio}</div>
+        <div class="partido-hoy-hora">${partido.hora || 'Hora no definida'}</div>
+        <div class="partido-hoy-estadio">${partido.estadio || 'Estadio no definido'}</div>
       </div>
     </div>
   `).join('');
 }
 
 // ----------------------
-// TOGGLE PARTIDOS DE HOY
+// TOGGLE PARTIDOS DE HOY - VERSIÓN MEJORADA
 // ----------------------
 function togglePartidosHoy() {
   const container = $('partidosHoyContainer');
-  const overlay = $('partidosHoyOverlay');
+  const overlay = $('partidosHoyOverlay'); // Asegúrate de que el ID coincide
+  
+  if (!container || !overlay) {
+    console.error('No se encontraron los elementos del modal de partidos');
+    return;
+  }
   
   if (container.classList.contains('visible')) {
     container.classList.remove('visible');
@@ -164,6 +137,97 @@ function togglePartidosHoy() {
   } else {
     container.classList.add('visible');
     overlay.classList.add('visible');
+    
+    // Si no hay partidos, intentar cargarlos nuevamente
+    if (partidosHoy.length === 0) {
+      fetchTeams().then(() => {
+        mostrarPartidosHoy();
+      });
+    }
+  }
+}
+
+// ----------------------
+// INICIALIZACIÓN - VERSIÓN MEJORADA
+// ----------------------
+async function init() {
+  clearTeamData('Home');
+  clearTeamData('Away');
+  updateCalcButton();
+
+  // Crear overlay para partidos de hoy
+  const overlay = document.createElement('div');
+  overlay.id = 'partidosHoyOverlay'; // Este ID debe coincidir con el usado en togglePartidosHoy
+  overlay.className = 'partidos-hoy-overlay';
+  overlay.addEventListener('click', togglePartidosHoy);
+  document.body.appendChild(overlay);
+
+  // Configurar eventos para partidos de hoy
+  const toggleBtn = $('togglePartidosHoy');
+  const closeBtn = $('closePartidosHoy');
+  
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', togglePartidosHoy);
+  } else {
+    console.error('Botón togglePartidosHoy no encontrado');
+  }
+  
+  if (closeBtn) {
+    closeBtn.addEventListener('click', togglePartidosHoy);
+  } else {
+    console.error('Botón closePartidosHoy no encontrado');
+  }
+
+  // Cargar datos iniciales
+  try {
+    teamsByLeague = await fetchTeams();
+    
+    // Inicializar selects de liga
+    const leagueSelect = $('leagueSelect');
+    if (leagueSelect) {
+      leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
+      Object.keys(teamsByLeague).sort().forEach(code => {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = leagueNames[code] || code;
+        leagueSelect.appendChild(opt);
+      });
+
+      leagueSelect.addEventListener('change', onLeagueChange);
+    }
+    
+    // Configurar eventos de equipos
+    const teamHomeSelect = $('teamHome');
+    const teamAwaySelect = $('teamAway');
+    
+    if (teamHomeSelect) {
+      teamHomeSelect.addEventListener('change', () => {
+        if (restrictSameTeam()) {
+          fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
+          updateCalcButton();
+        }
+      });
+    }
+    
+    if (teamAwaySelect) {
+      teamAwaySelect.addEventListener('change', () => {
+        if (restrictSameTeam()) {
+          fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
+          updateCalcButton();
+        }
+      });
+    }
+
+    // Configurar botones
+    const recalcBtn = $('recalc');
+    const resetBtn = $('reset');
+    
+    if (recalcBtn) recalcBtn.addEventListener('click', calculateAll);
+    if (resetBtn) resetBtn.addEventListener('click', clearAll);
+    
+  } catch (error) {
+    console.error('Error en inicialización:', error);
+    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema al inicializar la aplicación.</div>';
   }
 }
 
@@ -586,4 +650,5 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
+
 
