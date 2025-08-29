@@ -34,7 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxdoJucbVzKf9hKcMqVAxcZb31E4uhPZsEYp-IckZYeiCIAJRAvEcs1btsJ0yzwizHDJQ/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwhxSccznUNIZFSfNKygHE--qPK4vn6KtxW5iyYrj0BmM_efw18_IWAUEcwNBzlFqBhcA/exec";
 let teamsByLeague = {};
 
 const leagueNames = {
@@ -86,40 +86,23 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// MOSTRAR PARTIDOS DEL DÍA
+// MOSTRAR PARTIDOS DE HOY
 // ----------------------
-function displayMatchesToday(partidosHoy) {
+function displayTodayMatches(data) {
   const matchesList = $('matchesList');
-  if (!matchesList) return;
-
-  // Obtener la hora actual en Guatemala
-  const now = new Date();
-  const options = { timeZone: 'America/Guatemala', hour: '2-digit', minute: '2-digit', hour12: false };
-  const [currentHour, currentMinute] = new Intl.DateTimeFormat('en-US', options)
-    .format(now)
-    .split(':')
-    .map(n => parseInt(n));
-
-  // Filtrar partidos futuros
-  const partidosFuturos = partidosHoy.filter(partido => {
-    const [hour, minute] = partido.hora.split(':').map(n => parseInt(n));
-    return hour > currentHour || (hour === currentHour && minute > currentMinute);
-  });
-
-  if (partidosFuturos.length === 0) {
-    matchesList.innerHTML = '<span class="no-matches">No hay partidos futuros para hoy.</span>';
+  if (!data.partidosFuturos || data.partidosFuturos.length === 0) {
+    matchesList.innerHTML = '<p class="small">No hay partidos programados para hoy.</p>';
     return;
   }
 
-  // Mostrar hasta 2 partidos futuros
-  matchesList.innerHTML = partidosFuturos.slice(0, 2).map(partido => `
-    <div class="match">
-      <span class="match-team">${partido.local}</span>
-      <span class="match-vs">vs</span>
-      <span class="match-team">${partido.visitante}</span>
-      <span class="match-time">(${partido.hora} | ${partido.liga})</span>
+  const matchesHtml = data.partidosFuturos.map(match => `
+    <div class="match-item">
+      <span class="match-time">${match.hora}</span>
+      <span class="match-teams">${match.local} vs ${match.visitante}</span>
+      <span class="match-league">(${match.liga})</span>
     </div>
   `).join('');
+  matchesList.innerHTML = matchesHtml;
 }
 
 // ----------------------
@@ -142,13 +125,14 @@ async function fetchTeams() {
     }
     teamsByLeague = normalized;
     localStorage.setItem('teamsByLeague', JSON.stringify(normalized));
-    return { teams: normalized, partidosHoy: data.partidosHoy };
+    displayTodayMatches(data);
+    return normalized;
   } catch (err) {
     console.error('Error en fetchTeams:', err);
     const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
     $('details').innerHTML = errorMsg;
     if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
-    return { teams: {}, partidosHoy: [] };
+    return {};
   }
 }
 
@@ -160,12 +144,7 @@ async function init() {
   clearTeamData('Away');
   updateCalcButton();
 
-  const { teams, partidosHoy } = await fetchTeams();
-  teamsByLeague = teams;
-
-  // Mostrar partidos del día
-  displayMatchesToday(partidosHoy);
-
+  teamsByLeague = await fetchTeams();
   const leagueSelect = $('leagueSelect');
   const teamHomeSelect = $('teamHome');
   const teamAwaySelect = $('teamAway');
@@ -505,7 +484,8 @@ function calculateAll() {
   const avgDraw = (tH.pj && tA.pj) ? (pDrawP + pDrawDC) / 2 : 0.33;
   const avgAway = (tH.pj && tA.pj) ? (pAwayP + pAwayDC) / 2 : 0.33;
   const avgBTTS = (tH.pj && tA.pj) ? (pBTTSP + pBTTSDC) / 2 : 0.5;
-  const avgO25 = (tH.pj && tA.pj) ? (pO25P + pO25DC) / 2 : 0 circonstances
+  const avgO25 = (tH.pj && tA.pj) ? (pO25P + pO25DC) / 2 : 0.5;
+
   // Normalizar resultados principales
   const totalAvg = avgHome + avgDraw + avgAway;
   const finalHome = totalAvg > 0 ? avgHome / totalAvg : 0.33;
@@ -564,4 +544,3 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
-
