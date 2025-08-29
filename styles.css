@@ -1,5 +1,505 @@
 /* styles.css */
-/* ... (todo el CSS original sin cambios) */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin: 0;
+  padding: 8px;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 10px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: 20px;
+  margin: 0;
+  color: #fff;
+}
+
+h3 {
+  font-size: 16px;
+  margin: 8px 0 6px;
+  color: #fff;
+}
+
+h4 {
+  font-size: 14px;
+  margin: 8px 0 12px;
+  color: #e0e0e0;
+}
+
+p.small, div.small {
+  font-size: 10px;
+  color: #e0e0e0;
+}
+
+.card {
+  background: #2c2c2c;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #3a3a3a;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.table-like {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+label {
+  font-size: 12px;
+  color: #e0e0e0;
+  display: block;
+  margin-bottom: 4px;
+}
+
+input, select {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #4dabf7;
+  border-radius: 3px;
+  font-size: 12px;
+  box-sizing: border-box;
+  background: #2c2c2c;
+  color: #e0e0e0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+input:focus, select:focus {
+  border-color: #74c0fc;
+  outline: none;
+}
+
+input[type="number"] {
+  width: 60px;
+}
+
+.sep {
+  height: 1px;
+  background: #4a4a4a;
+  margin: 10px 0;
+}
+
+.btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #4dabf7;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.btn:hover {
+  background: #74c0fc;
+}
+
+.kpis {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kpis-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.kpis-row:nth-child(2) {
+  justify-content: center;
+}
+
+.tile {
+  flex: 1;
+  width: 100%;
+  max-width: 140px;
+  text-align: center;
+  padding: 10px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
+  border: 1px solid #4a4a4a;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  position: relative;
+  transition: background 0.3s ease;
+  box-sizing: border-box;
+}
+
+.tile:hover {
+  background: linear-gradient(135deg, #4a4a4a, #5a5a5a);
+}
+
+.tile:nth-child(1) {
+  border-color: #4dabf7;
+}
+
+.tile:nth-child(1)::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4dabf7;
+}
+
+.tile:nth-child(2) {
+  border-color: #f0c05a;
+}
+
+.tile:nth-child(2)::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f0c05a;
+}
+
+.tile:nth-child(3) {
+  border-color: #f87171;
+}
+
+.tile:nth-child(3)::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f87171;
+}
+
+.tile:nth-child(4) {
+  border-color: #a855f7;
+}
+
+.tile:nth-child(4)::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a855f7;
+}
+
+.tile:nth-child(5) {
+  border-color: #34c759;
+}
+
+.tile:nth-child(5)::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34c759;
+}
+
+.tile strong {
+  font-size: 14px;
+  color: #f0f0f0;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.tile div.small {
+  font-size: 9px;
+  color: #e0e0e0;
+  white-space: normal;
+  line-height: 1.1;
+}
+
+.correction-factors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 4px;
+}
+
+.correction-factor {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px;
+  border-radius: 3px;
+  background: #333;
+  border: 1px solid #4a4a4a;
+}
+
+.correction-factor .label {
+  font-size: 10px;
+  color: #a0a0a0;
+}
+
+.correction-factor .value {
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.recs div {
+  margin: 2px 0;
+  color: #e0e0e0;
+}
+
+.recs .error {
+  color: #ff9999;
+  background: #2a2a2a;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid #ff6666;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  font-size: 11px;
+  text-align: center;
+  order: -1;
+}
+
+.recs .error strong {
+  font-size: 12px;
+  color: #ff6666;
+}
+
+.stat-card {
+  background: #333;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 4px solid;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+}
+
+.stat-card:nth-child(1) {
+  border-color: #4dabf7;
+}
+
+.stat-card:nth-child(2) {
+  border-color: #f87171;
+}
+
+.team-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.stat-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.stat-title::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #74c0fc;
+}
+
+.stat-card:nth-child(2) .stat-title::before {
+  background: #ff8787;
+}
+
+.stat-values {
+  font-size: 10px;
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #2c2c2c;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #4a4a4a;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.stat-section {
+  background: #3a3a3a;
+  border-radius: 4px;
+  padding: 4px;
+  border: 1px solid #5a5a5a;
+}
+
+.section-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4dabf7;
+  margin-bottom: 3px;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.stat-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 3px;
+}
+
+.stat-metrics span {
+  background: #444;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid #666;
+  font-size: 9px;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.stat-metrics span:hover {
+  background: #555;
+}
+
+.stat-legend-text {
+  font-size: 8px;
+  color: #a0a0a0;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.stat-legend {
+  font-size: 11px;
+  color: #f0f0f0;
+  background: #444;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid #74c0fc;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  margin-bottom: 4px;
+  text-align: center;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.stat-legend div {
+  flex: 1;
+  min-width: 80px;
+}
+
+.bet-slip {
+  background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 6px;
+  color: #f0f0f0;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 2px solid #4dabf7;
+  box-shadow: 0 2px 6px rgba(77, 171, 247, 0.2), 0 0 8px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: visible;
+  animation: float 2s ease-in-out infinite;
+  min-height: 80px;
+  text-align: left;
+}
+
+.bet-slip .star {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 10px;
+  color: #ffffff;
+  background: #4dabf7;
+  padding: 2px 6px;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.bet-slip .main-bet {
+  font-size: 14px;
+  color: #f0f0f0;
+  display: block;
+}
+
+.bet-slip .main-bet strong {
+  font-size: 16px;
+  color: #4dabf7;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+}
+
+.bet-slip .other-bets {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 20px;
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.bet-slip .other-bets li {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.bet-slip .other-bets li::before {
+  content: '✔';
+  position: absolute;
+  left: -16px;
+  color: #34c759;
+  font-size: 12px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 2px 6px rgba(77, 171, 247, 0.2), 0 0 8px rgba(0,0,0,0.2); }
+  50% { transform: scale(1.02); box-shadow: 0 4px 8px rgba(77, 171, 247, 0.3), 0 0 10px rgba(0,0,0,0.3); }
+}
+
+.pulse {
+  animation: pulse 0.3s ease-in-out;
+}
 
 /* Estilos adicionales para la sección de partidos */
 .matches-list {
