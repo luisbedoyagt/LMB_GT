@@ -298,6 +298,18 @@ input[type="number"] {
   color: #ff6666;
 }
 
+.recs .warning {
+  color: #ffcc00;
+  background: #2a2a2a;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid #ffaa00;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  font-size: 11px;
+  text-align: center;
+  margin-top: 8px;
+}
+
 .stat-card {
   background: #333;
   border-radius: 8px;
@@ -623,7 +635,7 @@ input[type="number"] {
   padding: 20px 0;
 }
 
-/* OVERLAY CORREGIDO - nombre de clase corregido */
+/* OVERLAY CORREGIDO */
 .partidos-hoy-overlay {
   position: fixed;
   top: 0;
@@ -639,12 +651,43 @@ input[type="number"] {
   display: block;
 }
 
+/* ANIMACIONES */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -48%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, -48%); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translate(-50%, -50%); 
+  }
 }
 
-/* Responsive */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0); 
+  }
+  50% { 
+    transform: translateY(-2px); 
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1); 
+    box-shadow: 0 2px 6px rgba(77, 171, 247, 0.2), 0 0 8px rgba(0,0,0,0.2); 
+  }
+  50% { 
+    transform: scale(1.02); 
+    box-shadow: 0 4px 8px rgba(77, 171, 247, 0.3), 0 0 10px rgba(0,0,0,0.3); 
+  }
+}
+
+.pulse {
+  animation: pulse 0.3s ease-in-out;
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: 1fr;
@@ -654,4 +697,87 @@ input[type="number"] {
     width: 95%;
     max-width: none;
   }
+  
+  .kpis-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .tile {
+    max-width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .correction-factors {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ESTILOS ADICIONALES PARA MEJORAR LA EXPERIENCIA */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #4dabf7;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.success {
+  color: #34c759;
+}
+
+.danger {
+  color: #ff453a;
+}
+
+.warning {
+  color: #ff9f0a;
+}
+
+.info {
+  color: #0a84ff;
+}
+
+/* MEJORAS DE ACCESIBILIDAD */
+@media (prefers-reduced-motion: reduce) {
+  .partidos-hoy-container,
+  .stat-card,
+  .bet-slip,
+  .tile {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ESTILOS PARA ESTADOS DE FOCO MEJORADOS */
+button:focus,
+input:focus,
+select:focus {
+  outline: 2px solid #4dabf7;
+  outline-offset: 2px;
+}
+
+/* SCROLLBAR PERSONALIZADO */
+.partidos-hoy-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.partidos-hoy-list::-webkit-scrollbar-track {
+  background: #2c2c2c;
+  border-radius: 3px;
+}
+
+.partidos-hoy-list::-webkit-scrollbar-thumb {
+  background: #4dabf7;
+  border-radius: 3px;
+}
+
+.partidos-hoy-list::-webkit-scrollbar-thumb:hover {
+  background: #74c0fc;
 }
