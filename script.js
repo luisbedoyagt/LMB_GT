@@ -34,7 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbykdJlzO-SNapMYES6o8KQQ9gdOnoKugUgP3MZkeHfkzJw7XrkXwaFwYk74BGqA9bR15g/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwhxSccznUNIZFSfNKygHE--qPK4vn6KtxW5iyYrj0BmM_efw18_IWAUEcwNBzlFqBhcA/exec";
 let teamsByLeague = {};
 
 const leagueNames = {
@@ -96,19 +96,25 @@ function displayTodayMatches(data) {
     return;
   }
 
-  console.log('Datos de partidosFuturos:', data.partidosFuturos);
+  console.log('Datos recibidos en displayTodayMatches:', JSON.stringify(data));
+  console.log('Partidos futuros:', data.partidosFuturos);
+
   if (!data.partidosFuturos || data.partidosFuturos.length === 0) {
     matchesList.innerHTML = '<p class="small">No hay partidos programados para hoy después de la hora actual.</p>';
+    console.log('No hay partidos futuros para mostrar.');
     return;
   }
 
-  const matchesHtml = data.partidosFuturos.map(match => `
-    <div class="match-item">
-      <span class="match-time">${match.hora}</span>
-      <span class="match-teams">${match.local} vs ${match.visitante}</span>
-      <span class="match-league">(${match.liga})</span>
-    </div>
-  `).join('');
+  const matchesHtml = data.partidosFuturos.map(match => {
+    console.log(`Renderizando partido: ${match.hora} - ${match.local} vs ${match.visitante}`);
+    return `
+      <div class="match-item">
+        <span class="match-time">${match.hora}</span>
+        <span class="match-teams">${match.local} vs ${match.visitante}</span>
+        <span class="match-league">(${match.liga})</span>
+      </div>
+    `;
+  }).join('');
   matchesList.innerHTML = matchesHtml;
 }
 
@@ -126,6 +132,7 @@ async function fetchTeams() {
       throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
     }
     const data = await res.json();
+    console.log('Datos completos de la API:', data);
     const normalized = {};
     for (const key in data.ligas) {
       normalized[key] = (data.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
