@@ -34,7 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzekVgU_GXKR2JYa950sOCYeztmGck4N-ZMjoOn3SoQk_hvBQVZSUIpGY1oO8GMdHI20A/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwVurxjaupDg88KrwZon1QbmMjwLLawtoIAFnPfOkDs4GUgtgsrI7AITC72SX4bWoEl/exec";
 let teamsByLeague = {};
 
 const leagueNames = {
@@ -106,12 +106,13 @@ function displayTodayMatches(data) {
   }
 
   const matchesHtml = data.partidosFuturos.map(match => {
-    console.log(`Renderizando partido: ${match.hora} - ${match.local} vs ${match.visitante}`);
+    console.log(`Renderizando partido: ${match.hora} - ${match.local} vs ${match.visitante} (${match.liga}) en ${match.estadio}`);
     return `
       <div class="match-item">
         <span class="match-time">${match.hora}</span>
         <span class="match-teams">${match.local} vs ${match.visitante}</span>
-        <span class="match-league">(${match.liga})</span>
+        <span class="match-league">(${leagueNames[Object.keys(leagueNames).find(code => leagueNames[code] === match.liga)] || match.liga})</span>
+        <span class="match-venue">${match.estadio}</span>
       </div>
     `;
   }).join('');
@@ -558,4 +559,3 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
-
