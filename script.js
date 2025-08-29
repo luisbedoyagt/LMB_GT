@@ -1,640 +1,376 @@
-// ----------------------
-// UTILIDADES
-// ----------------------
 const $ = id => document.getElementById(id);
 const formatPct = x => (100 * (isFinite(x) ? x : 0)).toFixed(1) + '%';
 const formatDec = x => (isFinite(x) ? x.toFixed(2) : '0.00');
-const parseNumberString = val => {
-  const s = String(val || '').replace(/,/g, '.');
-  const n = Number(s);
-  return isFinite(n) ? n : 0;
-};
+function parseNumberString(val){ const s=String(val||'').toString().replace(/,/g,'.'); const n=Number(s); return isFinite(n)?n:0; }
+function toDecimalOdds(v){ const a=parseFloat(String(v).replace(/,/g,'.')); return isNaN(a)||a<=0?1.01:a; }
 
-// Caché para factorial (mejora eficiencia)
-const factorialCache = [1, 1];
-function factorial(n) {
-  if (n < 0) return 0;
-  if (factorialCache[n] !== undefined) return factorialCache[n];
-  factorialCache[n] = n * factorial(n - 1);
-  return factorialCache[n];
-}
-
-function poissonProb(lambda, k) {
-  return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
-}
-
-function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
-  if (h === 0 && a === 0) return tau * poissonProb(lambdaH, 0) * poissonProb(lambdaA, 0);
-  if (h === 0 && a === 1) return tau * poissonProb(lambdaH, 0) * poissonProb(lambdaA, 1);
-  if (h === 1 && a === 0) return tau * poissonProb(lambdaH, 1) * poissonProb(lambdaA, 0);
-  if (h === 1 && a === 1) return tau * poissonProb(lambdaH, 1) * poissonProb(lambdaA, 1);
-  return poissonProb(lambdaH, h) * poissonProb(lambdaA, a);
-}
-
-// ----------------------
-// CONFIGURACIÓN DE LIGAS
-// ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzx03NPHZrjCm3v8-YDhaMsxXDAZ5W0H2LYL_g9FJ66dBUFZMdaNJEZnuQzyC2H_g3abQ/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyP6dc9ww4I9kw26fQCc0gAyEtYbQVg6DsoAtlnxqhFFJClOrHoudM8PdnBnT9YBopSlA/exec";
 let teamsByLeague = {};
-let partidosHoy = [];
+const leagueNames = { "WC":"FIFA World Cup","CL":"UEFA Champions League","BL1":"Bundesliga","DED":"Eredivisie","BSA":"Campeonato Brasileiro","PD":"Liga Española","FL1":"Ligue 1","ELC":"Championship","PPL":"Primeira Liga","EC":"European Championship","SA":"Serie A","PL":"Premier League" };
 
-const leagueNames = {
-  "esp.1": "LaLiga España",
-  "esp.2": "Segunda España",
-  "eng.1": "Premier League Inglaterra",
-  "eng.2": "Championship Inglaterra",
-  "ita.1": "Serie A Italia",
-  "ger.1": "Bundesliga Alemania",
-  "fra.1": "Ligue 1 Francia",
-  "ned.1": "Eredivisie Países Bajos",
-  "ned.2": "Eerste Divisie Países Bajos",
-  "por.1": "Liga Portugal",
-  "mex.1": "Liga MX México",
-  "usa.1": "MLS Estados Unidos",
-  "bra.1": "Brasileirão Brasil",
-  "gua.1": "Liga Nacional Guatemala",
-  "crc.1": "Liga Promerica Costa Rica",
-  "hon.1": "Liga Nacional Honduras",
-  "ksa.1": "Pro League Arabia Saudita"
-};
-
-// ----------------------
-// NORMALIZACIÓN DE DATOS
-// ----------------------
-function normalizeTeam(raw) {
-  if (!raw) return null;
+function normalizeTeam(raw){
+  if(!raw) return null;
   const r = {};
-  r.name = raw.name || '';
-  if (!r.name) return null;
-  r.pos = parseNumberString(raw.rank || 0);
-  r.gf = parseNumberString(raw.goalsFor || 0);
-  r.ga = parseNumberString(raw.goalsAgainst || 0);
-  r.pj = parseNumberString(raw.gamesPlayed || 0);
-  r.g = parseNumberString(raw.wins || 0);
-  r.e = parseNumberString(raw.ties || 0);
-  r.p = parseNumberString(raw.losses || 0);
-  r.points = parseNumberString(raw.points || (r.g * 3 + r.e) || 0);
-  r.gfHome = parseNumberString(raw.goalsForHome || 0);
-  r.gfAway = parseNumberString(raw.goalsForAway || 0);
-  r.gaHome = parseNumberString(raw.goalsAgainstHome || 0);
-  r.gaAway = parseNumberString(raw.goalsAgainstAway || 0);
-  r.pjHome = parseNumberString(raw.gamesPlayedHome || 0);
-  r.pjAway = parseNumberString(raw.gamesPlayedAway || 0);
-  r.winsHome = parseNumberString(raw.winsHome || 0);
-  r.winsAway = parseNumberString(raw.winsAway || 0);
-  r.logoUrl = raw.logoUrl || '';
+  r.name = raw.name || raw.Team || raw.team?.name || raw.teamName || raw.team_name || raw['Equipo'] || raw['team'] || raw['team_name'] || raw['team.shortName'] || '';
+  r.pos = raw.pos || raw.position || raw.rank || raw['Pos'] || raw['POS'] || null;
+  r.gf = parseNumberString(raw.gf || raw.goalsFor || raw.goals_for || raw.GF || raw['GF'] || raw['goals'] || raw['goals_for']);
+  r.ga = parseNumberString(raw.ga || raw.goalsAgainst || raw.goals_against || raw.GC || raw['GC'] ||  raw['goals_against']);
+  r.pj = parseNumberString(raw.PJ || raw.pj || raw.played || raw.playedGames || raw.matches || raw['Matches'] || raw['matches']);
+  r.g  = parseNumberString(raw.G || raw.g || raw.won || raw.W || raw.w);
+  r.e  = parseNumberString(raw.E || raw.e || raw.draw || raw.D || raw.draws || raw.drawn);
+  r.p  = parseNumberString(raw.P || raw.p || raw.lost || raw.L || raw.l);
+  r.form = raw.form || raw.Form || null;
   return r;
 }
 
-// ----------------------
-// FETCH EQUIPOS (con datos de partidos de hoy)
-// ----------------------
-async function fetchTeams() {
-  const leagueSelect = $('leagueSelect');
-  if (leagueSelect) leagueSelect.innerHTML = '<option value="">Cargando ligas...</option>';
-
-  try {
+async function fetchTeams(){
+  try{
     const res = await fetch(WEBAPP_URL);
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
-    }
+    if(!res.ok) throw new Error('fetch falló ' + res.status);
     const data = await res.json();
-    console.log('Datos recibidos del servidor:', data);
-    
     const normalized = {};
-    for (const key in data.ligas) {
-      normalized[key] = (data.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
-    }
-    teamsByLeague = normalized;
-    partidosHoy = data.partidosHoy || [];
-    
-    console.log('Partidos de hoy:', partidosHoy);
-    
-    // Mostrar partidos de hoy si existen
-    if (partidosHoy.length > 0) {
-      mostrarPartidosHoy();
-    }
-    
-    localStorage.setItem('teamsByLeague', JSON.stringify(normalized));
+    for(const key in data){ const arr = data[key] || []; normalized[key] = arr.map(x => normalizeTeam(x)); }
     return normalized;
-  } catch (err) {
-    console.error('Error en fetchTeams:', err);
-    const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
-    $('details').innerHTML = errorMsg;
-    if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
-    return {};
-  }
+  }catch(err){ console.error('Error fetching teams:', err); return {}; }
 }
 
-// ----------------------
-// MOSTRAR PARTIDOS DE HOY
-// ----------------------
-function mostrarPartidosHoy() {
-  const partidosHoyList = $('partidosHoyList');
-  if (!partidosHoyList) {
-    console.error('Elemento partidosHoyList no encontrado');
-    return;
-  }
+async function init(){
+  teamsByLeague = await fetchTeams();
+  const leagueCodes = Object.keys(teamsByLeague);
+  leagueCodes.forEach(code => { const opt = document.createElement('option'); opt.value = code; opt.textContent = leagueNames[code] || code; $('leagueSelect').appendChild(opt); });
+  const saved = localStorage.getItem('bankroll');
+  if(saved) $('bankroll').value = saved;
+  $('leagueSelect').addEventListener('change', onLeagueChange);
+  $('teamHome').addEventListener('change', ()=>fillTeamData($('teamHome').value, $('leagueSelect').value,'Home'));
+  $('teamAway').addEventListener('change', ()=>fillTeamData($('teamAway').value, $('leagueSelect').value,'Away'));
+  $('recalc').addEventListener('click', calculateAll);
+  $('reset').addEventListener('click', ()=>location.reload());
+  $('clearAll').addEventListener('click', clearAll);
+  $('saveBank').addEventListener('click', saveBankrollToStorage);
   
-  console.log('Mostrando partidos de hoy:', partidosHoy);
-  
-  if (!partidosHoy || partidosHoy.length === 0) {
-    partidosHoyList.innerHTML = '<div class="partido-hoy-placeholder">No hay partidos programados para hoy</div>';
-    return;
-  }
-  
-  partidosHoyList.innerHTML = partidosHoy.map(partido => `
-    <div class="partido-hoy">
-      <div class="partido-hoy-liga">${partido.liga || 'Liga no especificada'}</div>
-      <div class="partido-hoy-equipos">
-        <div class="partido-hoy-local">${partido.local || 'Local'}</div>
-        <div class="partido-hoy-vs">vs</div>
-        <div class="partido-hoy-visitante">${partido.visitante || 'Visitante'}</div>
-      </div>
-      <div class="partido-hoy-info">
-        <div class="partido-hoy-hora">${partido.hora || 'Hora no definida'}</div>
-        <div class="partido-hoy-estadio">${partido.estadio || 'Estadio no definido'}</div>
-      </div>
-    </div>
-  `).join('');
+  // Event listeners para los nuevos campos
+  $('homeAdvantage').addEventListener('change', calculateAll);
+  $('formWeight').addEventListener('change', calculateAll);
+  $('dixonColesParam').addEventListener('change', calculateAll);
+  $('maxTeams').addEventListener('change', calculateAll);
+  $('formHome').addEventListener('change', calculateAll);
+  $('formAway').addEventListener('change', calculateAll);
 }
+document.addEventListener('DOMContentLoaded', init);
 
-// ----------------------
-// TOGGLE PARTIDOS DE HOY
-// ----------------------
-function togglePartidosHoy() {
-  const container = $('partidosHoyContainer');
-  const overlay = $('partidosHoyOverlay');
-  
-  if (!container || !overlay) {
-    console.error('No se encontraron los elementos del modal de partidos');
-    return;
-  }
-  
-  if (container.classList.contains('visible')) {
-    container.classList.remove('visible');
-    overlay.classList.remove('visible');
-  } else {
-    container.classList.add('visible');
-    overlay.classList.add('visible');
-    
-    // Si no hay partidos, intentar cargarlos nuevamente
-    if (partidosHoy.length === 0) {
-      fetchTeams().then(() => {
-        mostrarPartidosHoy();
-      });
-    } else {
-      mostrarPartidosHoy();
-    }
-  }
-}
-
-// ----------------------
-// INICIALIZACIÓN
-// ----------------------
-async function init() {
-  console.log('Inicializando aplicación...');
-  
-  // Crear overlay para partidos de hoy
-  const overlay = document.createElement('div');
-  overlay.id = 'partidosHoyOverlay';
-  overlay.className = 'partidos-hoy-overlay';
-  overlay.addEventListener('click', togglePartidosHoy);
-  document.body.appendChild(overlay);
-
-  // Configurar eventos para partidos de hoy
-  const toggleBtn = $('togglePartidosHoy');
-  const closeBtn = $('closePartidosHoy');
-  
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', togglePartidosHoy);
-    console.log('Botón togglePartidosHoy configurado');
-  } else {
-    console.error('Botón togglePartidosHoy no encontrado');
-  }
-  
-  if (closeBtn) {
-    closeBtn.addEventListener('click', togglePartidosHoy);
-    console.log('Botón closePartidosHoy configurado');
-  } else {
-    console.error('Botón closePartidosHoy no encontrado');
-  }
-
-  clearTeamData('Home');
-  clearTeamData('Away');
-  updateCalcButton();
-
-  // Cargar datos iniciales
-  try {
-    teamsByLeague = await fetchTeams();
-    
-    // Inicializar selects de liga
-    const leagueSelect = $('leagueSelect');
-    const teamHomeSelect = $('teamHome');
-    const teamAwaySelect = $('teamAway');
-    
-    if (!leagueSelect || !teamHomeSelect || !teamAwaySelect) {
-      $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema con la interfaz HTML.</div>';
-      return;
-    }
-
-    leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
-    Object.keys(teamsByLeague).sort().forEach(code => {
-      const opt = document.createElement('option');
-      opt.value = code;
-      opt.textContent = leagueNames[code] || code;
-      leagueSelect.appendChild(opt);
-    });
-
-    leagueSelect.addEventListener('change', onLeagueChange);
-    teamHomeSelect.addEventListener('change', () => {
-      if (restrictSameTeam()) {
-        fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
-        updateCalcButton();
-      }
-    });
-    teamAwaySelect.addEventListener('change', () => {
-      if (restrictSameTeam()) {
-        fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
-        updateCalcButton();
-      }
-    });
-
-    $('recalc').addEventListener('click', calculateAll);
-    $('reset').addEventListener('click', clearAll);
-    
-    console.log('Aplicación inicializada correctamente');
-    
-  } catch (error) {
-    console.error('Error en inicialización:', error);
-    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema al inicializar la aplicación.</div>';
-  }
-}
-
-// ----------------------
-// FUNCIONES AUXILIARES
-// ----------------------
-function onLeagueChange() {
+function onLeagueChange(){
   const code = $('leagueSelect').value;
-  const teamHomeSelect = $('teamHome');
-  const teamAwaySelect = $('teamAway');
-  teamHomeSelect.innerHTML = '<option value="">Cargando equipos...</option>';
-  teamAwaySelect.innerHTML = '<option value="">Cargando equipos...</option>';
-
-  if (!code || !teamsByLeague[code] || teamsByLeague[code].length === 0) {
-    clearTeamData('Home');
-    clearTeamData('Away');
-    updateCalcButton();
-    $('details').innerHTML = '<div class="warning"><strong>Advertencia:</strong> No hay datos disponibles para esta liga.</div>';
-    return;
-  }
-
-  const fragmentHome = document.createDocumentFragment();
-  const fragmentAway = document.createDocumentFragment();
-  const defaultOptionHome = document.createElement('option');
-  defaultOptionHome.value = '';
-  defaultOptionHome.textContent = '-- Selecciona equipo --';
-  fragmentHome.appendChild(defaultOptionHome);
-  const defaultOptionAway = document.createElement('option');
-  defaultOptionAway.value = '';
-  defaultOptionAway.textContent = '-- Selecciona equipo --';
-  fragmentAway.appendChild(defaultOptionAway);
-
+  $('teamHome').innerHTML = '<option value="">-- Selecciona equipo --</option>';
+  $('teamAway').innerHTML = '<option value="">-- Selecciona equipo --</option>';
+  if(!teamsByLeague[code]) return;
   teamsByLeague[code].forEach(t => {
-    const opt1 = document.createElement('option');
-    opt1.value = t.name;
-    opt1.textContent = t.name;
-    fragmentHome.appendChild(opt1);
-
-    const opt2 = document.createElement('option');
-    opt2.value = t.name;
-    opt2.textContent = t.name;
-    fragmentAway.appendChild(opt2);
+    const opt1 = document.createElement('option'); opt1.value = t.name; opt1.textContent = t.name; $('teamHome').appendChild(opt1);
+    const opt2 = document.createElement('option'); opt2.value = t.name; opt2.textContent = t.name; $('teamAway').appendChild(opt2);
   });
-
-  teamHomeSelect.innerHTML = '';
-  teamAwaySelect.innerHTML = '';
-  teamHomeSelect.appendChild(fragmentHome);
-  teamAwaySelect.appendChild(fragmentAway);
-
-  clearTeamData('Home');
-  clearTeamData('Away');
-  updateCalcButton();
 }
 
-function updateCalcButton() {
-  const teamHome = $('teamHome').value;
-  const teamAway = $('teamAway').value;
-  const leagueCode = $('leagueSelect').value;
-  $('recalc').disabled = !(leagueCode && teamHome && teamAway && teamHome !== teamAway);
-}
-
-function restrictSameTeam() {
-  const teamHome = $('teamHome').value;
-  const teamAway = $('teamAway').value;
-  if (teamHome && teamAway && teamHome === teamAway) {
-    $('details').innerHTML = '<div class="error"><strong>Error:</strong> No puedes seleccionar el mismo equipo para local y visitante.</div>';
-    if (document.activeElement === $('teamHome')) {
-      $('teamHome').value = '';
-      clearTeamData('Home');
-    } else {
-      $('teamAway').value = '';
-      clearTeamData('Away');
-    }
-    updateCalcButton();
-    return false;
-  }
-  return true;
-}
-
-function clearTeamData(type) {
-  const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
-  box.innerHTML = `
-    <div class="stat-section" data-testid="general-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento General</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>Puntos: 0</span>
-        <span>DG: 0</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="local-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Local</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>PG: 0</span>
-        <span>DG: 0</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Visitante</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>PG: 0</span>
-        <span>DG: 0</span>
-      </div>
-    </div>
-    <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
-  `;
-  if (type === 'Home') {
-    $('posHome').value = '0';
-    $('gfHome').value = '0';
-    $('gaHome').value = '0';
-    $('winRateHome').value = '0%';
-    $('formHomeTeam').innerHTML = 'Local: —';
-  } else {
-    $('posAway').value = '0';
-    $('gfAway').value = '0';
-    $('gaAway').value = '0';
-    $('winRateAway').value = '0%';
-    $('formAwayTeam').innerHTML = 'Visitante: —';
-  }
-}
-
-function clearAll() {
-  document.querySelectorAll('input').forEach(i => i.value = '0');
-  document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-  ['pHome','pDraw','pAway','pBTTS','pO25','details','homeAdvantageFactor','strengthFactor','dixonColesFactor','suggestion'].forEach(id => {
-    const el = $(id);
-    if (el) el.textContent = '—';
-  });
-  ['formHomeTeam','formAwayTeam'].forEach(id => $(id).innerHTML = id.includes('Home') ? 'Local: —' : 'Visitante: —');
-  clearTeamData('Home');
-  clearTeamData('Away');
-  updateCalcButton();
-}
-
-// ----------------------
-// BÚSQUEDA Y LLENADO DE EQUIPO
-// ----------------------
-function findTeam(leagueCode, teamName) {
-  if (!teamsByLeague[leagueCode]) return null;
+function findTeam(leagueCode, teamName){
+  if(!teamsByLeague[leagueCode]) return null;
   return teamsByLeague[leagueCode].find(t => t.name === teamName) || null;
 }
 
-function fillTeamData(teamName, leagueCode, type) {
+function fillTeamData(teamName, leagueCode, type){
+  if(!teamName) return;
   const t = findTeam(leagueCode, teamName);
-  if (!t) {
-    console.error(`Equipo no encontrado: ${teamName} en liga ${leagueCode}`);
-    $('details').innerHTML = `<div class="error"><strong>Error:</strong> Equipo ${teamName} no encontrado en la liga seleccionada.</div>`;
-    return;
-  }
+  if(!t) return;
 
-  const lambda = type === 'Home' ? (t.pjHome ? t.gfHome / t.pjHome : t.gf / (t.pj || 1)) : (t.pjAway ? t.gfAway / t.pjAway : t.gf / (t.pj || 1));
-  const gaAvg = type === 'Home' ? (t.pjHome ? t.gaHome / t.pjHome : t.ga / (t.pj || 1)) : (t.pjAway ? t.gaAway / t.pjAway : t.ga / (t.pj || 1));
-  const dg = t.gf - t.ga;
-  const dgHome = t.gfHome - t.gaHome;
-  const dgAway = t.gfAway - t.gaAway;
+  const formString = `${t.g||0}-${t.e||0}-${t.p||0}`; // ← nuevo: forma automática G-E-P
 
-  const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
-  box.innerHTML = `
-    <div class="stat-section" data-testid="general-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento General</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pj || 0}</span>
-        <span>Puntos: ${t.points || 0}</span>
-        <span>DG: ${dg >= 0 ? '+' + dg : dg || 0}</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="local-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Local</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pjHome || 0}</span>
-        <span>PG: ${t.winsHome || 0}</span>
-        <span>DG: ${dgHome >= 0 ? '+' + dgHome : dgHome || 0}</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Visitante</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pjAway || 0}</span>
-        <span>PG: ${t.winsAway || 0}</span>
-        <span>DG: ${dgAway >= 0 ? '+' + dgAway : dgAway || 0}</span>
-      </div>
-    </div>
-    <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
-  `;
-
-  if (type === 'Home') {
-    $('posHome').value = t.pos || 0;
-    $('gfHome').value = formatDec(lambda);
-    $('gaHome').value = formatDec(gaAvg);
-    $('winRateHome').value = formatPct(t.pjHome ? t.winsHome / t.pjHome : 0);
-    $('formHomeTeam').innerHTML = t.logoUrl
-      ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> Local: ${t.name}`
-      : `Local: ${t.name}`;
+  if(type === 'Home'){
+    $('posHome').value = t.pos || '';
+    $('gfHome').value  = Number.isFinite(t.gf) ? t.gf : '';
+    $('gaHome').value  = Number.isFinite(t.ga) ? t.ga : '';
+    $('formHome').value = formString;                 // ← nuevo
+    $('formHomeTeam').textContent = `Local: ${t.name}`;
+    $('formHomeBox').textContent = `PJ: ${t.pj||0} | G: ${t.g||0} | E: ${t.e||0} | P: ${t.p||0}`;
   } else {
-    $('posAway').value = t.pos || 0;
-    $('gfAway').value = formatDec(lambda);
-    $('gaAway').value = formatDec(gaAvg);
-    $('winRateAway').value = formatPct(t.pjAway ? t.winsAway / t.pjAway : 0);
-    $('formAwayTeam').innerHTML = t.logoUrl
-      ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> Visitante: ${t.name}`
-      : `Visitante: ${t.name}`;
+    $('posAway').value = t.pos || '';
+    $('gfAway').value  = Number.isFinite(t.gf) ? t.gf : '';
+    $('gaAway').value  = Number.isFinite(t.ga) ? t.ga : '';
+    $('formAway').value = formString;                 // ← nuevo
+    $('formAwayTeam').textContent = `Visitante: ${t.name}`;
+    $('formAwayBox').textContent = `PJ: ${t.pj||0} | G: ${t.g||0} | E: ${t.e||0} | P: ${t.p||0}`;
   }
+  calculateAll();
 }
 
-// ----------------------
-// CÁLCULO PRINCIPAL
-// ----------------------
-function calculateAll() {
-  const teamHome = $('teamHome').value;
-  const teamAway = $('teamAway').value;
-  const league = $('leagueSelect').value;
-  if (!teamHome || !teamAway || !league) {
-    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Selecciona una liga y ambos equipos.</div>';
-    return;
-  }
+function saveBankrollToStorage(){
+  const bank = parseNumberString($('bankroll').value);
+  localStorage.setItem('bankroll', bank);
+  alert('Banca guardada: Q' + bank);
+}
 
-  const tH = findTeam(league, teamHome);
-  const tA = findTeam(league, teamAway);
-  if (!tH || !tA) {
-    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Equipos no encontrados.</div>';
-    return;
-  }
-
-  // Check de jornadas mínimas
-  let warning = '';
-  if (tH.pj < 5 || tA.pj < 5) {
-    warning = '<div class="warning"><strong>Advertencia:</strong> Al menos un equipo tiene menos de 5 partidos jugados. Las predicciones pueden ser menos precisas en etapas tempranas de la liga (ideal: 10+ jornadas).</div>';
-  }
-
-  // Calcular promedios de la liga (fallback si totalGames=0)
-  const teams = teamsByLeague[league];
-  let totalGames = 0;
-  let totalGfHome = 0;
-  let totalGaHome = 0;
-  teams.forEach(t => {
-    totalGames += t.pjHome || t.pj || 0;
-    totalGfHome += t.gfHome || t.gf || 0;
-    totalGaHome += t.gaHome || t.ga || 0;
+function clearAll(){
+  document.querySelectorAll('input').forEach(i=>{
+    if(i.id !== 'bankroll') i.value = '';
   });
-  const avgGh = totalGames > 0 ? totalGfHome / totalGames : 1.2;
-  const avgGa = totalGames > 0 ? totalGaHome / totalGames : 1.0;
-
-  // Ataque y defensa ajustados
-  const attackH = (tH.pjHome || tH.pj) > 0 ? (tH.gfHome || tH.gf) / (tH.pjHome || tH.pj) / avgGh : 1;
-  const defenseA = (tA.pjAway || tA.pj) > 0 ? (tA.gaAway || tA.ga) / (tA.pjAway || tA.pj) / avgGh : 1;
-  const lambdaH = attackH * defenseA * avgGh;
-
-  const attackA = (tA.pjAway || tA.pj) > 0 ? (tA.gfAway || tA.gf) / (tA.pjAway || tA.pj) / avgGa : 1;
-  const defenseH = (tH.pjHome || tH.pj) > 0 ? (tH.gaHome || tH.ga) / (tH.pjHome || tH.pj) / avgGa : 1;
-  const lambdaA = attackA * defenseH * avgGa;
-
-  // Método 1: Poisson
-  let pHomeP = 0;
-  let pDrawP = 0;
-  let pAwayP = 0;
-  let pBTTSP = 0;
-  let pO25P = 0;
-  const maxGoals = 15;
-
-  for (let h = 0; h <= maxGoals; h++) {
-    for (let a = 0; a <= maxGoals; a++) {
-      const prob = poissonProb(lambdaH, h) * poissonProb(lambdaA, a);
-      if (h > a) pHomeP += prob;
-      else if (h === a) pDrawP += prob;
-      else pAwayP += prob;
-
-      if (h >= 1 && a >= 1) pBTTSP += prob;
-      if (h + a > 2) pO25P += prob;
-    }
-  }
-
-  // Método 2: Dixon-Coles
-  let pHomeDC = 0;
-  let pDrawDC = 0;
-  let pAwayDC = 0;
-  let pBTTSDC = 0;
-  let pO25DC = 0;
-  for (let h = 0; h <= maxGoals; h++) {
-    for (let a = 0; a <= maxGoals; a++) {
-      const prob = dixonColesAdjustment(lambdaH, lambdaA, h, a, 0.9);
-      if (h > a) pHomeDC += prob;
-      else if (h === a) pDrawDC += prob;
-      else pAwayDC += prob;
-
-      if (h >= 1 && a >= 1) pBTTSDC += prob;
-      if (h + a > 2) pO25DC += prob;
-    }
-  }
-
-  // Normalizar Dixon-Coles
-  const totalDC = pHomeDC + pDrawDC + pAwayDC;
-  if (totalDC > 0) {
-    pHomeDC /= totalDC;
-    pDrawDC /= totalDC;
-    pAwayDC /= totalDC;
-    pBTTSDC /= totalDC;
-    pO25DC /= totalDC;
-  }
-
-  // Promediar probabilidades (solo Poisson + Dixon-Coles)
-  const avgHome = (tH.pj && tA.pj) ? (pHomeP + pHomeDC) / 2 : 0.33;
-  const avgDraw = (tH.pj && tA.pj) ? (pDrawP + pDrawDC) / 2 : 0.33;
-  const avgAway = (tH.pj && tA.pj) ? (pAwayP + pAwayDC) / 2 : 0.33;
-  const avgBTTS = (tH.pj && tA.pj) ? (pBTTSP + pBTTSDC) / 2 : 0.5;
-  const avgO25 = (tH.pj && tA.pj) ? (pO25P + pO25DC) / 2 : 0.5;
-
-  // Normalizar resultados principales
-  const totalAvg = avgHome + avgDraw + avgAway;
-  const finalHome = totalAvg > 0 ? avgHome / totalAvg : 0.33;
-  const finalDraw = totalAvg > 0 ? avgDraw / totalAvg : 0.33;
-  const finalAway = totalAvg > 0 ? avgAway / totalAvg : 0.33;
-
-  // Mostrar probabilidades
-  $('pHome').textContent = formatPct(finalHome);
-  $('pDraw').textContent = formatPct(finalDraw);
-  $('pAway').textContent = formatPct(finalAway);
-  $('pBTTS').textContent = formatPct(avgBTTS);
-  $('pO25').textContent = formatPct(avgO25);
-
-  // Factores de corrección
-  const homeAdvantage = formatDec(avgGh / (avgGa || 1));
-  const ppgH = tH.points / (tH.pj || 1);
-  const ppgA = tA.points / (tA.pj || 1);
-  const strengthDiff = formatDec(ppgH - ppgA);
-  const dixonColes = '0.90';
-
-  $('homeAdvantageFactor').textContent = homeAdvantage;
-  $('strengthFactor').textContent = strengthDiff;
-  $('dixonColesFactor').textContent = dixonColes;
-
-  // Recomendación con umbrales
-  const outcomes = [
-    { name: `${teamHome} gana`, prob: finalHome },
-    { name: 'Empate', prob: finalDraw },
-    { name: `${teamAway} gana`, prob: finalAway }
-  ];
-  const maxOutcome = outcomes.reduce((max, curr) => curr.prob > max.prob ? curr : max, outcomes[0] || { name: 'Empate', prob: 0.33 });
-
-  let suggestionText = `<span class="star">★</span><span class="main-bet">🏆 Apuesta principal: <strong>${maxOutcome.name} (${formatPct(maxOutcome.prob)})</strong></span>`;
-
-  // Lógica de umbrales para BTTS y O25
-  const bttsText = avgBTTS > 0.55 ? `✔ Ambos anotan (${formatPct(avgBTTS)})` :
-                   avgBTTS < 0.45 ? `❌ No ambos anotan (${formatPct(1 - avgBTTS)})` :
-                   `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
-  const o25Text = avgO25 > 0.55 ? `✔ +2.5 goles (${formatPct(avgO25)})` :
-                  avgO25 < 0.45 ? `❌ -2.5 goles (${formatPct(1 - avgO25)})` :
-                  `— +2.5 goles equilibrado (${formatPct(avgO25)})`;
-
-  const others = [bttsText, o25Text];
-  suggestionText += `<ul class="other-bets">${others.map(bet => `<li>${bet}</li>`).join('')}</ul>`;
-
-  // Si no hay claro favorito
-  if (maxOutcome.prob < 0.40) {
-    suggestionText += `<div class="warning">No hay un claro favorito; considera evitar esta apuesta principal.</div>`;
-  }
-
-  $('details').innerHTML = `${warning}Basado en datos ajustados por rendimiento local/visitante y métodos Poisson + Dixon-Coles.`;
-  $('suggestion').innerHTML = suggestionText;
-
-  // Animación
-  const suggestionEl = $('suggestion');
-  suggestionEl.classList.add('pulse');
-  setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
+  document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+  ['pHome','pDraw','pAway','pBTTS','pO25','expectedBest','details','suggestion','formHomeTeam','formAwayTeam','formHomeBox','formAwayBox', 
+   'homeAdvantageFactor', 'strengthFactor', 'recentFormFactor', 'dixonColesFactor', 'kellyStake', 'betAmount'].forEach(id=>{
+    const el = $(id);
+    if(el) el.textContent = id.includes('form') ? (id.includes('Team') ? (id.includes('Home') ? 'Local: —' : 'Visitante: —') : 'PJ: — | G: — | E: — | P: —') : '—';
+  });
+  $('suggestion').style.display = 'none';
+  
+  // Restablecer valores por defecto
+  $('homeAdvantage').value = 15;
+  $('formWeight').value = 30;
+  $('dixonColesParam').value = -0.13;
+  $('maxTeams').value = 20;
+  $('formHome').value = '3-1-1';
+  $('formAway').value = '2-2-1';
 }
 
-// Iniciar la aplicación cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', init);
+function poissonPMF(lambda,k){ 
+  if(k < 0) return 0;
+  return Math.pow(lambda,k)*Math.exp(-lambda)/factorial(k); 
+}
+
+function factorial(n){ 
+  if(n <= 1) return 1; 
+  let f = 1; 
+  for(let i = 2; i <= n; i++) f *= i; 
+  return f; 
+}
+
+function clamp01(x){ return Math.max(0,Math.min(1,x)); }
+
+// Función Dixon-Coles para ajustar probabilidades de baja puntuación
+function dixonColesAdjustment(lambdaHome, lambdaAway, rho) {
+  if (lambdaHome < 0.01 || lambdaAway < 0.01) return 1;
+  
+  // Probabilidad de 0-0
+  const prob00 = poissonPMF(lambdaHome, 0) * poissonPMF(lambdaAway, 0);
+  const adjustedProb00 = prob00 * (1 - (lambdaHome * lambdaAway * rho));
+  
+  // Probabilidad de 1-0
+  const prob10 = poissonPMF(lambdaHome, 1) * poissonPMF(lambdaAway, 0);
+  const adjustedProb10 = prob10 * (1 + (lambdaAway * rho));
+  
+  // Probabilidad de 0-1
+  const prob01 = poissonPMF(lambdaHome, 0) * poissonPMF(lambdaAway, 1);
+  const adjustedProb01 = prob01 * (1 + (lambdaHome * rho));
+  
+  // Probabilidad de 1-1
+  const prob11 = poissonPMF(lambdaHome, 1) * poissonPMF(lambdaAway, 1);
+  const adjustedProb11 = prob11 * (1 - rho);
+  
+  // Factor de corrección total
+  const originalProbs = prob00 + prob10 + prob01 + prob11;
+  const adjustedProbs = adjustedProb00 + adjustedProb10 + adjustedProb01 + adjustedProb11;
+  
+  return originalProbs > 0 ? adjustedProbs / originalProbs : 1;
+}
+
+// Calcular fuerza relativa basada en posición en la tabla
+function calculateStrengthFactor(posHome, posAway, maxTeams) {
+  if (!posHome || !posAway || !maxTeams) return 1;
+  
+  // Normalizar posiciones (1 es el mejor, maxTeams es el peor)
+  const normalizedHome = (maxTeams - posHome + 1) / maxTeams;
+  const normalizedAway = (maxTeams - posAway + 1) / maxTeams;
+  
+  // Calcular factor de fuerza relativa
+  return normalizedHome / normalizedAway;
+}
+
+// Calcular factor de forma reciente
+function calculateFormFactor(formHome, formAway, formWeight) {
+  if (!formHome || !formAway) return 1;
+  
+  try {
+    // Parsear forma (formato: G-E-P)
+    const [homeW, homeD, homeL] = formHome.split('-').map(x => parseInt(x) || 0);
+    const [awayW, awayD, awayL] = formAway.split('-').map(x => parseInt(x) || 0);
+    
+    // Calcular puntos por partido (3 por victoria, 1 por empate)
+    const homePpg = (homeW * 3 + homeD) / (homeW + homeD + homeL);
+    const awayPpg = (awayW * 3 + awayD) / (awayW + awayD + awayL);
+    
+    // Evitar divisiones por cero
+    if (awayPpg === 0) return 1;
+    
+    // Calcular factor de forma
+    const formFactor = homePpg / awayPpg;
+    
+    // Aplicar peso (formWeight es el porcentaje de influencia de la forma reciente)
+    const weight = formWeight / 100;
+    return 1 + (formFactor - 1) * weight;
+  } catch (e) {
+    console.error("Error parsing form data:", e);
+    return 1;
+  }
+}
+
+function computeProbabilities(lambdaHome, lambdaAway){
+  // Obtener factores de corrección
+  const homeAdvantageFactor = 1 + (parseNumberString($('homeAdvantage').value) / 100);
+  const posHome = parseNumberString($('posHome').value);
+  const posAway = parseNumberString($('posAway').value);
+  const maxTeams = parseNumberString($('maxTeams').value);
+  const strengthFactor = calculateStrengthFactor(posHome, posAway, maxTeams);
+  
+  const formHome = $('formHome').value;
+  const formAway = $('formAway').value;
+  const formWeight = parseNumberString($('formWeight').value);
+  const recentFormFactor = calculateFormFactor(formHome, formAway, formWeight);
+  
+  const rho = parseNumberString($('dixonColesParam').value);
+  const dixonColesFactor = dixonColesAdjustment(lambdaHome, lambdaAway, rho);
+  
+  // Mostrar factores aplicados
+  $('homeAdvantageFactor').textContent = formatDec(homeAdvantageFactor) + 'x';
+  $('strengthFactor').textContent = formatDec(strengthFactor) + 'x';
+  $('recentFormFactor').textContent = formatDec(recentFormFactor) + 'x';
+  $('dixonColesFactor').textContent = formatDec(dixonColesFactor) + 'x';
+  
+  // Aplicar factores de corrección
+  const adjHome = Math.max(lambdaHome * homeAdvantageFactor * strengthFactor * recentFormFactor, 0.3);
+  const adjAway = Math.max(lambdaAway / strengthFactor / recentFormFactor, 0.3);
+
+  // Calcular probabilidades básicas
+  let pHome = 0, pDraw = 0, pAway = 0;
+  const maxGoals = 8;
+  
+  for (let i = 0; i <= maxGoals; i++) {
+    for (let j = 0; j <= maxGoals; j++) {
+      const prob = poissonPMF(adjHome, i) * poissonPMF(adjAway, j) * dixonColesFactor;
+      
+      if (i > j) pHome += prob;
+      else if (i === j) pDraw += prob;
+      else pAway += prob;
+    }
+  }
+  
+  // Normalizar probabilidades
+  const total = pHome + pDraw + pAway;
+  if (total > 0) {
+    pHome /= total;
+    pDraw /= total;
+    pAway /= total;
+  }
+  
+  // Calcular BTTS (Both Teams To Score)
+  let pBTTS = 0;
+  for (let i = 1; i <= maxGoals; i++) {
+    for (let j = 1; j <= maxGoals; j++) {
+      pBTTS += poissonPMF(adjHome, i) * poissonPMF(adjAway, j) * dixonColesFactor;
+    }
+  }
+  
+  // Calcular Over 2.5
+  let pO25 = 0;
+  for (let i = 0; i <= maxGoals; i++) {
+    for (let j = 0; j <= maxGoals; j++) {
+      if (i + j > 2.5) {
+        pO25 += poissonPMF(adjHome, i) * poissonPMF(adjAway, j) * dixonColesFactor;
+      }
+    }
+  }
+  
+  return {
+    pHome: clamp01(pHome),
+    pDraw: clamp01(pDraw),
+    pAway: clamp01(pAway),
+    pBTTS: clamp01(pBTTS),
+    pO25: clamp01(pO25)
+  };
+}
+
+function calculateKellyStake(probability, odds, bankroll, kellyFraction = 0.5) {
+  // Fórmula de Kelly: f* = (bp - q) / b
+  // donde b = cuota - 1, p = probabilidad, q = 1 - p
+  const b = odds - 1;
+  const p = probability;
+  const q = 1 - p;
+  
+  const idealStake = (b * p - q) / b;
+  
+  // Usar sólo una fracción del criterio de Kelly completo (más conservador)
+  const fractionalStake = Math.max(0, idealStake) * kellyFraction;
+  
+  // Calcular monto a apostar
+  const amount = bankroll * fractionalStake;
+  
+  return {
+    stakePercent: fractionalStake * 100,
+    amount: amount
+  };
+}
+
+function suggestBet(probObj, odds, bankroll){
+  let bestBet = null;
+  let maxEV = -Infinity;
+  let bestStake = 0;
+  let bestAmount = 0;
+  
+  const bets = [
+    {name: 'Local', prob: probObj.pHome, odds: odds.oddsHome},
+    {name: 'Empate', prob: probObj.pDraw, odds: odds.oddsDraw},
+    {name: 'Visitante', prob: probObj.pAway, odds: odds.oddsAway},
+    {name: 'BTTS Sí', prob: probObj.pBTTS, odds: odds.oddsBTTS},
+    {name: 'Over 2.5', prob: probObj.pO25, odds: odds.oddsOver25}
+  ];
+  
+  bets.forEach(bet => {
+    const ev = bet.prob * bet.odds - 1;
+    if (ev > maxEV) {
+      maxEV = ev;
+      bestBet = bet.name;
+      
+      // Calcular stake según Kelly
+      const kelly = calculateKellyStake(bet.prob, bet.odds, bankroll);
+      bestStake = kelly.stakePercent;
+      bestAmount = kelly.amount;
+    }
+  });
+  
+  return {
+    bestBet,
+    stakePercent: bestStake,
+    amount: bestAmount,
+    ev: maxEV
+  };
+}
+
+function calculateAll(){
+  const lambdaHome = parseNumberString($('gfHome').value);
+  const lambdaAway = parseNumberString($('gfAway').value);
+  const bankroll = parseNumberString($('bankroll').value);
+
+  const odds = {
+    oddsHome: toDecimalOdds($('oddsHome').value),
+    oddsDraw: toDecimalOdds($('oddsDraw').value),
+    oddsAway: toDecimalOdds($('oddsAway').value),
+    oddsBTTS: toDecimalOdds($('oddsBTTS').value),
+    oddsOver25: toDecimalOdds($('oddsOver25').value)
+  };
+
+  const probs = computeProbabilities(lambdaHome, lambdaAway);
+  $('pHome').textContent = formatPct(probs.pHome);
+  $('pDraw').textContent = formatPct(probs.pDraw);
+  $('pAway').textContent = formatPct(probs.pAway);
+  $('pBTTS').textContent = formatPct(probs.pBTTS);
+  $('pO25').textContent = formatPct(probs.pO25);
+
+  const suggestion = suggestBet(probs, odds, bankroll);
+  $('expectedBest').textContent = suggestion.bestBet;
+  $('kellyStake').textContent = formatDec(suggestion.stakePercent) + '%';
+  $('betAmount').textContent = 'Q' + formatDec(suggestion.amount);
+  
+  $('suggestion').textContent = `Apuesta sugerida → ${suggestion.bestBet}: ${formatDec(suggestion.stakePercent)}% de tu banca (EV: ${formatPct(suggestion.ev)})`;
+  $('suggestion').style.display = 'block';
+  
+  // Detalles adicionales
+  let details = `<div><strong>Detalles del cálculo:</strong></div>`;
+  details += `<div>• Lambda Local ajustado: ${formatDec(lambdaHome * parseNumberString($('homeAdvantage').value/100 + 1))}</div>`;
+  details += `<div>• Lambda Visitante ajustado: ${formatDec(lambdaAway)}</div>`;
+  details += `<div>• Valor Esperado (EV) máximo: ${formatPct(suggestion.ev)}</div>`;
+  
+  $('details').innerHTML = details;
+}
