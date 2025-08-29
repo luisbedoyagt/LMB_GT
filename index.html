@@ -1,181 +1,227 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora para Pronósticos de Fútbol / LMB</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Calculadora Apuestas Avanzada • Poisson + Mejoras</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Cuadro flotante para partidos de hoy -->
-  <div id="partidosHoyContainer" class="partidos-hoy-container">
-    <div class="partidos-hoy-header">
-      <h3>Partidos de Hoy</h3>
-      <button id="closePartidosHoy" class="close-btn">×</button>
-    </div>
-    <div id="partidosHoyList" class="partidos-hoy-list">
-      <div class="partido-hoy-placeholder">Cargando partidos de hoy...</div>
-    </div>
-  </div>
-
   <div class="container">
     <div class="header">
-      <h1>Calculadora para Pronósticos de Fútbol / LMB</h1>
-      <p class="small">Datos en tiempo real de ligas y estadísticas avanzadas.</p>
-      <button id="togglePartidosHoy" class="btn partidos-hoy-btn">Ver Partidos de Hoy</button>
+      <h1>Calculadora Apuestas Avanzada • Modelo Mejorado</h1>
+      <p class="small">Sistema mejorado con factores de corrección, forma reciente y modelo Dixon-Coles</p>
     </div>
 
-    <div class="card">
-      <h3>Selecciona Liga</h3>
-      <label for="leagueSelect">Liga:</label>
-      <select id="leagueSelect"></select>
-    </div>
-
+    <!-- Banco & Cuotas -->
     <div class="grid">
       <div class="card">
-        <h3>Equipo Local</h3>
-        <label for="teamHome">Equipo:</label>
-        <select id="teamHome"></select>
+        <h3>Banco mensual</h3>
+        <div class="table-like">
+          <div>
+            <label>Banca actual (Q)</label>
+            <input id="bankroll" type="number" value="1000" min="0" step="1"/>
+          </div>
+          <div>
+            <label>Guardar</label><br/>
+            <button id="saveBank" class="btn">Guardar banca</button>
+          </div>
+        </div>
         <div class="sep"></div>
-        <div class="stat-card">
-          <div class="stat-title" id="formHomeTeam">Local: —</div>
-          <div class="stat-values" id="formHomeBox">
-            <div class="stat-section" data-testid="general-home">
-              <span class="section-title">Rendimiento General</span>
-              <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>Puntos: 0</span>
-                <span>DG: 0</span>
-              </div>
-            </div>
-            <div class="stat-section" data-testid="local-home">
-              <span class="section-title">Rendimiento de Local</span>
-              <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>PG: 0</span>
-                <span>DG: 0</span>
-              </div>
-            </div>
-            <div class="stat-section" data-testid="visitante-home">
-              <span class="section-title">Rendimiento de Visitante</span>
-              <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>PG: 0</span>
-                <span>DG: 0</span>
-              </div>
-            </div>
-            <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
-          </div>
-          <div class="stat-legend">
-            <div>Posición: <input readonly id="posHome" value="0" class="small"></div>
-            <div>Goles a favor: <input readonly id="gfHome" value="0" class="small"></div>
-            <div>Goles en contra: <input readonly id="gaHome" value="0" class="small"></div>
-            <div>Win Rate Local (%): <input readonly id="winRateHome" value="0%" class="small"></div>
-          </div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <button id="recalc" class="btn">Calcular</button>
+          <button id="reset" class="btn">Reset valores</button>
+          <button id="clearAll" class="btn">Resetear todo</button>
         </div>
       </div>
 
       <div class="card">
-        <h3>Equipo Visitante</h3>
-        <label for="teamAway">Equipo:</label>
-        <select id="teamAway"></select>
+        <h3>Cuotas</h3>
+        <div class="table-like">
+          <div><label>1X2 - Local</label><input id="oddsHome" type="number" value="2.10" step="0.01" min="1"/></div>
+          <div><label>1X2 - Empate</label><input id="oddsDraw" type="number" value="3.40" step="0.01" min="1"/></div>
+        </div>
+        <div class="table-like" style="margin-top:8px">
+          <div><label>1X2 - Visitante</label><input id="oddsAway" type="number" value="3.80" step="0.01" min="1"/></div>
+          <div><label>BTTS Sí</label><input id="oddsBTTS" type="number" value="1.90" step="0.01" min="1"/></div>
+        </div>
+        <div class="table-like" style="margin-top:8px">
+          <div><label>Over 2.5</label><input id="oddsOver25" type="number" value="2.00" step="0.01" min="1"/></div>
+          <div></div>
+        </div>
+        <p class="small" style="margin-top:8px">Consejo: usa decimales. (Americana → decimal antes)</p>
+      </div>
+    </div>
+
+    <!-- Selección equipos -->
+    <div class="grid" style="margin-top:12px">
+      <div class="card">
+        <h3>Equipos y estadísticas</h3>
+        <div class="table-like">
+          <div>
+            <label>Liga</label>
+            <select id="leagueSelect"><option value="">-- Selecciona liga --</option></select>
+          </div>
+        </div>
+
+        <div class="table-like" style="margin-top:8px">
+          <div>
+            <label>Equipo Local</label>
+            <select id="teamHome"></select>
+          </div>
+          <div>
+            <label>Equipo Visitante</label>
+            <select id="teamAway"></select>
+          </div>
+        </div>
+
         <div class="sep"></div>
-        <div class="stat-card">
-          <div class="stat-title" id="formAwayTeam">Visitante: —</div>
-          <div class="stat-values" id="formAwayBox">
-            <div class="stat-section" data-testid="general-away">
-              <span class="section-title">Rendimiento General</span>
-              <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>Puntos: 0</span>
-                <span>DG: 0</span>
-              </div>
-            </div>
-            <div class="stat-section" data-testid="local-away">
-              <span class="section-title">Rendimiento de Local</span>
-              <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>PG: 0</span>
-                <span>DG: 0</span>
-              </div>
-            </div>
-            <div class="stat-section" data-testid="visitante-away">
-              <span class="section-title">Rendimiento de Visitante</span>
-              <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>PG: 0</span>
-                <span>DG: 0</span>
-              </div>
-            </div>
-            <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
-          </div>
-          <div class="stat-legend">
-            <div>Posición: <input readonly id="posAway" value="0" class="small"></div>
-            <div>Goles a favor: <input readonly id="gfAway" value="0" class="small"></div>
-            <div>Goles en contra: <input readonly id="gaAway" value="0" class="small"></div>
-            <div>Win Rate Visit. (%): <input readonly id="winRateAway" value="0%" class="small"></div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <div class="card">
-      <h3>Factores de Corrección y Acciones</h3>
-      <div class="correction-factors">
-        <div class="correction-factor">
-          <span class="label">Ventaja local:</span>
-          <span class="value" id="homeAdvantageFactor">—</span>
+        <div class="table-like">
+          <div>
+            <label>Pos Local</label><input id="posHome" type="number" value="-" min="1" step="1"/>
+          </div>
+          <div>
+            <label>Pos Visitante</label><input id="posAway" type="number" value="-" min="1" step="1"/>
+          </div>
         </div>
-        <div class="correction-factor">
-          <span class="label">Fuerza relativa:</span>
-          <span class="value" id="strengthFactor">—</span>
-        </div>
-        <div class="correction-factor">
-          <span class="label">Dixon-Coles:</span>
-          <span class="value" id="dixonColesFactor">—</span>
-        </div>
-      </div>
-      <div class="sep"></div>
-      <div class="table-like">
-        <button id="recalc" class="btn" disabled>Calcular</button>
-        <button id="reset" class="btn">Resetear</button>
-      </div>
-    </div>
 
-    <div class="card">
-      <h3>Pronósticos</h3>
-      <div class="kpis">
-        <div class="kpis-row">
-          <div class="tile">
-            <strong id="pHome">—</strong>
-            <div class="small">Probabilidad: Local</div>
+        <div class="sep"></div>
+
+        <div class="table-like">
+          <div>
+            <label>GF local</label><input id="gfHome" type="number" value="1.6" step="0.01" min="0"/>
           </div>
-          <div class="tile">
-            <strong id="pDraw">—</strong>
-            <div class="small">Probabilidad: Empate</div>
-          </div>
-          <div class="tile">
-            <strong id="pAway">—</strong>
-            <div class="small">Probabilidad: Visitante</div>
+          <div>
+            <label>GC local</label><input id="gaHome" type="number" value="1.1" step="0.01" min="0"/>
           </div>
         </div>
-        <div class="kpis-row">
-          <div class="tile">
-            <strong id="pBTTS">—</strong>
-            <div class="small">Probabilidad: Ambos anotan</div>
+        <div class="table-like" style="margin-top:8px">
+          <div>
+            <label>GF visitante</label><input id="gfAway" type="number" value="1.4" step="0.01" min="0"/>
           </div>
-          <div class="tile">
-            <strong id="pO25">—</strong>
-            <div class="small">Probabilidad: Más de 2.5 goles</div>
+          <div>
+            <label>GC visitante</label><input id="gaAway" type="number" value="1.2" step="0.01" min="0"/>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        
+        <h4>Forma reciente (últimos 5 partidos)</h4>
+        <div class="table-like" style="margin-top:6px">
+          <div>
+            <label>Forma Local (G-E-P)</label>
+            <input id="formHome" type="text" placeholder="3-1-1" value="3-1-1"/>
+          </div>
+          <div>
+            <label>Forma Visitante (G-E-P)</label>
+            <input id="formAway" type="text" placeholder="2-2-1" value="2-2-1"/>
+          </div>
+        </div>
+        
+        <div class="sep"></div>
+        
+        <h4>Factores de Corrección</h4>
+        <div class="table-like">
+          <div>
+            <label>Ventaja local (+%)</label>
+            <input id="homeAdvantage" type="number" value="15" step="1" min="0" max="50"/>
+          </div>
+          <div>
+            <label>Peso forma reciente (%)</label>
+            <input id="formWeight" type="number" value="30" step="5" min="0" max="100"/>
+          </div>
+        </div>
+        <div class="table-like" style="margin-top:8px">
+          <div>
+            <label>Factor Dixon-Coles (ρ)</label>
+            <input id="dixonColesParam" type="number" value="-0.13" step="0.01" min="-0.5" max="0.5"/>
+          </div>
+          <div>
+            <label>Máx. equipos en liga</label>
+            <input id="maxTeams" type="number" value="20" step="1" min="10" max="30"/>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <h4>Forma general</h4>
+        <div class="table-like" style="margin-top:6px">
+          <div class="stat-card" id="formHomeCard">
+            <div class="stat-title" id="formHomeTeam">Local: —</div>
+            <div class="stat-values" id="formHomeBox">PJ: — | G: — | E: — | P: —</div>
+          </div>
+          <div class="stat-card" id="formAwayCard">
+            <div class="stat-title" id="formAwayTeam">Visitante: —</div>
+            <div class="stat-values" id="formAwayBox">PJ: — | G: — | E: — | P: —</div>
           </div>
         </div>
       </div>
-      <div class="sep"></div>
-      <h3>Recomendación</h3>
-      <div class="recs" id="details">—</div>
-      <div class="bet-slip" id="suggestion">Esperando datos para tu apuesta estelar...</div>
+
+      <!-- Resultados -->
+      <div class="card">
+        <h3>Resultados & Recomendaciones</h3>
+        <div class="kpis" style="margin-top:6px">
+          <div class="tile"><strong id="pHome">—</strong><div class="small">Prob. Local</div></div>
+          <div class="tile"><strong id="pDraw">—</strong><div class="small">Prob. Empate</div></div>
+          <div class="tile"><strong id="pAway">—</strong><div class="small">Prob. Visitante</div></div>
+          <div class="tile"><strong id="pBTTS">—</strong><div class="small">Prob. BTTS</div></div>
+          <div class="tile"><strong id="pO25">—</strong><div class="small">Prob. Over 2.5</div></div>
+          <div class="tile"><strong id="expectedBest">—</strong><div class="small">Mejor EV</div></div>
+        </div>
+
+        <div class="sep"></div>
+        
+        <h4>Factores Aplicados</h4>
+        <div class="correction-factors">
+          <div class="correction-factor">
+            <div class="label">Ventaja Local</div>
+            <div class="value" id="homeAdvantageFactor">1.00x</div>
+          </div>
+          <div class="correction-factor">
+            <div class="label">Fuerza Relativa</div>
+            <div class="value" id="strengthFactor">1.00x</div>
+          </div>
+          <div class="correction-factor">
+            <div class="label">Forma Reciente</div>
+            <div class="value" id="recentFormFactor">1.00x</div>
+          </div>
+          <div class="correction-factor">
+            <div class="label">Dixon-Coles</div>
+            <div class="value" id="dixonColesFactor">1.00x</div>
+          </div>
+        </div>
+        
+        <div class="sep"></div>
+        
+        <div id="details" class="recs small"></div>
+
+        <div class="suggest" id="suggestion" style="display:none"></div>
+        
+        <div class="sep"></div>
+        
+        <div>
+          <h4>Stake según Kelly</h4>
+          <div class="table-like">
+            <div class="stat-card">
+              <div class="stat-title">Stake recomendado</div>
+              <div class="stat-values" id="kellyStake">—%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">Monto a apostar</div>
+              <div class="stat-values" id="betAmount">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+        <div class="abbrev">
+          <strong>Guía abreviaturas:</strong> EV = Expected Value (Valor Esperado) · PJ = Partidos Jugados · G = Ganados · E = Empatados · P = Perdidos · Stake = Monto sugerido
+        </div>
+      </div>
     </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
