@@ -4,7 +4,7 @@ const formatDec = x => (isFinite(x) ? x.toFixed(2) : '0.00');
 function parseNumberString(val){ const s=String(val||'').toString().replace(/,/g,'.'); const n=Number(s); return isFinite(n)?n:0; }
 function toDecimalOdds(v){ const a=parseFloat(String(v).replace(/,/g,'.')); return isNaN(a)||a<=0?1.01:a; }
 
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyP6dc9ww4I9kw26fQCc0gAyEtYbQVg6DsoAtlnxqhFFJClOrHoudM8PdnBnT9YBopSlA/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbykDbyL9RFMdtdkYTS2Mh36u0c0NzRq7Hw2IS6eUwbP-nrcm6MbE0ixBK8eLzkK6kwd_w/exec";
 let teamsByLeague = {};
 const leagueNames = { "WC":"FIFA World Cup","CL":"UEFA Champions League","BL1":"Bundesliga","DED":"Eredivisie","BSA":"Campeonato Brasileiro","PD":"Liga Española","FL1":"Ligue 1","ELC":"Championship","PPL":"Primeira Liga","EC":"European Championship","SA":"Serie A","PL":"Premier League" };
 
@@ -374,3 +374,4 @@ function calculateAll(){
   
   $('details').innerHTML = details;
 }
+
