@@ -487,54 +487,6 @@ input[type="number"] {
   font-size: 12px;
 }
 
-.matches-today {
-  margin-top: 10px;
-  padding: 8px;
-  background: #333;
-  border-radius: 6px;
-  border: 1px solid #4a4a4a;
-  text-align: center;
-}
-
-.matches-today h4 {
-  font-size: 14px;
-  margin: 0 0 6px;
-  color: #4dabf7;
-}
-
-.matches-today #matchesList {
-  font-size: 12px;
-  color: #e0e0e0;
-  line-height: 1.4;
-}
-
-.matches-today .match {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.matches-today .match-team {
-  font-weight: 600;
-  color: #fff;
-}
-
-.matches-today .match-vs {
-  color: #f0c05a;
-}
-
-.matches-today .match-time {
-  color: #a0a0a0;
-  font-size: 10px;
-}
-
-.matches-today .no-matches {
-  color: #a0a0a0;
-  font-style: italic;
-}
-
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2px); }
@@ -547,4 +499,32 @@ input[type="number"] {
 
 .pulse {
   animation: pulse 0.3s ease-in-out;
+}
+
+/* Estilos para los partidos de hoy */
+.match-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #4a4a4a;
+  font-size: 12px;
+  color: #f0f0f0;
+}
+
+.match-time {
+  font-weight: 600;
+  width: 60px;
+  color: #4dabf7;
+}
+
+.match-teams {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.match-league {
+  font-size: 10px;
+  color: #a0a0a0;
+  font-style: italic;
 }
