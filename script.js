@@ -1,3 +1,6 @@
+// ¡IMPORTANTE! Reemplaza este valor con la URL de tu App Web de Google Apps Script.
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyd4XMf1b6-dAkzmiTWLSMtBfIpfR3zTvuv2W7YTsyh_BjyE4de0jNAntCHpy283WRj6Q/exec";
+
 // ----------------------
 // UTILIDADES
 // ----------------------
@@ -34,7 +37,6 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-// La URL se define en el HTML
 let teamsByLeague = {};
 
 const leagueNames = {
@@ -90,9 +92,8 @@ function normalizeTeam(raw) {
 // ----------------------
 async function fetchTeams() {
     const leagueSelect = $('leagueSelect');
-    if (leagueSelect) leagueSelect.innerHTML = '<option value="">Cargando ligas...</option>';
+    if (leagueSelect) leagueSelect.innerHTML = '<option value="">Cargando ligas... (Esto puede tardar unos segundos)</option>';
     
-    // Mensaje de carga para el calendario
     const calendarEventsDiv = $('calendarEvents');
     if (calendarEventsDiv) {
         calendarEventsDiv.innerHTML = '<div class="calendar-loading">Cargando partidos...</div>';
@@ -106,20 +107,17 @@ async function fetchTeams() {
         }
         const data = await res.json();
         
-        // Asumimos que data.ligas contiene los datos de equipos
         const normalizedTeams = {};
         for (const key in data.ligas) {
             normalizedTeams[key] = (data.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
         }
 
-        // Guardar ambos en el objeto global teamsByLeague
         teamsByLeague = {
             ligas: normalizedTeams,
             calendario: data.calendario || {}
         };
         localStorage.setItem('teamsByLeague', JSON.stringify(teamsByLeague));
         
-        // Cargar eventos del calendario una vez que los datos estén disponibles
         loadCalendarEvents();
         return teamsByLeague;
 
@@ -211,7 +209,7 @@ document.addEventListener('DOMContentLoaded', init);
 function loadCalendarEvents() {
     const calendarData = teamsByLeague.calendario || {};
     const today = new Date();
-    const todayDateString = Utilities.formatDate(today, "America/Guatemala", "yyyy-MM-dd");
+    const todayDateString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     
     let allTodayEvents = [];
     for (const leagueName in calendarData) {
