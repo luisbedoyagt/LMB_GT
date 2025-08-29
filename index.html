@@ -12,10 +12,12 @@
       <h1>Calculadora para Pronósticos de Fútbol / LMB</h1>
       <p class="small">Datos en tiempo real de ligas y estadísticas avanzadas.</p>
     </div>
+
     <div class="card" id="todayMatches">
       <h3>Partidos de Hoy</h3>
       <div id="matchesList"></div>
     </div>
+
     <div class="card">
       <h3>Selecciona Liga</h3>
       <label for="leagueSelect">Liga:</label>
@@ -28,6 +30,7 @@
         <label for="teamHome">Equipo:</label>
         <select id="teamHome"></select>
         <div class="sep"></div>
+
         <div class="stat-card">
           <div class="stat-title" id="formHomeTeam">Local: —</div>
           <div class="stat-values" id="formHomeBox">
@@ -57,6 +60,7 @@
             </div>
             <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
           </div>
+
           <div class="stat-legend">
             <div>Posición: <input readonly id="posHome" value="0" class="small"></div>
             <div>Goles a favor: <input readonly id="gfHome" value="0" class="small"></div>
@@ -71,6 +75,7 @@
         <label for="teamAway">Equipo:</label>
         <select id="teamAway"></select>
         <div class="sep"></div>
+
         <div class="stat-card">
           <div class="stat-title" id="formAwayTeam">Visitante: —</div>
           <div class="stat-values" id="formAwayBox">
@@ -100,6 +105,7 @@
             </div>
             <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
           </div>
+
           <div class="stat-legend">
             <div>Posición: <input readonly id="posAway" value="0" class="small"></div>
             <div>Goles a favor: <input readonly id="gfAway" value="0" class="small"></div>
@@ -161,12 +167,14 @@
           </div>
         </div>
       </div>
+
       <div class="sep"></div>
       <h3>Recomendación</h3>
       <div class="recs" id="details">—</div>
       <div class="bet-slip" id="suggestion">Esperando datos para tu apuesta estelar...</div>
     </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
