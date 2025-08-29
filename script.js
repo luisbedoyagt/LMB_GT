@@ -100,6 +100,8 @@ async function fetchTeams() {
       throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
     }
     const data = await res.json();
+    console.log('Datos recibidos:', data); // Depuración
+    console.log('Partidos futuros:', data.partidosFuturos); // Depuración
 
     // Procesar ligas
     const normalized = {};
@@ -131,8 +133,12 @@ async function fetchTeams() {
 function renderMatches() {
   const matchesList = $('matchesList');
   const noMatches = $('noMatches');
-  if (!matchesList || !calendarData.partidosFuturos) return;
+  if (!matchesList || !calendarData.partidosFuturos) {
+    console.error('No se encontró matchesList o partidosFuturos no definido');
+    return;
+  }
 
+  console.log('Renderizando partidos:', calendarData.partidosFuturos); // Depuración
   matchesList.innerHTML = ''; // Limpiar lista anterior
 
   if (calendarData.partidosFuturos.length === 0) {
@@ -567,4 +573,3 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
-
