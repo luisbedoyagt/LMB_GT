@@ -13,9 +13,13 @@
       <p class="small">Datos en tiempo real de ligas y estadísticas avanzadas.</p>
     </div>
 
-    <div class="card" id="todayMatches">
+    <!-- Nueva sección para mostrar los partidos del día -->
+    <div class="card" id="calendarCard">
       <h3>Partidos de Hoy</h3>
-      <div id="matchesList"></div>
+      <div id="matchesList" class="matches-list">
+        <!-- Aquí se insertarán los partidos dinámicamente -->
+      </div>
+      <p id="noMatches" class="small" style="display: none;">No hay partidos futuros hoy.</p>
     </div>
 
     <div class="card">
@@ -30,7 +34,6 @@
         <label for="teamHome">Equipo:</label>
         <select id="teamHome"></select>
         <div class="sep"></div>
-
         <div class="stat-card">
           <div class="stat-title" id="formHomeTeam">Local: —</div>
           <div class="stat-values" id="formHomeBox">
@@ -60,7 +63,6 @@
             </div>
             <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
           </div>
-
           <div class="stat-legend">
             <div>Posición: <input readonly id="posHome" value="0" class="small"></div>
             <div>Goles a favor: <input readonly id="gfHome" value="0" class="small"></div>
@@ -75,7 +77,6 @@
         <label for="teamAway">Equipo:</label>
         <select id="teamAway"></select>
         <div class="sep"></div>
-
         <div class="stat-card">
           <div class="stat-title" id="formAwayTeam">Visitante: —</div>
           <div class="stat-values" id="formAwayBox">
@@ -105,7 +106,6 @@
             </div>
             <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
           </div>
-
           <div class="stat-legend">
             <div>Posición: <input readonly id="posAway" value="0" class="small"></div>
             <div>Goles a favor: <input readonly id="gfAway" value="0" class="small"></div>
@@ -167,14 +167,12 @@
           </div>
         </div>
       </div>
-
       <div class="sep"></div>
       <h3>Recomendación</h3>
       <div class="recs" id="details">—</div>
       <div class="bet-slip" id="suggestion">Esperando datos para tu apuesta estelar...</div>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
