@@ -34,7 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzbcoDfTtqrElV2uWZRVJzS_DhQaZMjscNd371g62C935bAQMovPnsoxDmANH1tup1Mtg/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwhxSccznUNIZFSfNKygHE--qPK4vn6KtxW5iyYrj0BmM_efw18_IWAUEcwNBzlFqBhcA/exec";
 let teamsByLeague = {};
 let partidosHoy = [];
 
@@ -552,7 +552,6 @@ function calculateAll() {
   $('strengthFactor').textContent = strengthDiff;
   $('dixonColesFactor').textContent = dixonColes;
 
-
   // Recomendación con umbrales
   const outcomes = [
     { name: `${teamHome} gana`, prob: finalHome },
@@ -563,7 +562,7 @@ function calculateAll() {
 
   let suggestionText = `<span class="star">★</span><span class="main-bet">🏆 Apuesta principal: <strong>${maxOutcome.name} (${formatPct(maxOutcome.prob)})</strong></span>`;
 
-  // Lógica de umbrales para BTTS y O25
+  // Lógica de umbrales para BTTS và O25
   const bttsText = avgBTTS > 0.55 ? `✔ Ambos anotan (${formatPct(avgBTTS)})` :
                    avgBTTS < 0.45 ? `❌ No ambos anotan (${formatPct(1 - avgBTTS)})` :
                    `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
@@ -587,5 +586,3 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
-
-
