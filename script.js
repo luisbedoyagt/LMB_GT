@@ -130,23 +130,18 @@ function displayUpcomingEvents() {
     if (allData.calendario) {
         for (const liga in allData.calendario) {
             allData.calendario[liga].forEach(event => {
-                // Combina la fecha y la hora en un solo string
-                const fullDateTimeString = `${event.fecha}T${event.hora}`;
-                const eventDate = new Date(fullDateTimeString);
+                // Parsea la fecha y hora
+                const startDate = new Date(event.fecha);
+                const endDate = new Date(event.hora);
 
                 // Formatea la fecha y hora a un formato legible
                 const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
                 const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guatemala' };
 
-                // Verifica si la fecha es válida
-                if (isNaN(eventDate)) {
-                    console.error('Fecha inválida para el evento:', event);
-                    return; // Salta este evento si la fecha no es válida
-                }
-
-                const formattedDate = eventDate.toLocaleDateString('es-ES', dateOptions);
-                const formattedTime = eventDate.toLocaleTimeString('es-ES', timeOptions);
+                const formattedDate = startDate.toLocaleDateString('es-ES', dateOptions);
+                const formattedTime = startDate.toLocaleTimeString('es-ES', timeOptions);
                 
+                // Muestra solo la fecha de inicio, ya que la de finalización es un valor predeterminado
                 const eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
                 
                 allEvents.push({
