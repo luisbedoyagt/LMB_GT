@@ -507,19 +507,29 @@ input[type="number"] {
     gap: 4px;
 }
 
+#selected-league-events {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+
 #selected-league-events .event-box {
+    flex: 1;
     background: #2c2c2c;
-    padding: 12px;
+    padding: 10px;
     border-radius: 6px;
-    margin-bottom: 8px;
-    font-size: 12px;
+    font-size: 11px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 3px;
     border: 1px solid #40c4ff;
     box-shadow: 0 0 8px rgba(64, 196, 255, 0.3), 0 2px 4px rgba(0,0,0,0.3);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
+    min-width: 150px;
+    max-width: 200px;
 }
 
 #selected-league-events .event-box:hover {
@@ -528,19 +538,40 @@ input[type="number"] {
 }
 
 #selected-league-events .event-box strong {
-    font-size: 13px;
+    font-size: 12px;
     color: #f0f0f0;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #selected-league-events .event-box span {
-    font-size: 11px;
+    font-size: 10px;
     color: #a0a0a0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #selected-league-events .event-box small {
-    font-size: 10px;
+    font-size: 9px;
     color: #e0e0e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+    #selected-league-events {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    #selected-league-events .event-box {
+        min-width: 100%;
+        max-width: 100%;
+    }
 }
 
 @keyframes float {
