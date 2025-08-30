@@ -130,14 +130,14 @@ function displayUpcomingEvents() {
     if (allData.calendario) {
         for (const liga in allData.calendario) {
             allData.calendario[liga].forEach(event => {
-                // Combina la fecha y la hora en un solo string
-                const combinedDateTime = `${event.fecha}T${event.hora}:00`;
-                const eventDate = new Date(combinedDateTime);
-
-                // Verifica si la fecha es válida
-                if (isNaN(eventDate)) {
-                    console.error('Fecha inválida para el evento:', event);
-                    return; // Salta este evento si la fecha no es válida
+                // Parsea la fecha
+                const eventDate = new Date(event.fecha);
+                
+                // Si la hora existe, la parseamos y la agregamos al objeto de fecha
+                if (event.hora) {
+                    const [hours, minutes] = event.hora.split(':').map(Number);
+                    eventDate.setHours(hours);
+                    eventDate.setMinutes(minutes);
                 }
 
                 // Formatea la fecha y hora a un formato legible
