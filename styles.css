@@ -1,520 +1,526 @@
-/* styles.css */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    margin: 0;
-    padding: 8px;
-    background-color: #1a1a1a;
-    color: #e0e0e0;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 10px;
-}
-
-.header {
-    text-align: center;
-    margin-bottom: 12px;
-}
-
-h1 {
-    font-size: 20px;
-    margin: 0;
-    color: #fff;
-}
-
-h3 {
-    font-size: 16px;
-    margin: 8px 0 6px;
-    color: #fff;
-}
-
-h4 {
-    font-size: 14px;
-    margin: 8px 0 12px;
-    color: #e0e0e0;
-}
-
-p.small, div.small {
-    font-size: 10px;
-    color: #e0e0e0;
-}
-
-.card {
-    background: #2c2c2c;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #3a3a3a;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.table-like {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-}
-
-label {
-    font-size: 12px;
-    color: #e0e0e0;
-    display: block;
-    margin-bottom: 4px;
-}
-
-input, select {
-    width: 100%;
-    padding: 5px;
-    border: 1px solid #4dabf7;
-    border-radius: 3px;
-    font-size: 12px;
-    box-sizing: border-box;
-    background: #2c2c2c;
-    color: #e0e0e0;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-input:focus, select:focus {
-    border-color: #74c0fc;
-    outline: none;
-}
-
-input[type="number"] {
-    width: 60px;
-}
-
-.sep {
-    height: 1px;
-    background: #4a4a4a;
-    margin: 10px 0;
-}
-
-.btn {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    background: #4dabf7;
-    color: #fff;
-    font-size: 12px;
-    cursor: pointer;
-    margin-bottom: 12px;
-}
-
-.btn:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-}
-
-.btn:hover {
-    background: #74c0fc;
-}
-
-.kpis {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.kpis-row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 10px;
-    justify-content: center;
-}
-
-.kpis-row:nth-child(2) {
-    justify-content: center;
-}
-
-.tile {
-    flex: 1;
-    width: 100%;
-    max-width: 140px;
-    text-align: center;
-    padding: 10px;
-    border-radius: 5px;
-    background: linear-gradient(135deg, #3a3a3a, #4a4a4a);
-    border: 1px solid #4a4a4a;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
-    position: relative;
-    transition: background 0.3s ease;
-    box-sizing: border-box;
-}
-
-.tile:hover {
-    background: linear-gradient(135deg, #4a4a4a, #5a5a5a);
-}
-
-.tile:nth-child(1) {
-    border-color: #4dabf7;
-}
-
-.tile:nth-child(1)::before {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #4dabf7;
-}
-
-.tile:nth-child(2) {
-    border-color: #f0c05a;
-}
-
-.tile:nth-child(2)::before {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #f0c05a;
-}
-
-.tile:nth-child(3) {
-    border-color: #f87171;
-}
-
-.tile:nth-child(3)::before {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #f87171;
-}
-
-.tile:nth-child(4) {
-    border-color: #a855f7;
-}
-
-.tile:nth-child(4)::before {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #a855f7;
-}
-
-.tile:nth-child(5) {
-    border-color: #34c759;
-}
-
-.tile:nth-child(5)::before {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #34c759;
-}
-
-.tile strong {
-    font-size: 14px;
-    color: #f0f0f0;
-    text-shadow: 0 0 1px rgba(255, 255, 255, 0.4);
-}
-
-.tile div.small {
-    font-size: 9px;
-    color: #e0e0e0;
-    white-space: normal;
-    line-height: 1.1;
-}
-
-.correction-factors {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 4px;
-}
-
-.correction-factor {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px;
-    border-radius: 3px;
-    background: #333;
-    border: 1px solid #4a4a4a;
-}
-
-.correction-factor .label {
-    font-size: 10px;
-    color: #a0a0a0;
-}
-
-.correction-factor .value {
-    font-size: 10px;
-    font-weight: bold;
-    color: #fff;
-}
-
-.recs div {
-    margin: 2px 0;
-    color: #e0e0e0;
-}
-
-.recs .error {
-    color: #ff9999;
-    background: #2a2a2a;
-    padding: 4px 8px;
-    border-radius: 3px;
-    border: 1px solid #ff6666;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    font-size: 11px;
-    text-align: center;
-    order: -1;
-}
-
-.recs .error strong {
-    font-size: 12px;
-    color: #ff6666;
-}
-
-.stat-card {
-    background: #333;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-    padding: 12px;
-    margin-bottom: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    border-left: 4px solid;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.6);
-}
-
-.stat-card:nth-child(1) {
-    border-color: #4dabf7;
-}
-
-.stat-card:nth-child(2) {
-    border-color: #f87171;
-}
-
-.team-logo {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 8px;
-    vertical-align: middle;
-}
-
-.stat-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
-}
-
-.stat-title::before {
-    content: '';
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #74c0fc;
-}
-
-.stat-card:nth-child(2) .stat-title::before {
-    background: #ff8787;
-}
-
-.stat-values {
-    font-size: 10px;
-    color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: #2c2c2c;
-    padding: 6px;
-    border-radius: 4px;
-    border: 1px solid #4a4a4a;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
-}
-
-.stat-section {
-    background: #3a3a3a;
-    border-radius: 4px;
-    padding: 4px;
-    border: 1px solid #5a5a5a;
-}
-
-.section-title {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: #4dabf7;
-    margin-bottom: 3px;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
-}
-
-.stat-metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-    gap: 3px;
-}
-
-.stat-metrics span {
-    background: #444;
-    padding: 2px 5px;
-    border-radius: 3px;
-    border: 1px solid #666;
-    font-size: 9px;
-    text-align: center;
-    transition: background 0.2s ease;
-}
-
-.stat-metrics span:hover {
-    background: #555;
-}
-
-.stat-legend-text {
-    font-size: 8px;
-    color: #a0a0a0;
-    margin-top: 4px;
-    text-align: center;
-}
-
-.stat-legend {
-    font-size: 11px;
-    color: #f0f0f0;
-    background: #444;
-    padding: 4px 8px;
-    border-radius: 3px;
-    border: 1px solid #74c0fc;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    margin-bottom: 4px;
-    text-align: center;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-}
-
-.stat-legend div {
-    flex: 1;
-    min-width: 80px;
-}
-
-.bet-slip {
-    background: linear-gradient(135deg, #2a3a4a, #3a4a5a);
-    border-radius: 6px;
-    padding: 12px;
-    margin-top: 6px;
-    color: #f0f0f0;
-    font-weight: 600;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    border: 2px solid #4dabf7;
-    box-shadow: 0 2px 6px rgba(77, 171, 247, 0.2), 0 0 8px rgba(0,0,0,0.2);
-    position: relative;
-    overflow: visible;
-    animation: float 2s ease-in-out infinite;
-    min-height: 80px;
-    text-align: left;
-}
-
-.bet-slip .star {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    font-size: 10px;
-    color: #ffffff;
-    background: #4dabf7;
-    padding: 2px 6px;
-    border-radius: 3px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-.bet-slip .main-bet {
-    font-size: 14px;
-    color: #f0f0f0;
-    display: block;
-}
-
-.bet-slip .main-bet strong {
-    font-size: 16px;
-    color: #4dabf7;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.3);
-}
-
-.bet-slip .other-bets {
-    list-style: none;
-    margin: 0;
-    padding: 0 0 0 20px;
-    font-size: 13px;
-    color: #e0e0e0;
-}
-
-.bet-slip .other-bets li {
-    position: relative;
-    margin-bottom: 4px;
-}
-
-.bet-slip .other-bets li::before {
-    content: '✔';
-    position: absolute;
-    left: -16px;
-    color: #34c759;
-    font-size: 12px;
-}
-
-#upcoming-events-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-#upcoming-events-list li {
-    background: #333;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border-left: 3px solid #f0c05a;
-    margin-bottom: 8px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 2px 6px rgba(77, 171, 247, 0.2), 0 0 8px rgba(0,0,0,0.2); }
-    50% { transform: scale(1.02); box-shadow: 0 4px 8px rgba(77, 171, 247, 0.3), 0 0 10px rgba(0,0,0,0.3); }
-}
 
-.pulse {
-    animation: pulse 0.3s ease-in-out;
+// ----------------------
+// UTILIDADES
+// ----------------------
+const $ = id => document.getElementById(id);
+const formatPct = x => (100 * (isFinite(x) ? x : 0)).toFixed(1) + '%';
+const formatDec = x => (isFinite(x) ? x.toFixed(2) : '0.00');
+const parseNumberString = val => {
+  const s = String(val || '').replace(/,/g, '.');
+  const n = Number(s);
+  return isFinite(n) ? n : 0;
+};
+
+// Caché para factorial (mejora eficiencia)
+const factorialCache = [1, 1];
+function factorial(n) {
+  if (n < 0) return 0;
+  if (factorialCache[n] !== undefined) return factorialCache[n];
+  factorialCache[n] = n * factorial(n - 1);
+  return factorialCache[n];
+}
+
+function poissonProb(lambda, k) {
+  return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+}
+
+function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
+  if (h === 0 && a === 0) return tau * poissonProb(lambdaH, 0) * poissonProb(lambdaA, 0);
+  if (h === 0 && a === 1) return tau * poissonProb(lambdaH, 0) * poissonProb(lambdaA, 1);
+  if (h === 1 && a === 0) return tau * poissonProb(lambdaH, 1) * poissonProb(lambdaA, 0);
+  if (h === 1 && a === 1) return tau * poissonProb(lambdaH, 1) * poissonProb(lambdaA, 1);
+  return poissonProb(lambdaH, h) * poissonProb(lambdaA, a);
+}
+
+// ----------------------
+// CONFIGURACIÓN DE LIGAS
+// ----------------------
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwhxSccznUNIZFSfNKygHE--qPK4vn6KtxW5iyYrj0BmM_efw18_IWAUEcwNBzlFqBhcA/exec";
+let teamsByLeague = {};
+
+const leagueNames = {
+  "esp.1": "LaLiga España",
+  "esp.2": "Segunda España",
+  "eng.1": "Premier League Inglaterra",
+  "eng.2": "Championship Inglaterra",
+  "ita.1": "Serie A Italia",
+  "ger.1": "Bundesliga Alemania",
+  "fra.1": "Ligue 1 Francia",
+  "ned.1": "Eredivisie Países Bajos",
+  "ned.2": "Eerste Divisie Países Bajos",
+  "por.1": "Liga Portugal",
+  "mex.1": "Liga MX México",
+  "usa.1": "MLS Estados Unidos",
+  "bra.1": "Brasileirão Brasil",
+  "gua.1": "Liga Nacional Guatemala",
+  "crc.1": "Liga Promerica Costa Rica",
+  "hon.1": "Liga Nacional Honduras",
+  "ksa.1": "Pro League Arabia Saudita"
+};
+
+// ----------------------
+// NORMALIZACIÓN DE DATOS
+// ----------------------
+function normalizeTeam(raw) {
+  if (!raw) return null;
+  const r = {};
+  r.name = raw.name || '';
+  if (!r.name) return null;
+  r.pos = parseNumberString(raw.rank || 0);
+  r.gf = parseNumberString(raw.goalsFor || 0);
+  r.ga = parseNumberString(raw.goalsAgainst || 0);
+  r.pj = parseNumberString(raw.gamesPlayed || 0);
+  r.g = parseNumberString(raw.wins || 0);
+  r.e = parseNumberString(raw.ties || 0);
+  r.p = parseNumberString(raw.losses || 0);
+  r.points = parseNumberString(raw.points || (r.g * 3 + r.e) || 0);
+  r.gfHome = parseNumberString(raw.goalsForHome || 0);
+  r.gfAway = parseNumberString(raw.goalsForAway || 0);
+  r.gaHome = parseNumberString(raw.goalsAgainstHome || 0);
+  r.gaAway = parseNumberString(raw.goalsAgainstAway || 0);
+  r.pjHome = parseNumberString(raw.gamesPlayedHome || 0);
+  r.pjAway = parseNumberString(raw.gamesPlayedAway || 0);
+  r.winsHome = parseNumberString(raw.winsHome || 0);
+  r.winsAway = parseNumberString(raw.winsAway || 0);
+  r.logoUrl = raw.logoUrl || '';
+  return r;
+}
+
+// ----------------------
+// FETCH EQUIPOS (sin cambios, añadido manejo de errores más claro)
+// ----------------------
+async function fetchTeams() {
+  const leagueSelect = $('leagueSelect');
+  if (leagueSelect) leagueSelect.innerHTML = '<option value="">Cargando ligas...</option>';
+
+  try {
+    const res = await fetch(WEBAPP_URL);
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
+    }
+    const data = await res.json();
+    const normalized = {};
+    for (const key in data) {
+      normalized[key] = (data[key] || []).map(normalizeTeam).filter(t => t && t.name);
+    }
+    teamsByLeague = normalized;
+    localStorage.setItem('teamsByLeague', JSON.stringify(normalized));
+    return normalized;
+  } catch (err) {
+    console.error('Error en fetchTeams:', err);
+    const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
+    $('details').innerHTML = errorMsg;
+    if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
+    return {};
+  }
+}
+
+// ----------------------
+// INICIALIZACIÓN
+// ----------------------
+async function init() {
+  clearTeamData('Home');
+  clearTeamData('Away');
+  updateCalcButton();
+
+  teamsByLeague = await fetchTeams();
+  const leagueSelect = $('leagueSelect');
+  const teamHomeSelect = $('teamHome');
+  const teamAwaySelect = $('teamAway');
+
+  if (!leagueSelect || !teamHomeSelect || !teamAwaySelect) {
+    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema con la interfaz HTML.</div>';
+    return;
+  }
+
+  leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
+  Object.keys(teamsByLeague).sort().forEach(code => {
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = leagueNames[code] || code;
+    leagueSelect.appendChild(opt);
+  });
+
+  leagueSelect.addEventListener('change', onLeagueChange);
+  teamHomeSelect.addEventListener('change', () => {
+    if (restrictSameTeam()) {
+      fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
+      updateCalcButton();
+    }
+  });
+  teamAwaySelect.addEventListener('change', () => {
+    if (restrictSameTeam()) {
+      fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
+      updateCalcButton();
+    }
+  });
+
+  $('recalc').addEventListener('click', calculateAll);
+  $('reset').addEventListener('click', clearAll);
+}
+document.addEventListener('DOMContentLoaded', init);
+
+// ----------------------
+// FUNCIONES AUXILIARES
+// ----------------------
+function onLeagueChange() {
+  const code = $('leagueSelect').value;
+  const teamHomeSelect = $('teamHome');
+  const teamAwaySelect = $('teamAway');
+  teamHomeSelect.innerHTML = '<option value="">Cargando equipos...</option>';
+  teamAwaySelect.innerHTML = '<option value="">Cargando equipos...</option>';
+
+  if (!code || !teamsByLeague[code] || teamsByLeague[code].length === 0) {
+    clearTeamData('Home');
+    clearTeamData('Away');
+    updateCalcButton();
+    $('details').innerHTML = '<div class="warning"><strong>Advertencia:</strong> No hay datos disponibles para esta liga.</div>';
+    return;
+  }
+
+  const fragmentHome = document.createDocumentFragment();
+  const fragmentAway = document.createDocumentFragment();
+  const defaultOptionHome = document.createElement('option');
+  defaultOptionHome.value = '';
+  defaultOptionHome.textContent = '-- Selecciona equipo --';
+  fragmentHome.appendChild(defaultOptionHome);
+  const defaultOptionAway = document.createElement('option');
+  defaultOptionAway.value = '';
+  defaultOptionAway.textContent = '-- Selecciona equipo --';
+  fragmentAway.appendChild(defaultOptionAway);
+
+  teamsByLeague[code].forEach(t => {
+    const opt1 = document.createElement('option');
+    opt1.value = t.name;
+    opt1.textContent = t.name;
+    fragmentHome.appendChild(opt1);
+
+    const opt2 = document.createElement('option');
+    opt2.value = t.name;
+    opt2.textContent = t.name;
+    fragmentAway.appendChild(opt2);
+  });
+
+  teamHomeSelect.innerHTML = '';
+  teamAwaySelect.innerHTML = '';
+  teamHomeSelect.appendChild(fragmentHome);
+  teamAwaySelect.appendChild(fragmentAway);
+
+  clearTeamData('Home');
+  clearTeamData('Away');
+  updateCalcButton();
+}
+
+function updateCalcButton() {
+  const teamHome = $('teamHome').value;
+  const teamAway = $('teamAway').value;
+  const leagueCode = $('leagueSelect').value;
+  $('recalc').disabled = !(leagueCode && teamHome && teamAway && teamHome !== teamAway);
+}
+
+function restrictSameTeam() {
+  const teamHome = $('teamHome').value;
+  const teamAway = $('teamAway').value;
+  if (teamHome && teamAway && teamHome === teamAway) {
+    $('details').innerHTML = '<div class="error"><strong>Error:</strong> No puedes seleccionar el mismo equipo para local y visitante.</div>';
+    if (document.activeElement === $('teamHome')) {
+      $('teamHome').value = '';
+      clearTeamData('Home');
+    } else {
+      $('teamAway').value = '';
+      clearTeamData('Away');
+    }
+    updateCalcButton();
+    return false;
+  }
+  return true;
+}
+
+function clearTeamData(type) {
+  const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
+  box.innerHTML = `
+    <div class="stat-section" data-testid="general-${type.toLowerCase()}">
+      <span class="section-title">Rendimiento General</span>
+      <div class="stat-metrics">
+        <span>PJ: 0</span>
+        <span>Puntos: 0</span>
+        <span>DG: 0</span>
+      </div>
+    </div>
+    <div class="stat-section" data-testid="local-${type.toLowerCase()}">
+      <span class="section-title">Rendimiento de Local</span>
+      <div class="stat-metrics">
+        <span>PJ: 0</span>
+        <span>PG: 0</span>
+        <span>DG: 0</span>
+      </div>
+    </div>
+    <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
+      <span class="section-title">Rendimiento de Visitante</span>
+      <div class="stat-metrics">
+        <span>PJ: 0</span>
+        <span>PG: 0</span>
+        <span>DG: 0</span>
+      </div>
+    </div>
+    <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
+  `;
+  if (type === 'Home') {
+    $('posHome').value = '0';
+    $('gfHome').value = '0';
+    $('gaHome').value = '0';
+    $('winRateHome').value = '0%';
+    $('formHomeTeam').innerHTML = 'Local: —';
+  } else {
+    $('posAway').value = '0';
+    $('gfAway').value = '0';
+    $('gaAway').value = '0';
+    $('winRateAway').value = '0%';
+    $('formAwayTeam').innerHTML = 'Visitante: —';
+  }
+}
+
+function clearAll() {
+  document.querySelectorAll('input').forEach(i => i.value = '0');
+  document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+  ['pHome','pDraw','pAway','pBTTS','pO25','details','homeAdvantageFactor','strengthFactor','dixonColesFactor','suggestion'].forEach(id => {
+    const el = $(id);
+    if (el) el.textContent = '—';
+  });
+  ['formHomeTeam','formAwayTeam'].forEach(id => $(id).innerHTML = id.includes('Home') ? 'Local: —' : 'Visitante: —');
+  clearTeamData('Home');
+  clearTeamData('Away');
+  updateCalcButton();
+}
+
+// ----------------------
+// BÚSQUEDA Y LLENADO DE EQUIPO
+// ----------------------
+function findTeam(leagueCode, teamName) {
+  if (!teamsByLeague[leagueCode]) return null;
+  return teamsByLeague[leagueCode].find(t => t.name === teamName) || null;
+}
+
+function fillTeamData(teamName, leagueCode, type) {
+  const t = findTeam(leagueCode, teamName);
+  if (!t) {
+    console.error(`Equipo no encontrado: ${teamName} en liga ${leagueCode}`);
+    $('details').innerHTML = `<div class="error"><strong>Error:</strong> Equipo ${teamName} no encontrado en la liga seleccionada.</div>`;
+    return;
+  }
+
+  const lambda = type === 'Home' ? (t.pjHome ? t.gfHome / t.pjHome : t.gf / (t.pj || 1)) : (t.pjAway ? t.gfAway / t.pjAway : t.gf / (t.pj || 1));
+  const gaAvg = type === 'Home' ? (t.pjHome ? t.gaHome / t.pjHome : t.ga / (t.pj || 1)) : (t.pjAway ? t.gaAway / t.pjAway : t.ga / (t.pj || 1));
+  const dg = t.gf - t.ga;
+  const dgHome = t.gfHome - t.gaHome;
+  const dgAway = t.gfAway - t.gaAway;
+
+  const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
+  box.innerHTML = `
+    <div class="stat-section" data-testid="general-${type.toLowerCase()}">
+      <span class="section-title">Rendimiento General</span>
+      <div class="stat-metrics">
+        <span>PJ: ${t.pj || 0}</span>
+        <span>Puntos: ${t.points || 0}</span>
+        <span>DG: ${dg >= 0 ? '+' + dg : dg || 0}</span>
+      </div>
+    </div>
+    <div class="stat-section" data-testid="local-${type.toLowerCase()}">
+      <span class="section-title">Rendimiento de Local</span>
+      <div class="stat-metrics">
+        <span>PJ: ${t.pjHome || 0}</span>
+        <span>PG: ${t.winsHome || 0}</span>
+        <span>DG: ${dgHome >= 0 ? '+' + dgHome : dgHome || 0}</span>
+      </div>
+    </div>
+    <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
+      <span class="section-title">Rendimiento de Visitante</span>
+      <div class="stat-metrics">
+        <span>PJ: ${t.pjAway || 0}</span>
+        <span>PG: ${t.winsAway || 0}</span>
+        <span>DG: ${dgAway >= 0 ? '+' + dgAway : dgAway || 0}</span>
+      </div>
+    </div>
+    <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
+  `;
+
+  if (type === 'Home') {
+    $('posHome').value = t.pos || 0;
+    $('gfHome').value = formatDec(lambda);
+    $('gaHome').value = formatDec(gaAvg);
+    $('winRateHome').value = formatPct(t.pjHome ? t.winsHome / t.pjHome : 0);
+    $('formHomeTeam').innerHTML = t.logoUrl
+      ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> Local: ${t.name}`
+      : `Local: ${t.name}`;
+  } else {
+    $('posAway').value = t.pos || 0;
+    $('gfAway').value = formatDec(lambda);
+    $('gaAway').value = formatDec(gaAvg);
+    $('winRateAway').value = formatPct(t.pjAway ? t.winsAway / t.pjAway : 0);
+    $('formAwayTeam').innerHTML = t.logoUrl
+      ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> Visitante: ${t.name}`
+      : `Visitante: ${t.name}`;
+  }
+}
+
+// ----------------------
+// CÁLCULO PRINCIPAL
+// ----------------------
+function calculateAll() {
+  const teamHome = $('teamHome').value;
+  const teamAway = $('teamAway').value;
+  const league = $('leagueSelect').value;
+  if (!teamHome || !teamAway || !league) {
+    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Selecciona una liga y ambos equipos.</div>';
+    return;
+  }
+
+  const tH = findTeam(league, teamHome);
+  const tA = findTeam(league, teamAway);
+  if (!tH || !tA) {
+    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Equipos no encontrados.</div>';
+    return;
+  }
+
+  // Check de jornadas mínimas
+  let warning = '';
+  if (tH.pj < 5 || tA.pj < 5) {
+    warning = '<div class="warning"><strong>Advertencia:</strong> Al menos un equipo tiene menos de 5 partidos jugados. Las predicciones pueden ser menos precisas en etapas tempranas de la liga (ideal: 10+ jornadas).</div>';
+  }
+
+  // Calcular promedios de la liga (fallback si totalGames=0)
+  const teams = teamsByLeague[league];
+  let totalGames = 0;
+  let totalGfHome = 0;
+  let totalGaHome = 0;
+  teams.forEach(t => {
+    totalGames += t.pjHome || t.pj || 0;
+    totalGfHome += t.gfHome || t.gf || 0;
+    totalGaHome += t.gaHome || t.ga || 0;
+  });
+  const avgGh = totalGames > 0 ? totalGfHome / totalGames : 1.2;
+  const avgGa = totalGames > 0 ? totalGaHome / totalGames : 1.0;
+
+  // Ataque y defensa ajustados
+  const attackH = (tH.pjHome || tH.pj) > 0 ? (tH.gfHome || tH.gf) / (tH.pjHome || tH.pj) / avgGh : 1;
+  const defenseA = (tA.pjAway || tA.pj) > 0 ? (tA.gaAway || tA.ga) / (tA.pjAway || tA.pj) / avgGh : 1;
+  const lambdaH = attackH * defenseA * avgGh;
+
+  const attackA = (tA.pjAway || tA.pj) > 0 ? (tA.gfAway || tA.gf) / (tA.pjAway || tA.pj) / avgGa : 1;
+  const defenseH = (tH.pjHome || tH.pj) > 0 ? (tH.gaHome || tH.ga) / (tH.pjHome || tH.pj) / avgGa : 1;
+  const lambdaA = attackA * defenseH * avgGa;
+
+  // Método 1: Poisson
+  let pHomeP = 0;
+  let pDrawP = 0;
+  let pAwayP = 0;
+  let pBTTSP = 0;
+  let pO25P = 0;
+  const maxGoals = 15;
+
+  for (let h = 0; h <= maxGoals; h++) {
+    for (let a = 0; a <= maxGoals; a++) {
+      const prob = poissonProb(lambdaH, h) * poissonProb(lambdaA, a);
+      if (h > a) pHomeP += prob;
+      else if (h === a) pDrawP += prob;
+      else pAwayP += prob;
+
+      if (h >= 1 && a >= 1) pBTTSP += prob;
+      if (h + a > 2) pO25P += prob;
+    }
+  }
+
+  // Método 2: Dixon-Coles
+  let pHomeDC = 0;
+  let pDrawDC = 0;
+  let pAwayDC = 0;
+  let pBTTSDC = 0;
+  let pO25DC = 0;
+  for (let h = 0; h <= maxGoals; h++) {
+    for (let a = 0; a <= maxGoals; a++) {
+      const prob = dixonColesAdjustment(lambdaH, lambdaA, h, a, 0.9);
+      if (h > a) pHomeDC += prob;
+      else if (h === a) pDrawDC += prob;
+      else pAwayDC += prob;
+
+      if (h >= 1 && a >= 1) pBTTSDC += prob;
+      if (h + a > 2) pO25DC += prob;
+    }
+  }
+
+  // Normalizar Dixon-Coles
+  const totalDC = pHomeDC + pDrawDC + pAwayDC;
+  if (totalDC > 0) {
+    pHomeDC /= totalDC;
+    pDrawDC /= totalDC;
+    pAwayDC /= totalDC;
+    pBTTSDC /= totalDC;
+    pO25DC /= totalDC;
+  }
+
+  // Promediar probabilidades (solo Poisson + Dixon-Coles)
+  const avgHome = (tH.pj && tA.pj) ? (pHomeP + pHomeDC) / 2 : 0.33;
+  const avgDraw = (tH.pj && tA.pj) ? (pDrawP + pDrawDC) / 2 : 0.33;
+  const avgAway = (tH.pj && tA.pj) ? (pAwayP + pAwayDC) / 2 : 0.33;
+  const avgBTTS = (tH.pj && tA.pj) ? (pBTTSP + pBTTSDC) / 2 : 0.5;
+  const avgO25 = (tH.pj && tA.pj) ? (pO25P + pO25DC) / 2 : 0.5;
+
+  // Normalizar resultados principales
+  const totalAvg = avgHome + avgDraw + avgAway;
+  const finalHome = totalAvg > 0 ? avgHome / totalAvg : 0.33;
+  const finalDraw = totalAvg > 0 ? avgDraw / totalAvg : 0.33;
+  const finalAway = totalAvg > 0 ? avgAway / totalAvg : 0.33;
+
+  // Mostrar probabilidades
+  $('pHome').textContent = formatPct(finalHome);
+  $('pDraw').textContent = formatPct(finalDraw);
+  $('pAway').textContent = formatPct(finalAway);
+  $('pBTTS').textContent = formatPct(avgBTTS);
+  $('pO25').textContent = formatPct(avgO25);
+
+  // Factores de corrección
+  const homeAdvantage = formatDec(avgGh / (avgGa || 1));
+  const ppgH = tH.points / (tH.pj || 1);
+  const ppgA = tA.points / (tA.pj || 1);
+  const strengthDiff = formatDec(ppgH - ppgA);
+  const dixonColes = '0.90';
+
+  $('homeAdvantageFactor').textContent = homeAdvantage;
+  $('strengthFactor').textContent = strengthDiff;
+  $('dixonColesFactor').textContent = dixonColes;
+
+  // Recomendación con umbrales
+  const outcomes = [
+    { name: `${teamHome} gana`, prob: finalHome },
+    { name: 'Empate', prob: finalDraw },
+    { name: `${teamAway} gana`, prob: finalAway }
+  ];
+  const maxOutcome = outcomes.reduce((max, curr) => curr.prob > max.prob ? curr : max, outcomes[0] || { name: 'Empate', prob: 0.33 });
+
+  let suggestionText = `<span class="star">★</span><span class="main-bet">🏆 Apuesta principal: <strong>${maxOutcome.name} (${formatPct(maxOutcome.prob)})</strong></span>`;
+
+  // Lógica de umbrales para BTTS y O25
+  const bttsText = avgBTTS > 0.55 ? `✔ Ambos anotan (${formatPct(avgBTTS)})` :
+                   avgBTTS < 0.45 ? `❌ No ambos anotan (${formatPct(1 - avgBTTS)})` :
+                   `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
+  const o25Text = avgO25 > 0.55 ? `✔ +2.5 goles (${formatPct(avgO25)})` :
+                  avgO25 < 0.45 ? `❌ -2.5 goles (${formatPct(1 - avgO25)})` :
+                  `— +2.5 goles equilibrado (${formatPct(avgO25)})`;
+
+  const others = [bttsText, o25Text];
+  suggestionText += `<ul class="other-bets">${others.map(bet => `<li>${bet}</li>`).join('')}</ul>`;
+
+  // Si no hay claro favorito
+  if (maxOutcome.prob < 0.40) {
+    suggestionText += `<div class="warning">No hay un claro favorito; considera evitar esta apuesta principal.</div>`;
+  }
+
+  $('details').innerHTML = `${warning}Basado en datos ajustados por rendimiento local/visitante y métodos Poisson + Dixon-Coles.`;
+  $('suggestion').innerHTML = suggestionText;
+
+  // Animación
+  const suggestionEl = $('suggestion');
+  suggestionEl.classList.add('pulse');
+  setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
