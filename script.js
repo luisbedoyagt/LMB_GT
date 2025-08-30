@@ -34,7 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwmGKLh9QzVacpVqguY12EtaPj9cQsQCu_ayfQGZuv30bRTWnDwcr8jT41TvR2YA3i3mA/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyM-nLQDN0IguUhpBaioTfSEUWGi13u97koGNcqQe8IrG8ClcKP5fziLUDla3EMrvuUxg/exec";
 let teamsByLeague = {};
 let allData = {};
 
@@ -595,3 +595,4 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
+
