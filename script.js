@@ -34,8 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-// !IMPORTANT! REEMPLAZA ESTA URL CON LA TUYA
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1GEB731pFFa_IQM17hm5ZtPd5iSSXV-_O0f5Th2760MxVrFPD9xL1K2hwTyELrVudCw/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwmGKLh9QzVacpVqguY12EtaPj9cQsQCu_ayfQGZuv30bRTWnDwcr8jT41TvR2YA3i3mA/exec";
 let teamsByLeague = {};
 let allData = {};
 
@@ -346,7 +345,7 @@ function clearTeamData(type) {
     $('formHomeTeam').innerHTML = 'Local: —';
   } else {
     $('posAway').value = '0';
-    $('gfAway').value = '0'; 
+    $('gfAway').value = '0';
     $('gaAway').value = '0';
     $('winRateAway').value = '0%';
     $('formAwayTeam').innerHTML = 'Visitante: —';
@@ -574,11 +573,11 @@ function calculateAll() {
 
   // Lógica de umbrales para BTTS y O25
   const bttsText = avgBTTS > 0.55 ? `✔ Ambos anotan (${formatPct(avgBTTS)})` :
-                     avgBTTS < 0.45 ? `❌ No ambos anotan (${formatPct(1 - avgBTTS)})` :
-                     `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
+                   avgBTTS < 0.45 ? `❌ No ambos anotan (${formatPct(1 - avgBTTS)})` :
+                   `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
   const o25Text = avgO25 > 0.55 ? `✔ +2.5 goles (${formatPct(avgO25)})` :
-                     avgO25 < 0.45 ? `❌ -2.5 goles (${formatPct(1 - avgO25)})` :
-                     `— +2.5 goles equilibrado (${formatPct(avgO25)})`;
+                  avgO25 < 0.45 ? `❌ -2.5 goles (${formatPct(1 - avgO25)})` :
+                  `— +2.5 goles equilibrado (${formatPct(avgO25)})`;
 
   const others = [bttsText, o25Text];
   suggestionText += `<ul class="other-bets">${others.map(bet => `<li>${bet}</li>`).join('')}</ul>`;
