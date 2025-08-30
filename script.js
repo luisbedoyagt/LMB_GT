@@ -151,7 +151,7 @@ function displayUpcomingEvents() {
       allData.calendario[liga].forEach(event => {
         let eventDateTime;
         try {
-          console.log(`Evento: ${event.local} vs. ${event.visitante}, Fecha: ${event.fecha}`);
+          console.log(`Evento: ${event.local} vs. ${event.visitante}, Fecha: ${event.fecha}, Estadio: ${event.estadio}`);
           const parsedDate = new Date(event.fecha);
           if (isNaN(parsedDate.getTime())) {
             throw new Error("Fecha inválida");
@@ -179,6 +179,7 @@ function displayUpcomingEvents() {
         allEvents.push({
           liga: event.liga,
           teams: `${event.local} vs. ${event.visitante}`,
+          estadio: event.estadio || 'Por confirmar',
           date: eventDateTime,
         });
       });
@@ -189,7 +190,7 @@ function displayUpcomingEvents() {
     upcomingEventsList.innerHTML = '';
     allEvents.forEach(event => {
       const li = document.createElement('li');
-      li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <small>${event.date}</small>`;
+      li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <span>Estadio: ${event.estadio}</span> <br> <small>${event.date}</small>`;
       upcomingEventsList.appendChild(li);
     });
   } else {
@@ -210,7 +211,7 @@ function displaySelectedLeagueEvents(leagueCode) {
   selectedEventsList.innerHTML = '';
 
   if (!leagueCode || !allData.calendario) {
-    selectedEventsList.innerHTML = '<li>Selecciona una liga para ver sus próximos eventos.</li>';
+    selectedEventsList.innerHTML = '<li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>';
     return;
   }
 
@@ -218,7 +219,7 @@ function displaySelectedLeagueEvents(leagueCode) {
   const events = (allData.calendario[ligaName] || []).slice(0, 3); // Limitar a 3 eventos
 
   if (events.length === 0) {
-    selectedEventsList.innerHTML = '<li>No hay eventos próximos para esta liga.</li>';
+    selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos para esta liga.</li>';
     return;
   }
 
@@ -250,7 +251,12 @@ function displaySelectedLeagueEvents(leagueCode) {
     }
 
     const li = document.createElement('li');
-    li.innerHTML = `${event.local} vs. ${event.visitante} <br> <small>${eventDateTime}</small>`;
+    li.className = 'event-box';
+    li.innerHTML = `
+      <strong>${event.local} vs. ${event.visitante}</strong>
+      <span>Estadio: ${event.estadio || 'Por confirmar'}</span>
+      <small>${eventDateTime}</small>
+    `;
     selectedEventsList.appendChild(li);
   });
 }
