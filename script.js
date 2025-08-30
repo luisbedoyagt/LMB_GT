@@ -11,7 +11,7 @@ const CONFIG = {
         MEDIUM: 0.50,
         LOW: 0.40
     },
-    WEBAPP_URL: "https://script.google.com/macros/s/AKfycbzmJ3dMXHgPoFwepwBEIG0noGm5ZL_zAt-8lvx8SZSgiyM_nDxTi4QW-bY8JImXfGFYXg/exec"
+    WEBAPP_URL: "https://script.google.com/macros/s/AKfycbyDj8aHyA3vLiFQZxIDNYS4b8XaDeApI8_PlZc3deFtwyj0Fj7SHgwngUVlqc8_xoBdEw/exec"
 };
 
 const LEAGUE_NAMES = {
@@ -1098,3 +1098,4 @@ window.DixonColesCalculator = {
     PoissonModel,
     DixonColesModel
 };
+
