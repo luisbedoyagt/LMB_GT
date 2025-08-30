@@ -34,7 +34,6 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-// !IMPORTANT! REEMPLAZA ESTA URL CON LA TUYA
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1GEB731pFFa_IQM17hm5ZtPd5iSSXV-_O0f5Th2760MxVrFPD9xL1K2hwTyELrVudCw/exec";
 let teamsByLeague = {};
 let allData = {};
@@ -130,25 +129,31 @@ function displayUpcomingEvents() {
     if (allData.calendario) {
         for (const liga in allData.calendario) {
             allData.calendario[liga].forEach(event => {
-                // Parsea la fecha
-                const eventDate = new Date(event.fecha);
-                
-                // Si la hora existe, la parseamos y la agregamos al objeto de fecha
-                if (event.hora) {
-                    const [hours, minutes] = event.hora.split(':').map(Number);
-                    eventDate.setHours(hours);
-                    eventDate.setMinutes(minutes);
+                // Combine fecha and hora into a single Date object
+                let eventDateTime;
+                try {
+                    // Assume fecha is in a format like "2025-08-30" and hora like "14:30"
+                    const dateStr = event.fecha; // e.g., "2025-08-30"
+                    const timeStr = event.hora || "00:00"; // Fallback to "00:00" if hora is missing
+                    const combinedDateTime = new Date(`${dateStr}T${timeStr}:00`);
+
+                    // Check if the date is valid
+                    if (isNaN(combinedDateTime.getTime())) {
+                        throw new Error("Invalid date or time");
+                    }
+
+                    // Format date and time
+                    const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                    const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guatemala' };
+                    const formattedDate = combinedDateTime.toLocaleDateString('es-ES', dateOptions);
+                    const formattedTime = combinedDateTime.toLocaleTimeString('es-ES', timeOptions);
+                    eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
+                } catch (err) {
+                    // Fallback if parsing fails
+                    console.warn(`Error parsing date/time for event: ${event.local} vs. ${event.visitante}`, err);
+                    eventDateTime = `${event.fecha} (Hora no disponible)`;
                 }
 
-                // Formatea la fecha y hora a un formato legible
-                const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guatemala' };
-
-                const formattedDate = eventDate.toLocaleDateString('es-ES', dateOptions);
-                const formattedTime = eventDate.toLocaleTimeString('es-ES', timeOptions);
-                
-                const eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
-                
                 allEvents.push({
                     liga: event.liga,
                     teams: `${event.local} vs. ${event.visitante}`,
@@ -157,9 +162,9 @@ function displayUpcomingEvents() {
             });
         }
     }
-    
+
     if (allEvents.length > 0) {
-        upcomingEventsList.innerHTML = ''; 
+        upcomingEventsList.innerHTML = '';
         allEvents.forEach(event => {
             const li = document.createElement('li');
             li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <small>${event.date}</small>`;
