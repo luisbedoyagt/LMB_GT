@@ -34,6 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
+// !IMPORTANT! REEMPLAZA ESTA URL CON LA TUYA
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx1GEB731pFFa_IQM17hm5ZtPd5iSSXV-_O0f5Th2760MxVrFPD9xL1K2hwTyELrVudCw/exec";
 let teamsByLeague = {};
 let allData = {};
@@ -129,28 +130,22 @@ function displayUpcomingEvents() {
     if (allData.calendario) {
         for (const liga in allData.calendario) {
             allData.calendario[liga].forEach(event => {
-                let eventDateTime;
-                try {
-                    // Intentar parsear event.fecha como un string ISO
-                    const parsedDate = new Date(event.fecha);
+                // Combina la fecha y la hora en un formato ISO 8601.
+                // Esto es más robusto que pasar los componentes por separado.
+                const dateTimeString = `${event.fecha}T${event.hora || '00:00'}:00`;
 
-                    // Verificar si la fecha es válida
-                    if (isNaN(parsedDate.getTime())) {
-                        throw new Error("Fecha inválida");
-                    }
+                // Crea el objeto de fecha a partir de la cadena de texto
+                const eventDate = new Date(dateTimeString);
 
-                    // Formatear la fecha y hora en la zona horaria de Guatemala
-                    const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                    const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guatemala' };
-                    const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
-                    const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
-                    eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
-                } catch (err) {
-                    // Fallback si el parseo falla
-                    console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
-                    eventDateTime = `${event.fecha} (Hora no disponible)`;
-                }
+                // Formatea la fecha y hora a un formato legible
+                const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guatemala' };
 
+                const formattedDate = eventDate.toLocaleDateString('es-ES', dateOptions);
+                const formattedTime = eventDate.toLocaleTimeString('es-ES', timeOptions);
+                
+                const eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
+                
                 allEvents.push({
                     liga: event.liga,
                     teams: `${event.local} vs. ${event.visitante}`,
@@ -159,9 +154,9 @@ function displayUpcomingEvents() {
             });
         }
     }
-
+    
     if (allEvents.length > 0) {
-        upcomingEventsList.innerHTML = '';
+        upcomingEventsList.innerHTML = ''; 
         allEvents.forEach(event => {
             const li = document.createElement('li');
             li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <small>${event.date}</small>`;
@@ -332,7 +327,7 @@ function clearTeamData(type) {
     $('formHomeTeam').innerHTML = 'Local: —';
   } else {
     $('posAway').value = '0';
-    $('gfAway').value = '0';
+    $('gfAway').value = '0'; 
     $('gaAway').value = '0';
     $('winRateAway').value = '0%';
     $('formAwayTeam').innerHTML = 'Visitante: —';
@@ -368,7 +363,7 @@ function fillTeamData(teamName, leagueCode, type) {
     return;
   }
 
-  const lambda = type === 'Home' ? (t.pjHome ? t.gfHome/ t.pjHome : t.gf / (t.pj || 1)) : (t.pjAway ? t.gfAway / t.pjAway : t.gf / (t.pj || 1));
+  const lambda = type === 'Home' ? (t.pjHome ? t.gfHome / t.pjHome : t.gf / (t.pj || 1)) : (t.pjAway ? t.gfAway / t.pjAway : t.gf / (t.pj || 1));
   const gaAvg = type === 'Home' ? (t.pjHome ? t.gaHome / t.pjHome : t.ga / (t.pj || 1)) : (t.pjAway ? t.gaAway / t.pjAway : t.ga / (t.pj || 1));
   const dg = t.gf - t.ga;
   const dgHome = t.gfHome - t.gaHome;
@@ -560,11 +555,11 @@ function calculateAll() {
 
   // Lógica de umbrales para BTTS y O25
   const bttsText = avgBTTS > 0.55 ? `✔ Ambos anotan (${formatPct(avgBTTS)})` :
-                   avgBTTS < 0.45 ? `❌ No ambos anotan (${formatPct(1 - avgBTTS)})` :
-                   `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
+                     avgBTTS < 0.45 ? `❌ No ambos anotan (${formatPct(1 - avgBTTS)})` :
+                     `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
   const o25Text = avgO25 > 0.55 ? `✔ +2.5 goles (${formatPct(avgO25)})` :
-                  avgO25 < 0.45 ? `❌ -2.5 goles (${formatPct(1 - avgO25)})` :
-                  `— +2.5 goles equilibrado (${formatPct(avgO25)})`;
+                     avgO25 < 0.45 ? `❌ -2.5 goles (${formatPct(1 - avgO25)})` :
+                     `— +2.5 goles equilibrado (${formatPct(avgO25)})`;
 
   const others = [bttsText, o25Text];
   suggestionText += `<ul class="other-bets">${others.map(bet => `<li>${bet}</li>`).join('')}</ul>`;
