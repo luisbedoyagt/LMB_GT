@@ -151,7 +151,7 @@ function displayUpcomingEvents() {
       allData.calendario[liga].forEach(event => {
         let eventDateTime;
         try {
-          console.log(`Evento: ${event.local} vs. ${event.visitante}, Fecha: ${event.fecha}, Estadio: ${event.estadio}`);
+          console.log(`Evento: ${event.local} vs. ${event.visitante}, Estadio: ${event.estadio}, Fecha: ${event.fecha}, Liga: ${event.liga}`);
           const parsedDate = new Date(event.fecha);
           if (isNaN(parsedDate.getTime())) {
             throw new Error("Fecha inválida");
@@ -190,7 +190,11 @@ function displayUpcomingEvents() {
     upcomingEventsList.innerHTML = '';
     allEvents.forEach(event => {
       const li = document.createElement('li');
-      li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <span>Estadio: ${event.estadio}</span> <br> <small>${event.date}</small>`;
+      li.innerHTML = `
+        <strong>${event.liga}</strong>: ${event.teams}
+        <span>Estadio: ${event.estadio}</span>
+        <small>${event.date}</small>
+      `;
       upcomingEventsList.appendChild(li);
     });
   } else {
@@ -226,6 +230,7 @@ function displaySelectedLeagueEvents(leagueCode) {
   events.forEach(event => {
     let eventDateTime;
     try {
+      console.log(`Evento seleccionado: ${event.local} vs. ${event.visitante}, Estadio: ${event.estadio}, Fecha: ${event.fecha}, Liga: ${ligaName}`);
       const parsedDate = new Date(event.fecha);
       if (isNaN(parsedDate.getTime())) {
         throw new Error("Fecha inválida");
