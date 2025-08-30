@@ -44,7 +44,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a) {
 }
 
 // ----------------------
-// CONFIGURACIÓN DE LIGAS (sin cambios)
+// CONFIGURACIÓN DE LIGAS
 // ----------------------
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwhxSccznUNIZFSfNKygHE--qPK4vn6KtxW5iyYrj0BmM_efw18_IWAUEcwNBzlFqBhcA/exec";
 let teamsByLeague = {};
@@ -70,7 +70,7 @@ const leagueNames = {
 };
 
 // ----------------------
-// NORMALIZACIÓN DE DATOS (sin cambios)
+// NORMALIZACIÓN DE DATOS
 // ----------------------
 function normalizeTeam(raw) {
   if (!raw) return null;
@@ -98,54 +98,119 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// FETCH EQUIPOS (sin cambios)
+// FETCH EQUIPOS (MEJORADO)
 // ----------------------
-async function fetchTeams() {
+async function fetchTeams(attempt = 1, maxAttempts = 3) {
   const leagueSelect = $('leagueSelect');
-  if (leagueSelect) leagueSelect.innerHTML = '<option value="">Cargando ligas...</option>';
+  const details = $('details');
+  if (leagueSelect) {
+    leagueSelect.innerHTML = '<option value="">Cargando ligas...</option>';
+    leagueSelect.disabled = true;
+  }
+  if (details) {
+    details.innerHTML = '<div class="loading">Cargando datos de ligas...</div>';
+  }
 
   try {
-    const res = await fetch(WEBAPP_URL);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout de 5 segundos
+    const res = await fetch(WEBAPP_URL, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
     if (!res.ok) {
+      if (attempt < maxAttempts) {
+        console.warn(`Intento ${attempt} fallido. Reintentando...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return fetchTeams(attempt + 1, maxAttempts);
+      }
       const errorText = await res.text();
       throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
     }
+
     const data = await res.json();
+    console.log('Datos recibidos:', data);
+
     const normalized = {};
-    for (const key in data) {
-      normalized[key] = (data[key] || []).map(normalizeTeam).filter(t => t && t.name);
+    for (const key in data.ligas || data) { // Compatibilidad con estructura antigua
+      const teams = (data.ligas?.[key] || data[key] || []).map(normalizeTeam).filter(t => t && t.name);
+      if (teams.length > 0) {
+        normalized[key] = teams;
+      }
     }
+
+    if (Object.keys(normalized).length === 0) {
+      throw new Error('No se encontraron ligas válidas en los datos recibidos');
+    }
+
     teamsByLeague = normalized;
     localStorage.setItem('teamsByLeague', JSON.stringify(normalized));
+    console.log('Ligas cargadas:', Object.keys(teamsByLeague));
+    console.log('Equipos en mex.1:', teamsByLeague['mex.1']?.map(t => t.name));
+
+    if (leagueSelect) leagueSelect.disabled = false;
+    if (details) details.innerHTML = '';
     return normalized;
   } catch (err) {
     console.error('Error en fetchTeams:', err);
-    const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
-    $('details').innerHTML = errorMsg;
-    if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
+    if (attempt < maxAttempts) {
+      console.warn(`Intento ${attempt} fallido. Reintentando...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return fetchTeams(attempt + 1, maxAttempts);
+    }
+
+    // Fallback a datos cacheados
+    const cachedTeams = localStorage.getItem('teamsByLeague');
+    if (cachedTeams) {
+      teamsByLeague = JSON.parse(cachedTeams);
+      console.log('Usando datos cacheados:', Object.keys(teamsByLeague));
+      if (details) {
+        details.innerHTML = '<div class="warning">No se pudo conectar a la API. Usando datos cacheados.</div>';
+      }
+      if (leagueSelect) leagueSelect.disabled = false;
+      return teamsByLeague;
+    }
+
+    const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión o el endpoint de Google Sheets. Detalle: ${err.message}</div>`;
+    if (details) details.innerHTML = errorMsg;
+    if (leagueSelect) {
+      leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
+      leagueSelect.disabled = false;
+    }
     return {};
   }
 }
 
 // ----------------------
-// INICIALIZACIÓN (sin cambios)
+// INICIALIZACIÓN (MEJORADA)
 // ----------------------
 async function init() {
+  const leagueSelect = $('leagueSelect');
+  const teamHomeSelect = $('teamHome');
+  const teamAwaySelect = $('teamAway');
+  const details = $('details');
+
+  if (!leagueSelect || !teamHomeSelect || !teamAwaySelect) {
+    if (details) {
+      details.innerHTML = '<div class="error"><strong>Error:</strong> Elementos HTML (leagueSelect, teamHome, teamAway) no encontrados. Verifica el HTML.</div>';
+    }
+    console.error('Elementos DOM requeridos no encontrados');
+    return;
+  }
+
   clearTeamData('Home');
   clearTeamData('Away');
   updateCalcButton();
 
   teamsByLeague = await fetchTeams();
-  const leagueSelect = $('leagueSelect');
-  const teamHomeSelect = $('teamHome');
-  const teamAwaySelect = $('teamAway');
 
-  if (!leagueSelect || !teamHomeSelect || !teamAwaySelect) {
-    $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema con la interfaz HTML.</div>';
+  leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
+  if (Object.keys(teamsByLeague).length === 0) {
+    if (details) {
+      details.innerHTML = '<div class="error"><strong>Error:</strong> No se cargaron ligas. Intenta recargar la página o verifica la API.</div>';
+    }
     return;
   }
 
-  leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
   Object.keys(teamsByLeague).sort().forEach(code => {
     const opt = document.createElement('option');
     opt.value = code;
@@ -173,7 +238,7 @@ async function init() {
 document.addEventListener('DOMContentLoaded', init);
 
 // ----------------------
-// FUNCIONES AUXILIARES (sin cambios)
+// FUNCIONES AUXILIARES (SIN CAMBIOS)
 // ----------------------
 function onLeagueChange() {
   const code = $('leagueSelect').value;
@@ -306,7 +371,7 @@ function clearAll() {
 }
 
 // ----------------------
-// BÚSQUEDA Y LLENADO DE EQUIPO (sin cambios)
+// BÚSQUEDA Y LLENADO DE EQUIPO
 // ----------------------
 function findTeam(leagueCode, teamName) {
   if (!teamsByLeague[leagueCode]) return null;
@@ -376,7 +441,7 @@ function fillTeamData(teamName, leagueCode, type) {
 }
 
 // ----------------------
-// CÁLCULO PRINCIPAL (MEJORADO)
+// CÁLCULO PRINCIPAL
 // ----------------------
 function calculateAll() {
   const teamHome = $('teamHome').value;
