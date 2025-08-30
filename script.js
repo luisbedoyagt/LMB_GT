@@ -130,22 +130,41 @@ function displayUpcomingEvents() {
     if (allData.calendario) {
         for (const liga in allData.calendario) {
             allData.calendario[liga].forEach(event => {
-                // Combina la fecha y la hora en un formato ISO 8601.
-                // Esto es más robusto que pasar los componentes por separado.
-                const dateTimeString = `${event.fecha}T${event.hora || '00:00'}:00`;
+                let eventDateTime;
+                try {
+                    // Imprimir el valor de event.fecha para depuración
+                    console.log(`Evento: ${event.local} vs. ${event.visitante}, Fecha: ${event.fecha}`);
 
-                // Crea el objeto de fecha a partir de la cadena de texto
-                const eventDate = new Date(dateTimeString);
+                    // Parsear event.fecha como un string ISO
+                    const parsedDate = new Date(event.fecha);
 
-                // Formatea la fecha y hora a un formato legible
-                const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guatemala' };
+                    // Verificar si la fecha es válida
+                    if (isNaN(parsedDate.getTime())) {
+                        throw new Error("Fecha inválida");
+                    }
 
-                const formattedDate = eventDate.toLocaleDateString('es-ES', dateOptions);
-                const formattedTime = eventDate.toLocaleTimeString('es-ES', timeOptions);
-                
-                const eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
-                
+                    // Formatear la fecha y hora en la zona horaria de Guatemala
+                    const dateOptions = {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        timeZone: 'America/Guatemala'
+                    };
+                    const timeOptions = {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                        timeZone: 'America/Guatemala'
+                    };
+                    const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
+                    const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
+                    eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
+                } catch (err) {
+                    // Fallback si el parseo falla
+                    console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
+                    eventDateTime = `${event.fecha} (Hora no disponible)`;
+                }
+
                 allEvents.push({
                     liga: event.liga,
                     teams: `${event.local} vs. ${event.visitante}`,
@@ -154,9 +173,9 @@ function displayUpcomingEvents() {
             });
         }
     }
-    
+
     if (allEvents.length > 0) {
-        upcomingEventsList.innerHTML = ''; 
+        upcomingEventsList.innerHTML = '';
         allEvents.forEach(event => {
             const li = document.createElement('li');
             li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <small>${event.date}</small>`;
