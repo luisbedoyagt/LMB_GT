@@ -487,22 +487,31 @@ input[type="number"] {
     font-size: 12px;
 }
 
-#upcoming-events-list {
+#upcoming-events-list,
+#selected-league-events {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-#upcoming-events-list li {
+#upcoming-events-list li,
+#selected-league-events li {
     background: #333;
     padding: 8px 12px;
     border-radius: 6px;
-    border-left: 3px solid #f0c05a;
     margin-bottom: 8px;
     font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+#upcoming-events-list li {
+    border-left: 3px solid #f0c05a;
+}
+
+#selected-league-events li {
+    border-left: 3px solid #74c0fc;
 }
 
 @keyframes float {
