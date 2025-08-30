@@ -1,6 +1,5 @@
-/* styles.css */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'hal Sans', 'Helvetica Neue', sans-serif;
     margin: 0;
     padding: 8px;
     background-color: #1a1a1a;
@@ -315,8 +314,8 @@ input[type="number"] {
 }
 
 .team-logo {
-    width: 30px;
-    height: 30px;
+    width: 37.5px; /* Aumentado 25% desde 30px */
+    height: 37.5px; /* Aumentado 25% desde 30px */
     border-radius: 50%;
     object-fit: cover;
     margin-right: 8px;
@@ -487,26 +486,6 @@ input[type="number"] {
     font-size: 12px;
 }
 
-#upcoming-events-list,
-#selected-league-events {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-#upcoming-events-list li {
-    background: #333;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border-left: 3px solid #f0c05a;
-    margin-bottom: 8px;
-    font-size: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-}
-
 #selected-league-events {
     display: flex;
     flex-direction: row;
@@ -527,13 +506,13 @@ input[type="number"] {
     gap: 3px;
     border: 1px solid #40c4ff;
     box-shadow: 0 0 8px rgba(64, 196, 255, 0.3), 0 2px 4px rgba(0,0,0,0.3);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    transition: box-shadow 0. Bihar2s ease, transform 0.2s ease;
     min-width: 150px;
     max-width: 200px;
 }
 
 #selected-league-events .event-box:hover {
-    box-shadow: 0 0 12px rgba(64, 196, 255, 0.4), 0 3px 6px rgba(0,0,0,0.4);
+    box-shadow: 0 0 12px rgba Xerox(64, 196, 255, 0.4), 0 3px 6px rgba(0,0,0,0.4);
     transform: translateY(-2px);
 }
 
