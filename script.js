@@ -58,6 +58,26 @@ const leagueNames = {
   "ksa.1": "Pro League Arabia Saudita"
 };
 
+const leagueCodeToName = {
+  "esp.1": "España_LaLiga",
+  "esp.2": "España_Segunda",
+  "eng.1": "Inglaterra_PremierLeague",
+  "eng.2": "Inglaterra_Championship",
+  "ita.1": "Italia_SerieA",
+  "ger.1": "Alemania_Bundesliga",
+  "fra.1": "Francia_Ligue1",
+  "ned.1": "PaísesBajos_Eredivisie",
+  "ned.2": "PaísesBajos_EersteDivisie",
+  "por.1": "Portugal_LigaPortugal",
+  "mex.1": "México_LigaMX",
+  "usa.1": "EstadosUnidos_MLS",
+  "bra.1": "Brasil_Brasileirao",
+  "gua.1": "Guatemala_LigaNacional",
+  "crc.1": "CostaRica_LigaPromerica",
+  "hon.1": "Honduras_LigaNacional",
+  "ksa.1": "Arabia_Saudi_ProLeague"
+};
+
 // ----------------------
 // NORMALIZACIÓN DE DATOS
 // ----------------------
@@ -119,70 +139,120 @@ async function fetchAllData() {
 }
 
 // ----------------------
-// FETCH Y MUESTRA DE EVENTOS FUTUROS (CORREGIDA)
+// MUESTRA DE EVENTOS FUTUROS
 // ----------------------
 function displayUpcomingEvents() {
-    const upcomingEventsList = $('upcoming-events-list');
-    if (!upcomingEventsList) return;
+  const upcomingEventsList = $('upcoming-events-list');
+  if (!upcomingEventsList) return;
 
-    const allEvents = [];
-    if (allData.calendario) {
-        for (const liga in allData.calendario) {
-            allData.calendario[liga].forEach(event => {
-                let eventDateTime;
-                try {
-                    // Imprimir el valor de event.fecha para depuración
-                    console.log(`Evento: ${event.local} vs. ${event.visitante}, Fecha: ${event.fecha}`);
-
-                    // Parsear event.fecha como un string ISO
-                    const parsedDate = new Date(event.fecha);
-
-                    // Verificar si la fecha es válida
-                    if (isNaN(parsedDate.getTime())) {
-                        throw new Error("Fecha inválida");
-                    }
-
-                    // Formatear la fecha y hora en la zona horaria de Guatemala
-                    const dateOptions = {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        timeZone: 'America/Guatemala'
-                    };
-                    const timeOptions = {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                        timeZone: 'America/Guatemala'
-                    };
-                    const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
-                    const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
-                    eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
-                } catch (err) {
-                    // Fallback si el parseo falla
-                    console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
-                    eventDateTime = `${event.fecha} (Hora no disponible)`;
-                }
-
-                allEvents.push({
-                    liga: event.liga,
-                    teams: `${event.local} vs. ${event.visitante}`,
-                    date: eventDateTime,
-                });
-            });
+  const allEvents = [];
+  if (allData.calendario) {
+    for (const liga in allData.calendario) {
+      allData.calendario[liga].forEach(event => {
+        let eventDateTime;
+        try {
+          console.log(`Evento: ${event.local} vs. ${event.visitante}, Fecha: ${event.fecha}`);
+          const parsedDate = new Date(event.fecha);
+          if (isNaN(parsedDate.getTime())) {
+            throw new Error("Fecha inválida");
+          }
+          const dateOptions = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            timeZone: 'America/Guatemala'
+          };
+          const timeOptions = {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'America/Guatemala'
+          };
+          const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
+          const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
+          eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
+        } catch (err) {
+          console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
+          eventDateTime = `${event.fecha} (Hora no disponible)`;
         }
+
+        allEvents.push({
+          liga: event.liga,
+          teams: `${event.local} vs. ${event.visitante}`,
+          date: eventDateTime,
+        });
+      });
+    }
+  }
+
+  if (allEvents.length > 0) {
+    upcomingEventsList.innerHTML = '';
+    allEvents.forEach(event => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <small>${event.date}</small>`;
+      upcomingEventsList.appendChild(li);
+    });
+  } else {
+    upcomingEventsList.innerHTML = '<li>No hay eventos próximos disponibles.</li>';
+  }
+
+  // Mostrar eventos de la liga seleccionada (inicialmente vacía)
+  displaySelectedLeagueEvents('');
+}
+
+// ----------------------
+// MUESTRA DE EVENTOS DE LA LIGA SELECCIONADA
+// ----------------------
+function displaySelectedLeagueEvents(leagueCode) {
+  const selectedEventsList = $('selected-league-events');
+  if (!selectedEventsList) return;
+
+  selectedEventsList.innerHTML = '';
+
+  if (!leagueCode || !allData.calendario) {
+    selectedEventsList.innerHTML = '<li>Selecciona una liga para ver sus próximos eventos.</li>';
+    return;
+  }
+
+  const ligaName = leagueCodeToName[leagueCode];
+  const events = (allData.calendario[ligaName] || []).slice(0, 3); // Limitar a 3 eventos
+
+  if (events.length === 0) {
+    selectedEventsList.innerHTML = '<li>No hay eventos próximos para esta liga.</li>';
+    return;
+  }
+
+  events.forEach(event => {
+    let eventDateTime;
+    try {
+      const parsedDate = new Date(event.fecha);
+      if (isNaN(parsedDate.getTime())) {
+        throw new Error("Fecha inválida");
+      }
+      const dateOptions = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'America/Guatemala'
+      };
+      const timeOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'America/Guatemala'
+      };
+      const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
+      const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
+      eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
+    } catch (err) {
+      console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
+      eventDateTime = `${event.fecha} (Hora no disponible)`;
     }
 
-    if (allEvents.length > 0) {
-        upcomingEventsList.innerHTML = '';
-        allEvents.forEach(event => {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <small>${event.date}</small>`;
-            upcomingEventsList.appendChild(li);
-        });
-    } else {
-        upcomingEventsList.innerHTML = '<li>No hay eventos próximos disponibles.</li>';
-    }
+    const li = document.createElement('li');
+    li.innerHTML = `${event.local} vs. ${event.visitante} <br> <small>${eventDateTime}</small>`;
+    selectedEventsList.appendChild(li);
+  });
 }
 
 // ----------------------
@@ -213,7 +283,10 @@ async function init() {
     leagueSelect.appendChild(opt);
   });
 
-  leagueSelect.addEventListener('change', onLeagueChange);
+  leagueSelect.addEventListener('change', () => {
+    onLeagueChange();
+    displaySelectedLeagueEvents(leagueSelect.value);
+  });
   teamHomeSelect.addEventListener('change', () => {
     if (restrictSameTeam()) {
       fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
@@ -363,6 +436,7 @@ function clearAll() {
   clearTeamData('Home');
   clearTeamData('Away');
   updateCalcButton();
+  displaySelectedLeagueEvents('');
 }
 
 // ----------------------
@@ -595,4 +669,3 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
-
