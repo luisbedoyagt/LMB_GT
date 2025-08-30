@@ -130,18 +130,16 @@ function displayUpcomingEvents() {
     if (allData.calendario) {
         for (const liga in allData.calendario) {
             allData.calendario[liga].forEach(event => {
-                // Parsea la fecha y hora
-                const startDate = new Date(event.fecha);
-                const endDate = new Date(event.hora);
+                // Parsea la fecha y hora desde el campo "fecha"
+                const eventDate = new Date(event.fecha);
 
                 // Formatea la fecha y hora a un formato legible
                 const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guatemala' };
+                const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
 
-                const formattedDate = startDate.toLocaleDateString('es-ES', dateOptions);
-                const formattedTime = startDate.toLocaleTimeString('es-ES', timeOptions);
+                const formattedDate = eventDate.toLocaleDateString('es-ES', dateOptions);
+                const formattedTime = eventDate.toLocaleTimeString('es-ES', timeOptions);
                 
-                // Muestra solo la fecha de inicio, ya que la de finalización es un valor predeterminado
                 const eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
                 
                 allEvents.push({
@@ -557,7 +555,7 @@ function calculateAll() {
                      `— Ambos anotan equilibrado (${formatPct(avgBTTS)})`;
   const o25Text = avgO25 > 0.55 ? `✔ +2.5 goles (${formatPct(avgO25)})` :
                      avgO25 < 0.45 ? `❌ -2.5 goles (${formatPct(1 - avgO25)})` :
-                     `— +2.5 goles equilibrado (${formatPct(avgO25)})`;
+                     `— +2.5 goles equilibrado (${formatO25})`);
 
   const others = [bttsText, o25Text];
   suggestionText += `<ul class="other-bets">${others.map(bet => `<li>${bet}</li>`).join('')}</ul>`;
