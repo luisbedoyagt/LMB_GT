@@ -34,7 +34,7 @@ function dixonColesAdjustment(lambdaH, lambdaA, h, a, tau = 0.9) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzsZpletwsXX29z2gSAWTWfsKvC3mguo2z5WwHX9Znm7S26Pf13GV1ZSOvSsI5WXQatyw/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwhxSccznUNIZFSfNKygHE--qPK4vn6KtxW5iyYrj0BmM_efw18_IWAUEcwNBzlFqBhcA/exec";
 let teamsByLeague = {};
 
 const leagueNames = {
@@ -100,8 +100,8 @@ async function fetchTeams() {
     }
     const data = await res.json();
     const normalized = {};
-    for (const key in data) {
-      normalized[key] = (data[key] || []).map(normalizeTeam).filter(t => t && t.name);
+    for (const key in data.ligas) {
+      normalized[key] = (data.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
     }
     teamsByLeague = normalized;
     localStorage.setItem('teamsByLeague', JSON.stringify(normalized));
@@ -116,42 +116,49 @@ async function fetchTeams() {
 }
 
 // ----------------------
-// FETCH EVENTOS FUTUROS
+// FETCH EVENTOS FUTUROS (CORREGIDA)
 // ----------------------
 async function fetchUpcomingEvents() {
-  const upcomingEventsList = $('upcoming-events-list');
-  if (!upcomingEventsList) return;
+    const upcomingEventsList = $('upcoming-events-list');
+    if (!upcomingEventsList) return;
 
-  // Si tu API tiene un endpoint específico para eventos, cámbialo aquí.
-  // Por ejemplo: const eventsUrl = `${WEBAPP_URL}?action=getEvents`;
-  const eventsUrl = WEBAPP_URL; // Usando el mismo URL por simplicidad, suponiendo que la respuesta incluye eventos
+    try {
+        const res = await fetch(WEBAPP_URL);
+        if (!res.ok) {
+            throw new Error(`Error HTTP: ${res.status}`);
+        }
+        const data = await res.json();
 
-  try {
-    const res = await fetch(eventsUrl);
-    if (!res.ok) {
-      throw new Error(`Error HTTP: ${res.status}`);
+        const allEvents = [];
+        if (data.calendario) {
+            for (const liga in data.calendario) {
+                // Obtiene los eventos de cada liga y los añade a una lista global
+                data.calendario[liga].forEach(event => {
+                    allEvents.push({
+                        liga: event.liga,
+                        teams: `${event.local} vs. ${event.visitante}`,
+                        date: `${event.fecha} - ${event.hora}`,
+                    });
+                });
+            }
+        }
+        
+        if (allEvents.length > 0) {
+            // Limpia el contenido estático
+            upcomingEventsList.innerHTML = ''; 
+            allEvents.forEach(event => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${event.liga}</strong>: ${event.teams} <br> <small>${event.date}</small>`;
+                upcomingEventsList.appendChild(li);
+            });
+        } else {
+            upcomingEventsList.innerHTML = '<li>No hay eventos próximos disponibles.</li>';
+        }
+
+    } catch (err) {
+        console.error('Error al cargar los eventos:', err);
+        upcomingEventsList.innerHTML = `<li>Error: No se pudieron cargar los eventos.</li>`;
     }
-    const data = await res.json();
-    
-    // Suponemos que la respuesta de tu API contiene un array de eventos
-    // en una propiedad llamada 'upcomingEvents'
-    const eventsData = data.upcomingEvents; 
-    
-    if (eventsData && eventsData.length > 0) {
-      upcomingEventsList.innerHTML = ''; // Limpia el contenido estático
-      eventsData.forEach(event => {
-        const li = document.createElement('li');
-        li.textContent = `${event.teams} — ${event.date}`;
-        upcomingEventsList.appendChild(li);
-      });
-    } else {
-      upcomingEventsList.innerHTML = '<li>No hay eventos próximos disponibles.</li>';
-    }
-
-  } catch (err) {
-    console.error('Error al cargar los eventos:', err);
-    upcomingEventsList.innerHTML = `<li>Error: No se pudieron cargar los eventos.</li>`;
-  }
 }
 
 // ----------------------
@@ -197,7 +204,6 @@ async function init() {
   $('recalc').addEventListener('click', calculateAll);
   $('reset').addEventListener('click', clearAll);
 
-  // >> Nuevo: llama a la función para cargar los eventos
   fetchUpcomingEvents(); 
 }
 document.addEventListener('DOMContentLoaded', init);
@@ -315,7 +321,7 @@ function clearTeamData(type) {
     $('formHomeTeam').innerHTML = 'Local: —';
   } else {
     $('posAway').value = '0';
-    $('gfAway').value = '0'; // Corregido: antes faltaba establecer gfAway
+    $('gfAway').value = '0'; 
     $('gaAway').value = '0';
     $('winRateAway').value = '0%';
     $('formAwayTeam').innerHTML = 'Visitante: —';
@@ -565,4 +571,3 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
-
