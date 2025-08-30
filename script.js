@@ -573,3 +573,4 @@ function calculateAll() {
   suggestionEl.classList.add('pulse');
   setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
+
