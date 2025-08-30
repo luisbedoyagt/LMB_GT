@@ -82,7 +82,7 @@ input, select {
 }
 
 input:focus, select:focus {
-    border-color: #74c0fc;
+    border-color: #40c4ff;
     outline: none;
 }
 
@@ -113,7 +113,7 @@ input[type="number"] {
 }
 
 .btn:hover {
-    background: #74c0fc;
+    background: #40c4ff;
 }
 
 .kpis {
@@ -338,7 +338,7 @@ input[type="number"] {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #74c0fc;
+    background: #40c4ff;
 }
 
 .stat-card:nth-child(2) .stat-title::before {
@@ -407,7 +407,7 @@ input[type="number"] {
     background: #444;
     padding: 4px 8px;
     border-radius: 3px;
-    border: 1px solid #74c0fc;
+    border: 1px solid #40c4ff;
     box-shadow: 0 1px 2px rgba(0,0,0,0.3);
     margin-bottom: 4px;
     text-align: center;
@@ -494,24 +494,53 @@ input[type="number"] {
     margin: 0;
 }
 
-#upcoming-events-list li,
-#selected-league-events li {
+#upcoming-events-list li {
     background: #333;
     padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #f0c05a;
+    margin-bottom: 8px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+#selected-league-events .event-box {
+    background: #2c2c2c;
+    padding: 12px;
     border-radius: 6px;
     margin-bottom: 8px;
     font-size: 12px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    border: 1px solid #40c4ff;
+    box-shadow: 0 0 8px rgba(64, 196, 255, 0.3), 0 2px 4px rgba(0,0,0,0.3);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-#upcoming-events-list li {
-    border-left: 3px solid #f0c05a;
+#selected-league-events .event-box:hover {
+    box-shadow: 0 0 12px rgba(64, 196, 255, 0.4), 0 3px 6px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
 }
 
-#selected-league-events li {
-    border-left: 3px solid #74c0fc;
+#selected-league-events .event-box strong {
+    font-size: 13px;
+    color: #f0f0f0;
+    font-weight: 600;
+}
+
+#selected-league-events .event-box span {
+    font-size: 11px;
+    color: #a0a0a0;
+}
+
+#selected-league-events .event-box small {
+    font-size: 10px;
+    color: #e0e0e0;
 }
 
 @keyframes float {
