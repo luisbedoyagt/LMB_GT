@@ -314,8 +314,8 @@ input[type="number"] {
 }
 
 .team-logo {
-    width: 47px; /* Aumentado 25% desde 37.5px */
-    height: 47px; /* Aumentado 25% desde 37.5px */
+    width: 47px;
+    height: 47px;
     border-radius: 50%;
     object-fit: cover;
     margin-right: 8px;
@@ -488,7 +488,7 @@ input[type="number"] {
 
 #selected-league-events {
     display: flex;
-    flex-direction:涯 row;
+    flex-direction: row;
     flex-wrap: nowrap;
     gap: 10px;
     justify-content: space-between;
