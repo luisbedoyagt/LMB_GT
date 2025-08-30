@@ -121,6 +121,10 @@ async function fetchAllData() {
     }
     allData = await res.json();
     
+    // Depuración: Mostrar datos crudos de allData.calendario
+    console.log('Datos crudos de allData.calendario:', JSON.stringify(allData.calendario, null, 2));
+    console.log('Datos de México_LigaMX:', JSON.stringify(allData.calendario['México_LigaMX'], null, 2));
+
     const normalized = {};
     for (const key in allData.ligas) {
       normalized[key] = (allData.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
