@@ -430,7 +430,7 @@ function clearTeamData(type) {
     box.innerHTML = `
     <div class="team-details">
         <div class="stat-section">
-            <span class="section-title">Rendimiento General</span>
+            <span class="section-title">General</span>
             <div class="stat-metrics">
                 <span>PJ: 0</span>
                 <span>Puntos: 0</span>
@@ -438,7 +438,7 @@ function clearTeamData(type) {
             </div>
         </div>
         <div class="stat-section">
-            <span class="section-title">Rendimiento de Local</span>
+            <span class="section-title">Local</span>
             <div class="stat-metrics">
                 <span>PJ: 0</span>
                 <span>PG: 0</span>
@@ -446,7 +446,7 @@ function clearTeamData(type) {
             </div>
         </div>
         <div class="stat-section">
-            <span class="section-title">Rendimiento de Visitante</span>
+            <span class="section-title">Visitante</span>
             <div class="stat-metrics">
                 <span>PJ: 0</span>
                 <span>PG: 0</span>
@@ -505,8 +505,6 @@ function fillTeamData(teamName, leagueCode, type) {
         return;
     }
 
-    const lambda = type === 'Home' ? (t.pjHome ? t.gfHome / t.pjHome : t.gf / (t.pj || 1)) : (t.pjAway ? t.gfAway / t.pjAway : t.gf / (t.pj || 1));
-    const gaAvg = type === 'Home' ? (t.pjHome ? t.gaHome / t.pjHome : t.ga / (t.pj || 1)) : (t.pjAway ? t.gaAway / t.pjAway : t.ga / (t.pj || 1));
     const dg = t.gf - t.ga;
     const dgHome = t.gfHome - t.gaHome;
     const dgAway = t.gfAway - t.gaAway;
@@ -515,7 +513,7 @@ function fillTeamData(teamName, leagueCode, type) {
     box.innerHTML = `
     <div class="team-details">
         <div class="stat-section">
-            <span class="section-title">Rendimiento General</span>
+            <span class="section-title">General</span>
             <div class="stat-metrics">
                 <span>PJ: ${t.pj || 0}</span>
                 <span>Puntos: ${t.points || 0}</span>
@@ -523,7 +521,7 @@ function fillTeamData(teamName, leagueCode, type) {
             </div>
         </div>
         <div class="stat-section">
-            <span class="section-title">Rendimiento de Local</span>
+            <span class="section-title">Local</span>
             <div class="stat-metrics">
                 <span>PJ: ${t.pjHome || 0}</span>
                 <span>PG: ${t.winsHome || 0}</span>
@@ -531,7 +529,7 @@ function fillTeamData(teamName, leagueCode, type) {
             </div>
         </div>
         <div class="stat-section">
-            <span class="section-title">Rendimiento de Visitante</span>
+            <span class="section-title">Visitante</span>
             <div class="stat-metrics">
                 <span>PJ: ${t.pjAway || 0}</span>
                 <span>PG: ${t.winsAway || 0}</span>
@@ -539,21 +537,22 @@ function fillTeamData(teamName, leagueCode, type) {
             </div>
         </div>
     </div>
-  `;
+    `;
 
+    // Actualizar los valores en los cuadros de estadísticas
     if (type === 'Home') {
         $('posHome').textContent = t.pos || '--';
-        $('gfHome').textContent = formatDec(lambda);
-        $('gaHome').textContent = formatDec(gaAvg);
-        $('winRateHome').textContent = formatPct(t.pjHome ? t.winsHome / t.pjHome : 0);
+        $('gfHome').textContent = formatDec(t.gf / (t.pj || 1));
+        $('gaHome').textContent = formatDec(t.ga / (t.pj || 1));
+        $('winRateHome').textContent = formatPct(t.pj ? t.g / t.pj : 0);
     } else {
         $('posAway').textContent = t.pos || '--';
-        $('gfAway').textContent = formatDec(lambda);
-        $('gaAway').textContent = formatDec(gaAvg);
-        $('winRateAway').textContent = formatPct(t.pjAway ? t.winsAway / t.pjAway : 0);
+        $('gfAway').textContent = formatDec(t.gf / (t.pj || 1));
+        $('gaAway').textContent = formatDec(t.ga / (t.pj || 1));
+        $('winRateAway').textContent = formatPct(t.pj ? t.g / t.pj : 0);
     }
 
-    // Código para agregar el logo
+    // Lógica para el logo
     const cardHeader = $(type === 'Home' ? 'card-home' : 'card-away').querySelector('.card-header');
     if (cardHeader) {
         const h3 = cardHeader.querySelector('h3');
@@ -569,7 +568,7 @@ function fillTeamData(teamName, leagueCode, type) {
                 logoImg.src = t.logoUrl;
                 logoImg.style.display = 'inline-block';
             } else {
-                logoImg.style.display = 'none'; // Ocultar si no hay URL
+                logoImg.style.display = 'none';
             }
         }
     }
