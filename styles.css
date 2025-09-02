@@ -569,9 +569,8 @@ select:focus {
 }
 
 
-/* Ajuste para pantallas más pequeñas para que se vean bien */
+/* --- A JUSTES PARA PANTALLAS MÓVILES --- */
 @media (max-width: 768px) {
-    /* Nueva estructura para móviles */
     .probabilities-container {
         display: flex;
         flex-direction: column;
@@ -584,16 +583,16 @@ select:focus {
         gap: 0.5rem;
     }
 
+    .main-probabilities .probability-tile {
+        flex: 1 1 32%; /* Un poco menos del 33.3% para dejar espacio para el gap */
+        max-width: 32%; /* Fuerza el tamaño máximo */
+    }
+
     .secondary-probabilities {
         display: flex;
         justify-content: center;
         gap: 1rem;
         flex-wrap: wrap;
-    }
-
-    .main-probabilities .probability-tile {
-        flex: 1 1 30%; /* Ahora son más flexibles y ocupan el espacio */
-        max-width: unset;
     }
 
     .secondary-probabilities .probability-tile {
