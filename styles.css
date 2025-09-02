@@ -173,10 +173,11 @@ body {
     padding: 1.5rem;
 }
 
-/* Contenedor principal de la grilla (Diseño para móviles por defecto) */
+/* Contenedor principal de la grilla */
+/* **IMPORTANTE: Las reglas para móviles van aquí por defecto** */
 .main-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Una sola columna para móviles */
     gap: 2rem;
 }
 
@@ -641,9 +642,8 @@ select:focus {
 
 /* Estilos para la nueva ficha de la IA */
 .ia-card {
-    grid-column: 1 / span 3;
-    grid-row: 3;
-    order: initial;
+    /* Por defecto, se apilará con los demás elementos en móviles */
+    grid-column: 1 / span 1;
 }
 .ia-card .card-header {
     background: var(--metal-gradient-light);
