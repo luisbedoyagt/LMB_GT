@@ -1,5 +1,5 @@
 // Variables globales y mapeo de ligas
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxFnQSZYn8lIvJuDYdK0t-6zWgUxG44MINgl_yK2UXPISE-4Wsu_tPOhX2Caze6KsQlfA/exec"; // Reemplaza con tu URL
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxhm6qAh0wNfIUTluhnrzBhQOcPc8e0lHFPKRV08URDwukJGKfgZI3_CENnHfOmw6V1VA/exec"; // Reemplaza con tu URL
 let allData = {
     ligas: {},
     calendario: {}
@@ -214,6 +214,14 @@ function fillTeamData(teamName, leagueCode, type) {
         stats[3].querySelector('.stat-metrics span:nth-child(2)').textContent = teamData.winsAway || '0';
         stats[3].querySelector('.stat-metrics span:nth-child(3)').textContent = teamData.lossesAway || '0';
     }
+
+    const teamHome = $('teamHome').value;
+    const teamAway = $('teamAway').value;
+    const league = $('leagueSelect').value;
+
+    if (teamHome && teamAway && league) {
+        calculateAll();
+    }
 }
 
 // ----------------------
@@ -240,36 +248,24 @@ function poisson(lambda, k) {
     return (Math.pow(lambda, k) * Math.exp(-lambda)) / factorial(k);
 }
 
-/**
- * Función que implementa una versión simplificada del modelo Dixon-Coles.
- * Utiliza los datos de ataque/defensa de las tablas para un cálculo más preciso.
- * @param {object} teamHome - Datos del equipo local.
- * @param {object} teamAway - Datos del equipo visitante.
- * @param {string} league - Código de la liga.
- * @returns {object} Probabilidades de local, empate, visitante, BTTS y más de 2.5 goles.
- */
 function dixonColesProbabilities(teamHome, teamAway, league) {
     const leagueData = allData.ligas[league];
     if (!leagueData || leagueData.length === 0) {
         return { finalHome: 0, finalDraw: 0, finalAway: 0, pBTTSH: 0, pO25H: 0 };
     }
 
-    // Calcula el promedio de goles de la liga
     const totalGoalsFor = leagueData.reduce((sum, team) => sum + (team.goalsFor || 0), 0);
     const totalGamesPlayed = leagueData.reduce((sum, team) => sum + (team.gamesPlayed || 0), 0);
     const lambdaLeague = totalGamesPlayed > 0 ? totalGoalsFor / totalGamesPlayed : 0.9;
     
-    // Calcula los factores de ataque y defensa (ajustados a la liga)
     const attackHome = (teamHome.goalsFor || 0) / (teamHome.gamesPlayed || 1) / lambdaLeague;
     const defenseHome = (teamHome.goalsAgainst || 0) / (teamHome.gamesPlayed || 1) / lambdaLeague;
     const attackAway = (teamAway.goalsFor || 0) / (teamAway.gamesPlayed || 1) / lambdaLeague;
     const defenseAway = (teamAway.goalsAgainst || 0) / (teamAway.gamesPlayed || 1) / lambdaLeague;
 
-    // Ajuste por la ventaja de local
-    const lambdaHome = attackHome * defenseAway * 1.3; // Factor de local
-    const lambdaAway = attackAway * defenseHome * 0.9;  // Factor de visitante
+    const lambdaHome = attackHome * defenseAway * 1.3;
+    const lambdaAway = attackAway * defenseHome * 0.9;
     
-    // Matriz de probabilidades de goles
     let probMatrix = Array(5).fill(null).map(() => Array(5).fill(0));
     let finalHome = 0;
     let finalDraw = 0;
@@ -277,8 +273,8 @@ function dixonColesProbabilities(teamHome, teamAway, league) {
     let pBTTS = 0;
     let pO25 = 0;
 
-    for (let i = 0; i < 5; i++) { // Goles Local
-        for (let j = 0; j < 5; j++) { // Goles Visitante
+    for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
             const p = poisson(lambdaHome, i) * poisson(lambdaAway, j);
             probMatrix[i][j] = p;
 
@@ -375,7 +371,8 @@ function formatPct(value) {
 }
 
 function clearResults() {
-    $('iaPredictionText').textContent = 'Esperando pronóstico...';
+    const iaPredictionText = $('iaPredictionText');
+    if (iaPredictionText) iaPredictionText.textContent = 'Esperando pronóstico...';
     $('pHome').textContent = 'N/A';
     $('pDraw').textContent = 'N/A';
     $('pAway').textContent = 'N/A';
@@ -390,6 +387,3 @@ function clearResults() {
 document.addEventListener('DOMContentLoaded', () => {
     fetchAllData();
 });
-
-
-
