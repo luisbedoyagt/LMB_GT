@@ -1,7 +1,6 @@
 /**
  * @fileoverview Script mejorado para interfaz web que muestra estadísticas de fútbol y calcula probabilidades de partidos
- * usando datos de una API de Google Apps Script. Ahora integra la API de Grok para predicciones avanzadas con IA, combinando
- * los datos locales de la app con llamadas a la API para mejorar la precisión.
+ * usando datos de una API de Google Apps Script. Integra la API de Grok para predicciones avanzadas con IA, activada por un botón.
  */
 
 // ----------------------
@@ -16,7 +15,7 @@ const parseNumberString = val => {
     return isFinite(n) ? n : 0;
 };
 
-// Funciones auxiliares para Poisson y Dixon-Coles (mantenidas como fallback si la API falla)
+// Funciones auxiliares para Poisson y Dixon-Coles (fallback si la API falla)
 function poissonProbability(lambda, k) {
     if (lambda <= 0 || k < 0) return 0;
     return (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
@@ -30,11 +29,11 @@ function factorial(n) {
 }
 
 // ----------------------
-// CONFIGURACIÓN DE LIGAS Y API DE GROK
+// CONFIGURACIÓN DE LIGAS Y API
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec"; // Tu API existente
-const GROK_API_URL = "https://api.x.ai/v1/chat/completions"; // API de Grok
-const GROK_API_KEY = "TU_CLAVE_API_DE_XAI"; // Reemplaza con tu clave real de https://x.ai/api
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
+const GROK_API_URL = "https://api.x.ai/v1/chat/completions";
+const GROK_API_KEY = "xai-yfaqau6cmN5bRELdR4nAbiDbqrCChFrpM8QRDYF5EhVyMiaY8nLyBlyTM1VaSaGtu75YTkhCjWt3Gzg1";
 
 let teamsByLeague = {};
 let allData = {};
@@ -112,7 +111,7 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// FETCH DATOS COMPLETOS (Mantiene tu API, pero puedes combinar con Grok)
+// FETCH DATOS
 // ----------------------
 async function fetchAllData() {
     const leagueSelect = $('leagueSelect');
@@ -120,16 +119,11 @@ async function fetchAllData() {
 
     try {
         const res = await fetch(`${WEBAPP_URL}?tipo=todo&update=false`);
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
-        }
+        if (!res.ok) throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
         allData = await res.json();
 
-        if (!allData.calendario || !allData.ligas) {
-            throw new Error('Estructura de datos inválida: faltan "calendario" o "ligas"');
-        }
-
+        if (!allData.calendario || !allData.ligas) throw new Error('Estructura de datos inválida');
+        
         const normalized = {};
         for (const key in allData.ligas) {
             normalized[key] = (allData.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
@@ -137,81 +131,18 @@ async function fetchAllData() {
         teamsByLeague = normalized;
 
         localStorage.setItem('allData', JSON.stringify(allData));
+        displaySelectedLeagueEvents($('leagueSelect').value);
         return allData;
     } catch (err) {
         console.error('Error en fetchAllData:', err);
-        const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
-        $('details').innerHTML = errorMsg;
+        $('details').innerHTML = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos. ${err.message}</div>`;
         if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
         return {};
     }
 }
 
 // ----------------------
-// MUESTRA DE EVENTOS FUTUROS
-// ----------------------
-function displayUpcomingEvents() {
-    const upcomingEventsList = $('upcoming-events-list');
-    if (!upcomingEventsList) return;
-
-    const allEvents = [];
-    if (allData.calendario) {
-        for (const liga in allData.calendario) {
-            allData.calendario[liga].forEach(event => {
-                let eventDateTime;
-                try {
-                    const parsedDate = new Date(event.fecha);
-                    if (isNaN(parsedDate.getTime())) {
-                        throw new Error("Fecha inválida");
-                    }
-                    const dateOptions = {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        timeZone: 'America/Guatemala'
-                    };
-                    const timeOptions = {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                        timeZone: 'America/Guatemala'
-                    };
-                    const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
-                    const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
-                    eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
-                } catch (err) {
-                    console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
-                    eventDateTime = `${event.fecha} (Hora no disponible)`;
-                }
-
-                allEvents.push({
-                    liga: event.liga,
-                    teams: `${event.local} vs. ${event.visitante}`,
-                    estadio: event.estadio || 'Por confirmar',
-                    date: eventDateTime,
-                });
-            });
-        }
-    }
-
-    if (allEvents.length > 0) {
-        upcomingEventsList.innerHTML = '';
-        allEvents.forEach(event => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-        <strong>${event.liga}</strong>: ${event.teams}
-        <span>Estadio: ${event.estadio}</span>
-        <small>${event.date}</small>
-      `;
-            upcomingEventsList.appendChild(li);
-        });
-    } else {
-        upcomingEventsList.innerHTML = '<li>No hay eventos próximos disponibles.</li>';
-    }
-}
-
-// ----------------------
-// MUESTRA DE EVENTOS DE LA LIGA SELECCIONADA (CON CAMBIOS EN CLASE)
+// MUESTRA DE EVENTOS DE LA LIGA SELECCIONADA
 // ----------------------
 function displaySelectedLeagueEvents(leagueCode) {
     const selectedEventsList = $('selected-league-events');
@@ -225,7 +156,7 @@ function displaySelectedLeagueEvents(leagueCode) {
     }
 
     const ligaName = leagueCodeToName[leagueCode];
-    const events = (allData.calendario[ligaName] || []).slice(0, 3); // Limita a los 3 primeros eventos
+    const events = (allData.calendario[ligaName] || []).slice(0, 3);
 
     if (events.length === 0) {
         selectedEventsList.innerHTML = '<div class="event-item placeholder"><span>No hay eventos próximos para esta liga.</span></div>';
@@ -236,24 +167,10 @@ function displaySelectedLeagueEvents(leagueCode) {
         let eventDateTime;
         try {
             const parsedDate = new Date(event.fecha);
-            if (isNaN(parsedDate.getTime())) {
-                throw new Error("Fecha inválida");
-            }
-            const dateOptions = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                timeZone: 'America/Guatemala'
-            };
-            const timeOptions = {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
-                timeZone: 'America/Guatemala'
-            };
-            const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
-            const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
-            eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
+            if (isNaN(parsedDate.getTime())) throw new Error("Fecha inválida");
+            const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/Guatemala' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Guatemala' };
+            eventDateTime = `${parsedDate.toLocaleDateString('es-ES', dateOptions)} ${parsedDate.toLocaleTimeString('es-ES', timeOptions)} (GT)`;
         } catch (err) {
             console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
             eventDateTime = `${event.fecha} (Hora no disponible)`;
@@ -270,10 +187,7 @@ function displaySelectedLeagueEvents(leagueCode) {
         `;
         selectedEventsList.appendChild(div);
 
-        // Nuevo: Agregar evento de click a cada item
-        div.addEventListener('click', () => {
-            selectEvent(event.local, event.visitante);
-        });
+        div.addEventListener('click', () => selectEvent(event.local, event.visitante));
     });
 }
 
@@ -311,17 +225,21 @@ async function init() {
     teamHomeSelect.addEventListener('change', () => {
         if (restrictSameTeam()) {
             fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
-            calculateAll();
         }
     });
     teamAwaySelect.addEventListener('change', () => {
         if (restrictSameTeam()) {
             fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
-            calculateAll();
         }
     });
 
     $('reset').addEventListener('click', clearAll);
+    
+    // Agregar listener para el botón de calcular con IA
+    const calcButton = $('calculateAI');
+    if (calcButton) {
+        calcButton.addEventListener('click', calculateAll);
+    }
 }
 document.addEventListener('DOMContentLoaded', init);
 
@@ -358,7 +276,6 @@ function onLeagueChange() {
         opt1.value = t.name;
         opt1.textContent = t.name;
         fragmentHome.appendChild(opt1);
-
         const opt2 = document.createElement('option');
         opt2.value = t.name;
         opt2.textContent = t.name;
@@ -374,40 +291,35 @@ function onLeagueChange() {
     clearTeamData('Away');
 }
 
-// Nueva función para seleccionar un evento
 function selectEvent(homeTeamName, awayTeamName) {
     const teamHomeSelect = $('teamHome');
     const teamAwaySelect = $('teamAway');
     
-    // Seleccionar el equipo local en el dropdown
     let foundHome = false;
-    for(let i = 0; i < teamHomeSelect.options.length; i++) {
-        if(teamHomeSelect.options[i].text === homeTeamName) {
+    for (let i = 0; i < teamHomeSelect.options.length; i++) {
+        if (teamHomeSelect.options[i].text === homeTeamName) {
             teamHomeSelect.selectedIndex = i;
             foundHome = true;
             break;
         }
     }
     
-    // Seleccionar el equipo visitante en el dropdown
     let foundAway = false;
-    for(let i = 0; i < teamAwaySelect.options.length; i++) {
-        if(teamAwaySelect.options[i].text === awayTeamName) {
+    for (let i = 0; i < teamAwaySelect.options.length; i++) {
+        if (teamAwaySelect.options[i].text === awayTeamName) {
             teamAwaySelect.selectedIndex = i;
             foundAway = true;
             break;
         }
     }
 
-    if(foundHome && foundAway) {
+    if (foundHome && foundAway) {
         fillTeamData(homeTeamName, $('leagueSelect').value, 'Home');
         fillTeamData(awayTeamName, $('leagueSelect').value, 'Away');
-        calculateAll(); // Disparar el cálculo automáticamente
     } else {
         $('details').innerHTML = '<div class="error"><strong>Error:</strong> No se pudo encontrar uno o ambos equipos en la lista de la liga.</div>';
     }
 }
-
 
 function restrictSameTeam() {
     const teamHome = $('teamHome').value;
@@ -455,7 +367,7 @@ function clearTeamData(type) {
             </div>
         </div>
     </div>
-  `;
+    `;
     if (type === 'Home') {
         $('posHome').textContent = '--';
         $('gfHome').textContent = '--';
@@ -467,12 +379,9 @@ function clearTeamData(type) {
         $('gaAway').textContent = '--';
         $('winRateAway').textContent = '--';
     }
-    // Ocultar logo si se borra la data
     const cardHeader = $(type === 'Home' ? 'card-home' : 'card-away').querySelector('.card-header');
     const logoImg = cardHeader ? cardHeader.querySelector('.team-logo') : null;
-    if (logoImg) {
-        logoImg.style.display = 'none';
-    }
+    if (logoImg) logoImg.style.display = 'none';
 }
 
 function clearAll() {
@@ -484,7 +393,6 @@ function clearAll() {
     });
     $('details').innerHTML = 'Detalles del Pronóstico';
     $('suggestion').innerHTML = '<p>Esperando datos...</p>';
-    
     clearTeamData('Home');
     clearTeamData('Away');
     displaySelectedLeagueEvents('');
@@ -502,7 +410,7 @@ function fillTeamData(teamName, leagueCode, type) {
     const t = findTeam(leagueCode, teamName);
     if (!t) {
         console.error(`Equipo no encontrado: ${teamName} en liga ${leagueCode}`);
-        $('details').innerHTML = `<div class="error"><strong>Error:</strong> Equipo ${teamName} no encontrado en la liga seleccionada.</div>`;
+        $('details').innerHTML = `<div class="error"><strong>Error:</strong> Equipo ${teamName} no encontrado.</div>`;
         return;
     }
 
@@ -540,7 +448,6 @@ function fillTeamData(teamName, leagueCode, type) {
     </div>
     `;
 
-    // Actualizar los valores en los cuadros de estadísticas
     if (type === 'Home') {
         $('posHome').textContent = t.pos || '--';
         $('gfHome').textContent = formatDec(t.gf / (t.pj || 1));
@@ -553,7 +460,6 @@ function fillTeamData(teamName, leagueCode, type) {
         $('winRateAway').textContent = formatPct(t.pj ? t.g / t.pj : 0);
     }
 
-    // Lógica para el logo
     const cardHeader = $(type === 'Home' ? 'card-home' : 'card-away').querySelector('.card-header');
     if (cardHeader) {
         const h3 = cardHeader.querySelector('h3');
@@ -576,7 +482,7 @@ function fillTeamData(teamName, leagueCode, type) {
 }
 
 // ----------------------
-// CÁLCULO DE PROBABILIDADES CON INTEGRACIÓN DE API DE GROK
+// CÁLCULO DE PROBABILIDADES CON GROK API
 // ----------------------
 async function calculateAll() {
     const teamHome = $('teamHome').value;
@@ -598,12 +504,12 @@ async function calculateAll() {
         return;
     }
 
-    // Preparar datos para enviar a Grok API
-    const prompt = `Calcula probabilidades de Poisson con ajuste Dixon-Coles para el partido ${teamHome} (local) vs ${teamAway} (visitante) usando estos datos de la tabla:
+    // Preparar prompt para Grok
+    const prompt = `Calcula probabilidades de Poisson con ajuste Dixon-Coles para el partido ${teamHome} (local) vs ${teamAway} (visitante) usando estos datos:
     Datos de ${teamHome}: ${JSON.stringify(tH)}
     Datos de ${teamAway}: ${JSON.stringify(tA)}
     Promedios de la liga: gfHome: 1.29, gaHome: 0.96, gfAway: 1.00, gaAway: 1.33
-    Devuelve un JSON con: { home: prob_local, draw: prob_empate, away: prob_visitante, btts: prob_ambos_anotan, over25: prob_mas_2.5_goles }`;
+    Devuelve un JSON con: { "home": prob_local, "draw": prob_empate, "away": prob_visitante, "btts": prob_ambos_anotan, "over25": prob_mas_2.5_goles }`;
 
     try {
         const response = await fetch(GROK_API_URL, {
@@ -613,23 +519,27 @@ async function calculateAll() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'grok-4', // O el modelo disponible
-                messages: [{ 
-                    role: 'user', 
-                    content: prompt 
-                }]
+                model: 'grok-4-latest',
+                messages: [{ role: 'user', content: prompt }],
+                stream: false,
+                temperature: 0
             })
         });
 
-        if (!response.ok) {
-            throw new Error(`Error en API de Grok: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`Error en API de Grok: ${response.statusText}`);
 
         const data = await response.json();
         const resultText = data.choices[0].message.content;
-        const { home: finalHome, draw: finalDraw, away: finalAway, btts: pBTTSH, over25: pO25H } = JSON.parse(resultText); // Asume que Grok devuelve JSON
+        let probabilities;
+        try {
+            probabilities = JSON.parse(resultText);
+        } catch (e) {
+            throw new Error('Respuesta de Grok no es un JSON válido');
+        }
 
-        const probabilities = [
+        const { home: finalHome, draw: finalDraw, away: finalAway, btts: pBTTSH, over25: pO25H } = probabilities;
+
+        const probArray = [
             { label: 'Local', value: finalHome, id: 'pHome', type: 'Resultado' },
             { label: 'Empate', value: finalDraw, id: 'pDraw', type: 'Resultado' },
             { label: 'Visitante', value: finalAway, id: 'pAway', type: 'Resultado' },
@@ -637,56 +547,74 @@ async function calculateAll() {
             { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', type: 'Mercado' }
         ];
 
-        // Actualiza los valores en los cuadros de probabilidad
-        probabilities.forEach(p => {
+        probArray.forEach(p => {
             const el = $(p.id);
             if (el) el.textContent = formatPct(p.value);
         });
 
-        // Filtra y ordena las 3 mejores recomendaciones
-        const recommendations = probabilities.filter(p => p.value >= 0.3)
-                                              .sort((a, b) => b.value - a.value)
-                                              .slice(0, 3);
-        
-        // Muestra los detalles y las recomendaciones
-        $('details').innerHTML = `<p><strong>Detalles del pronóstico (con IA Grok):</strong></p>`;
+        const recommendations = probArray.filter(p => p.value >= 0.3)
+                                       .sort((a, b) => b.value - a.value)
+                                       .slice(0, 3);
 
-        if (recommendations.length > 0) {
-            let suggestionHTML = '<ul>';
-            recommendations.forEach((rec, index) => {
-                const rank = index + 1;
-                suggestionHTML += `<li class="rec-item">
-                                     <span class="rec-rank">${rank}.</span>
-                                     <span class="rec-bet">${rec.label}</span>
-                                     <span class="rec-prob">${formatPct(rec.value)}</span>
-                                   </li>`;
-            });
-            suggestionHTML += '</ul>';
-            $('suggestion').innerHTML = suggestionHTML;
-        } else {
-            $('suggestion').innerHTML = '<p>No se encontraron recomendaciones con una probabilidad superior al 30%. Analiza otros mercados.</p>';
-        }
+        $('details').innerHTML = `<p><strong>Detalles del pronóstico (con IA Grok):</strong></p>`;
+        let suggestionHTML = recommendations.length > 0 ? '<ul>' : '<p>No se encontraron recomendaciones con probabilidad superior al 30%.</p>';
+        recommendations.forEach((rec, index) => {
+            suggestionHTML += `<li class="rec-item">
+                <span class="rec-rank">${index + 1}.</span>
+                <span class="rec-bet">${rec.label}</span>
+                <span class="rec-prob">${formatPct(rec.value)}</span>
+            </li>`;
+        });
+        if (recommendations.length > 0) suggestionHTML += '</ul>';
+        $('suggestion').innerHTML = suggestionHTML;
     } catch (err) {
-        console.error('Error en llamada a Grok API:', err);
-        $('details').innerHTML = '<div class="error"><strong>Error:</strong> Fallo al consultar la IA Grok. Usando cálculo local como fallback.</div>';
-        // Fallback al cálculo local si la API falla
-        const fallback = dixonColesProbabilitiesLocal(tH, tA, league);
-        // Procesar fallback similarmente...
-        // (Añade lógica para mostrar fallback si es necesario)
+        console.error('Error en Grok API:', err);
+        $('details').innerHTML = `<div class="error"><strong>Error:</strong> Fallo al consultar Grok: ${err.message}. Usando cálculo local.</div>`;
+        
+        // Fallback a cálculo local
+        const { finalHome, finalDraw, finalAway, pBTTSH, pO25H } = dixonColesProbabilitiesLocal(tH, tA, league);
+        const probArray = [
+            { label: 'Local', value: finalHome, id: 'pHome', type: 'Resultado' },
+            { label: 'Empate', value: finalDraw, id: 'pDraw', type: 'Resultado' },
+            { label: 'Visitante', value: finalAway, id: 'pAway', type: 'Resultado' },
+            { label: 'Ambos Anotan', value: pBTTSH, id: 'pBTTS', type: 'Mercado' },
+            { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', type: 'Mercado' }
+        ];
+
+        probArray.forEach(p => {
+            const el = $(p.id);
+            if (el) el.textContent = formatPct(p.value);
+        });
+
+        const recommendations = probArray.filter(p => p.value >= 0.3)
+                                       .sort((a, b) => b.value - a.value)
+                                       .slice(0, 3);
+
+        $('details').innerHTML = `<p><strong>Detalles del pronóstico (cálculo local):</strong></p>`;
+        let suggestionHTML = recommendations.length > 0 ? '<ul>' : '<p>No se encontraron recomendaciones con probabilidad superior al 30%.</p>';
+        recommendations.forEach((rec, index) => {
+            suggestionHTML += `<li class="rec-item">
+                <span class="rec-rank">${index + 1}.</span>
+                <span class="rec-bet">${rec.label}</span>
+                <span class="rec-prob">${formatPct(rec.value)}</span>
+            </li>`;
+        });
+        if (recommendations.length > 0) suggestionHTML += '</ul>';
+        $('suggestion').innerHTML = suggestionHTML;
     }
 }
 
-// Función fallback local con Poisson (por si la API falla)
+// ----------------------
+// CÁLCULO LOCAL (FALLBACK)
+// ----------------------
 function dixonColesProbabilitiesLocal(tH, tA, league) {
     const rho = -0.11;
     const shrinkageFactor = 1.0;
 
     const teams = teamsByLeague[league];
-    let totalGames = 0, totalGf = 0, totalGa = 0, totalGfHome = 0, totalGaHome = 0, totalGfAway = 0, totalGaAway = 0;
+    let totalGames = 0, totalGfHome = 0, totalGaHome = 0, totalGfAway = 0, totalGaAway = 0;
     teams.forEach(t => {
         totalGames += t.pj || 0;
-        totalGf += t.gf || 0;
-        totalGa += t.ga || 0;
         totalGfHome += t.gfHome || 0;
         totalGaHome += t.gaHome || 0;
         totalGfAway += t.gfAway || 0;
@@ -694,9 +622,9 @@ function dixonColesProbabilitiesLocal(tH, tA, league) {
     });
 
     const leagueAvgGfHome = totalGfHome / (totalGames || 1);
-    const leagueAvgGaAway = totalGaAway / (totalGames || 1);
-    const leagueAvgGfAway = totalGfAway / (totalGames || 1);
     const leagueAvgGaHome = totalGaHome / (totalGames || 1);
+    const leagueAvgGfAway = totalGfAway / (totalGames || 1);
+    const leagueAvgGaAway = totalGaAway / (totalGames || 1);
 
     const homeAttackRaw = (tH.gfHome || 0) / (tH.pjHome || 1);
     const homeDefenseRaw = (tH.gaHome || 0) / (tH.pjHome || 1);
@@ -713,20 +641,16 @@ function dixonColesProbabilitiesLocal(tH, tA, league) {
     const awayAttackStrength = awayAttackAdj / (leagueAvgGfAway || 1);
     const awayDefenseStrength = awayDefenseAdj / (leagueAvgGaAway || 1);
 
-    const lambdaHome = homeAttackStrength * awayDefenseStrength * (leagueAvgGfHome || 1);
-    const lambdaAway = awayAttackStrength * homeDefenseStrength * (leagueAvgGfAway || 1);
+    const lambdaHome = homeAttackStrength * awayDefenseStrength * leagueAvgGfHome;
+    const lambdaAway = awayAttackStrength * homeDefenseStrength * leagueAvgGfAway;
 
     const maxGoals = 6;
     let pHome = 0, pDraw = 0, pAway = 0, pBTTS = 0, pO25 = 0;
 
     for (let h = 0; h <= maxGoals; h++) {
         for (let a = 0; a <= maxGoals; a++) {
-            let prob;
-            if (h === a) {
-                prob = poissonProbability(lambdaHome, h) * poissonProbability(lambdaAway, a) * (1 + rho);
-            } else {
-                prob = poissonProbability(lambdaHome, h) * poissonProbability(lambdaAway, a);
-            }
+            let prob = poissonProbability(lambdaHome, h) * poissonProbability(lambdaAway, a);
+            if (h === a) prob *= (1 + rho);
 
             if (h > a) pHome += prob;
             else if (h === a) pDraw += prob;
@@ -736,16 +660,14 @@ function dixonColesProbabilitiesLocal(tH, tA, league) {
             if (h + a > 2) pO25 += prob;
         }
     }
-    
-    // Normalizar probabilidades principales para que sumen 1
+
     const total = pHome + pDraw + pAway;
-    const finalHome = total > 0 ? pHome / total : 0.33;
-    const finalDraw = total > 0 ? pDraw / total : 0.33;
-    const finalAway = total > 0 ? pAway / total : 0.33;
-
-    // Normalizar probabilidades de Ambos Anotan y Más de 2.5 Goles
-    const finalBTTS = pBTTS / total;
-    const finalO25 = pO25 / total;
-
-    return { finalHome, finalDraw, finalAway, pBTTSH: finalBTTS, pO25H: finalO25, rho };
+    return {
+        finalHome: total > 0 ? pHome / total : 0.33,
+        finalDraw: total > 0 ? pDraw / total : 0.33,
+        finalAway: total > 0 ? pAway / total : 0.33,
+        pBTTSH: total > 0 ? pBTTS / total : 0,
+        pO25H: total > 0 ? pO25 / total : 0,
+        rho
+    };
 }
