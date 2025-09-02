@@ -192,11 +192,13 @@ function fillTeamData(teamName, leagueCode, type) {
 
     const card = $(`card-${type.toLowerCase()}`);
     if (card) {
+        // Correcciones aquí para buscar dentro de la tarjeta
         card.querySelector('.team-logo').src = teamData.logoUrl || 'https://via.placeholder.com/60?text=Logo';
         card.querySelector('.team-name').textContent = teamData.name;
-        card.querySelector('#' + type.toLowerCase() + 'Rank').textContent = teamData.rank || 'N/A';
-        card.querySelector('#' + type.toLowerCase() + 'Points').textContent = teamData.points || 'N/A';
-
+        // Ahora se usa querySelector para buscar los elementos de ranking y puntos
+        card.querySelector(`.team-stats .rank`).textContent = teamData.rank || 'N/A';
+        card.querySelector(`.team-stats .points`).textContent = teamData.points || 'N/A';
+        
         const stats = card.querySelectorAll('.stat-section');
         stats[0].querySelector('.stat-metrics span:nth-child(1)').textContent = teamData.wins || '0';
         stats[0].querySelector('.stat-metrics span:nth-child(2)').textContent = teamData.ties || '0';
@@ -371,8 +373,15 @@ function formatPct(value) {
 }
 
 function clearResults() {
-    const iaPredictionText = $('iaPredictionText');
-    if (iaPredictionText) iaPredictionText.textContent = 'Esperando pronóstico...';
+    // La función clearResults ahora borra el pronóstico de la IA solo si existe
+    const detailsSection = $('details');
+    if (detailsSection) {
+        detailsSection.innerHTML = '';
+        const iaSection = detailsSection.querySelector('.ia-prediction-section');
+        if (iaSection) iaSection.remove();
+    }
+    
+    // Aquí limpias el resto de los elementos
     $('pHome').textContent = 'N/A';
     $('pDraw').textContent = 'N/A';
     $('pAway').textContent = 'N/A';
