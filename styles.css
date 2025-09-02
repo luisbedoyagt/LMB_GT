@@ -513,15 +513,21 @@ input[type="number"] {
     border: 2px solid;
     border-image: linear-gradient(45deg, #00f2fe, #ff00ff) 1;
     box-shadow: 0 0 12px rgba(0, 242, 254, 0.5), 0 0 8px rgba(255, 0, 255, 0.3);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition: box-shadow 0.3s ease, transform 0.3s ease, filter 0.2s ease;
     min-width: 160px;
     max-width: 220px;
     box-sizing: border-box;
+    cursor: pointer;
 }
 
 #selected-league-events .event-box:hover {
     box-shadow: 0 0 16px rgba(0, 242, 254, 0.7), 0 0 12px rgba(255, 0, 255, 0.5);
     transform: translateY(-3px);
+}
+
+#selected-league-events .event-box:active {
+    filter: brightness(1.2);
+    transform: scale(0.98);
 }
 
 #selected-league-events .event-box strong {
