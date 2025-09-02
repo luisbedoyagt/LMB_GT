@@ -315,7 +315,7 @@ select:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-bottom: 1.5rem; /* Espacio para que el botón no quede pegado al fondo */
+    padding-bottom: 1.5rem;
 }
 
 @media (min-width: 768px) {
@@ -415,11 +415,54 @@ select:focus {
     font-size: 0.9rem;
     color: var(--label-color);
     font-style: italic;
+    list-style: none; /* Elimina los puntos predeterminados */
+    padding: 0;
+    margin: 0;
 }
 
-.rec-suggestion strong {
+/* Nuevo estilo para la lista de recomendaciones */
+.rec-suggestion ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rec-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #2b7a4b, #38a169); /* Degradado de color */
     color: #fff;
-    font-weight: 700;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.rec-rank {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em;
+}
+
+.rec-bet {
+    flex-grow: 1;
+    text-align: left;
+    margin-left: 15px;
+}
+
+.rec-prob {
+    font-family: var(--font-heading);
+    font-size: 1.2em;
 }
 
 .error, .warning {
