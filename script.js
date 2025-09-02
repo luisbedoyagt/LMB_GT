@@ -225,10 +225,7 @@ async function init() {
         leagueSelect.appendChild(opt);
     });
 
-    leagueSelect.addEventListener('change', () => {
-        onLeagueChange();
-        displaySelectedLeagueEvents(leagueSelect.value);
-    });
+    leagueSelect.addEventListener('change', onLeagueChange);
     
     teamHomeSelect.addEventListener('change', () => {
         if (restrictSameTeam()) {
@@ -297,6 +294,11 @@ function onLeagueChange() {
 
     clearTeamData('Home');
     clearTeamData('Away');
+    
+    // Llamar a calculateAll() para actualizar todo el panel
+    calculateAll();
+    
+    displaySelectedLeagueEvents(code);
 }
 
 function selectEvent(homeTeamName, awayTeamName) {
@@ -304,20 +306,7 @@ function selectEvent(homeTeamName, awayTeamName) {
     const teamAwaySelect = $('teamAway');
     
     const leagueCode = $('leagueSelect').value;
-    const ligaName = leagueCodeToName[leagueCode];
-
-    // Buscar el evento en el calendario para obtener el pronóstico
-    const event = (allData.calendario[ligaName] || []).find(e => e.local === homeTeamName && e.visitante === awayTeamName);
-
-    // Si se encuentra el evento, muestra el pronóstico detallado de la hoja de cálculo
-    const detailedPredictionBox = $('detailed-prediction');
-    if (event && event['Pronóstico IA']) {
-        const formattedPrediction = event['Pronóstico IA'].replace(/\n/g, '<br>').replace(/###\s*(.*)/g, '<h4>$1</h4>');
-        detailedPredictionBox.innerHTML = `<h3>Análisis del Calendario</h3><div class="ia-prediction">${formattedPrediction}</div>`;
-    } else {
-        detailedPredictionBox.innerHTML = `<p>No hay un pronóstico detallado disponible para este partido en la hoja de cálculo.</p>`;
-    }
-
+    
     // Seleccionar el equipo local en el dropdown
     const homeOption = Array.from(teamHomeSelect.options).find(opt => opt.text === homeTeamName);
     if (homeOption) {
@@ -329,7 +318,8 @@ function selectEvent(homeTeamName, awayTeamName) {
     if (awayOption) {
         teamAwaySelect.value = awayOption.value;
     }
-
+    
+    // Llenar los datos y calcular, que ahora maneja el pronóstico de la IA
     if (homeOption && awayOption) {
         fillTeamData(homeTeamName, leagueCode, 'Home');
         fillTeamData(awayTeamName, leagueCode, 'Away');
@@ -577,6 +567,7 @@ function calculateAll() {
     if (!teamHome || !teamAway || !league) {
         $('details').innerHTML = '<div class="warning"><strong>Advertencia:</strong> Selecciona una liga y ambos equipos.</div>';
         $('suggestion').innerHTML = '<p>Esperando datos...</p>';
+        $('detailed-prediction').innerHTML = '<p>Esperando pronóstico detallado...</p>';
         return;
     }
 
@@ -586,8 +577,22 @@ function calculateAll() {
     if (!tH || !tA) {
         $('details').innerHTML = '<div class="error"><strong>Error:</strong> No se encontraron datos para uno o ambos equipos.</div>';
         $('suggestion').innerHTML = '<p>Esperando datos...</p>';
+        $('detailed-prediction').innerHTML = '<p>Esperando pronóstico detallado...</p>';
         return;
     }
+    
+    const ligaName = leagueCodeToName[league];
+    const event = (allData.calendario[ligaName] || []).find(e => e.local === teamHome && e.visitante === teamAway);
+
+    // Actualizar el contenedor del pronóstico detallado
+    const detailedPredictionBox = $('detailed-prediction');
+    if (event && event['Pronóstico IA']) {
+        const formattedPrediction = event['Pronóstico IA'].replace(/\n/g, '<br>').replace(/###\s*(.*)/g, '<h4>$1</h4>');
+        detailedPredictionBox.innerHTML = `<h3>Análisis del Calendario</h3><div class="ia-prediction">${formattedPrediction}</div>`;
+    } else {
+        detailedPredictionBox.innerHTML = `<p>No hay un pronóstico detallado disponible para este partido en la hoja de cálculo.</p>`;
+    }
+
 
     const { finalHome, finalDraw, finalAway, pBTTSH, pO25H } = dixonColesProbabilities(tH, tA, league);
 
