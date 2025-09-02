@@ -278,8 +278,10 @@ select:focus {
     border-bottom: none;
 }
 
-.team-details .stat-section span {
-    font-size: 0.9rem;
+.team-details .stat-section .section-title {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 0.95rem;
 }
 
 .team-details .stat-section .stat-metrics {
@@ -415,12 +417,11 @@ select:focus {
     font-size: 0.9rem;
     color: var(--label-color);
     font-style: italic;
-    list-style: none; /* Elimina los puntos predeterminados */
+    list-style: none;
     padding: 0;
     margin: 0;
 }
 
-/* Nuevo estilo para la lista de recomendaciones */
 .rec-suggestion ul {
     list-style: none;
     padding: 0;
@@ -434,7 +435,7 @@ select:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(90deg, #2b7a4b, #38a169); /* Degradado de color */
+    background: linear-gradient(90deg, #2b7a4b, #38a169);
     color: #fff;
     padding: 10px 15px;
     border-radius: 8px;
