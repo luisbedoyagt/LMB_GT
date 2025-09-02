@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora para Pronósticos de Fútbol</title>
+    <title>Calculadora para Pronósticos de Fútbol / LMB</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Calculadora para Pronósticos de Fútbol</h1>
+            <h1>Calculadora para Pronósticos de Fútbol / LMB</h1>
             <p class="small">Datos en tiempo real de ligas y estadísticas avanzadas.</p>
         </div>
 
         <div class="card">
             <h3>Eventos Próximos de la Liga Seleccionada</h3>
+            <div class="pagination-controls">
+                <button id="prevPage" class="btn pagination-btn" disabled>Atrás</button>
+                <span id="pageIndicator" class="page-indicator">Página 1 de 1</span>
+                <button id="nextPage" class="btn pagination-btn" disabled>Adelante</button>
+            </div>
             <ul id="selected-league-events">
-                <li>Selecciona una liga para ver sus próximos eventos.</li>
+                <li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>
             </ul>
         </div>
 
@@ -176,4 +181,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
