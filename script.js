@@ -260,12 +260,19 @@ function displaySelectedLeagueEvents(leagueCode) {
 
         const div = document.createElement('div');
         div.className = 'event-item';
+        div.dataset.homeTeam = event.local;
+        div.dataset.awayTeam = event.visitante;
         div.innerHTML = `
             <strong>${event.local} vs. ${event.visitante}</strong>
             <span>Estadio: ${event.estadio || 'Por confirmar'}</span>
             <span>${eventDateTime}</span>
         `;
         selectedEventsList.appendChild(div);
+
+        // Nuevo: Agregar evento de click a cada item
+        div.addEventListener('click', () => {
+            selectEvent(event.local, event.visitante);
+        });
     });
 }
 
@@ -301,26 +308,27 @@ async function init() {
         onLeagueChange();
         displaySelectedLeagueEvents(leagueSelect.value);
     });
+    
+    // El cálculo se activa al seleccionar un evento, no manualmente
     teamHomeSelect.addEventListener('change', () => {
         if (restrictSameTeam()) {
             fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
-            updateCalcButton();
+            calculateAll();
         }
     });
     teamAwaySelect.addEventListener('change', () => {
         if (restrictSameTeam()) {
             fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
-            updateCalcButton();
+            calculateAll();
         }
     });
 
-    $('recalc').addEventListener('click', calculateAll);
     $('reset').addEventListener('click', clearAll);
 }
 document.addEventListener('DOMContentLoaded', init);
 
 // ----------------------
-// FUNCIONES AUXILIARES (CORREGIDAS)
+// FUNCIONES AUXILIARES
 // ----------------------
 function onLeagueChange() {
     const code = $('leagueSelect').value;
@@ -370,11 +378,47 @@ function onLeagueChange() {
     updateCalcButton();
 }
 
+// Nueva función para seleccionar un evento
+function selectEvent(homeTeamName, awayTeamName) {
+    const teamHomeSelect = $('teamHome');
+    const teamAwaySelect = $('teamAway');
+    
+    // Seleccionar el equipo local en el dropdown
+    let foundHome = false;
+    for(let i = 0; i < teamHomeSelect.options.length; i++) {
+        if(teamHomeSelect.options[i].text === homeTeamName) {
+            teamHomeSelect.selectedIndex = i;
+            foundHome = true;
+            break;
+        }
+    }
+    
+    // Seleccionar el equipo visitante en el dropdown
+    let foundAway = false;
+    for(let i = 0; i < teamAwaySelect.options.length; i++) {
+        if(teamAwaySelect.options[i].text === awayTeamName) {
+            teamAwaySelect.selectedIndex = i;
+            foundAway = true;
+            break;
+        }
+    }
+
+    if(foundHome && foundAway) {
+        fillTeamData(homeTeamName, $('leagueSelect').value, 'Home');
+        fillTeamData(awayTeamName, $('leagueSelect').value, 'Away');
+        calculateAll(); // Disparar el cálculo automáticamente
+    } else {
+        $('details').innerHTML = '<div class="error"><strong>Error:</strong> No se pudo encontrar uno o ambos equipos en la lista de la liga.</div>';
+    }
+}
+
+
 function updateCalcButton() {
     const teamHome = $('teamHome').value;
     const teamAway = $('teamAway').value;
     const leagueCode = $('leagueSelect').value;
-    $('recalc').disabled = !(leagueCode && teamHome && teamAway && teamHome !== teamAway);
+    // El botón está oculto, por lo que esta función ya no es necesaria
+    // $('recalc').disabled = !(leagueCode && teamHome && teamAway && teamHome !== teamAway);
 }
 
 function restrictSameTeam() {
