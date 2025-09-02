@@ -219,7 +219,7 @@ function displaySelectedLeagueEvents(leagueCode) {
     selectedEventsList.innerHTML = '';
 
     if (!leagueCode || !allData.calendario) {
-        selectedEventsList.innerHTML = '<li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>';
+        selectedEventsList.innerHTML = '<div class="event-item placeholder"><span>Selecciona una liga para ver eventos próximos.</span></div>';
         return;
     }
 
@@ -227,7 +227,7 @@ function displaySelectedLeagueEvents(leagueCode) {
     const events = (allData.calendario[ligaName] || []).slice(0, 3);
 
     if (events.length === 0) {
-        selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos para esta liga.</li>';
+        selectedEventsList.innerHTML = '<div class="event-item placeholder"><span>No hay eventos próximos para esta liga.</span></div>';
         return;
     }
 
@@ -258,14 +258,14 @@ function displaySelectedLeagueEvents(leagueCode) {
             eventDateTime = `${event.fecha} (Hora no disponible)`;
         }
 
-        const li = document.createElement('li');
-        li.className = 'event-box';
-        li.innerHTML = `
+        const div = document.createElement('div');
+        div.className = 'event-item';
+        div.innerHTML = `
             <strong>${event.local} vs. ${event.visitante}</strong>
             <span>Estadio: ${event.estadio || 'Por confirmar'}</span>
-            <small>${eventDateTime}</small>
+            <span>${eventDateTime}</span>
         `;
-        selectedEventsList.appendChild(li);
+        selectedEventsList.appendChild(div);
     });
 }
 
@@ -398,55 +398,58 @@ function restrictSameTeam() {
 function clearTeamData(type) {
     const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
     box.innerHTML = `
-    <div class="stat-section" data-testid="general-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento General</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>Puntos: 0</span>
-        <span>DG: 0</span>
-      </div>
+    <div class="team-details">
+        <div class="stat-section">
+            <span class="section-title">Rendimiento General</span>
+            <div class="stat-metrics">
+                <span>PJ: 0</span>
+                <span>Puntos: 0</span>
+                <span>DG: 0</span>
+            </div>
+        </div>
+        <div class="stat-section">
+            <span class="section-title">Rendimiento de Local</span>
+            <div class="stat-metrics">
+                <span>PJ: 0</span>
+                <span>PG: 0</span>
+                <span>DG: 0</span>
+            </div>
+        </div>
+        <div class="stat-section">
+            <span class="section-title">Rendimiento de Visitante</span>
+            <div class="stat-metrics">
+                <span>PJ: 0</span>
+                <span>PG: 0</span>
+                <span>DG: 0</span>
+            </div>
+        </div>
     </div>
-    <div class="stat-section" data-testid="local-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Local</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>PG: 0</span>
-        <span>DG: 0</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Visitante</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>PG: 0</span>
-        <span>DG: 0</span>
-      </div>
-    </div>
-    <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
   `;
     if (type === 'Home') {
-        $('posHome').value = '0';
-        $('gfHome').value = '0';
-        $('gaHome').value = '0';
-        $('winRateHome').value = '0%';
-        $('formHomeTeam').innerHTML = 'Local: —';
+        $('posHome').textContent = '--';
+        $('gfHome').textContent = '--';
+        $('gaHome').textContent = '--';
+        $('winRateHome').textContent = '--';
+        $('formHomeTeam').innerHTML = 'Local: --';
     } else {
-        $('posAway').value = '0';
-        $('gfAway').value = '0';
-        $('gaAway').value = '0';
-        $('winRateAway').value = '0%';
-        $('formAwayTeam').innerHTML = 'Visitante: —';
+        $('posAway').textContent = '--';
+        $('gfAway').textContent = '--';
+        $('gaAway').textContent = '--';
+        $('winRateAway').textContent = '--';
+        $('formAwayTeam').innerHTML = 'Visitante: --';
     }
 }
 
 function clearAll() {
-    document.querySelectorAll('input').forEach(i => i.value = '0');
+    document.querySelectorAll('.stat-value').forEach(el => el.textContent = '--');
     document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-    ['pHome', 'pDraw', 'pAway', 'pBTTS', 'pO25', 'details', 'homeAdvantageFactor', 'strengthFactor', 'dixonColesFactor', 'suggestion'].forEach(id => {
+    ['pHome', 'pDraw', 'pAway', 'pBTTS', 'pO25'].forEach(id => {
         const el = $(id);
-        if (el) el.textContent = '—';
+        if (el) el.textContent = '--';
     });
-    ['formHomeTeam', 'formAwayTeam'].forEach(id => $(id).innerHTML = id.includes('Home') ? 'Local: —' : 'Visitante: —');
+    $('details').textContent = 'Detalles del Pronóstico';
+    $('suggestion').textContent = 'Esperando datos...';
+    
     clearTeamData('Home');
     clearTeamData('Away');
     updateCalcButton();
@@ -477,7 +480,7 @@ function fillTeamData(teamName, leagueCode, type) {
 
     const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
     box.innerHTML = `
-    <div class="stat-section" data-testid="general-${type.toLowerCase()}">
+    <div class="stat-section">
       <span class="section-title">Rendimiento General</span>
       <div class="stat-metrics">
         <span>PJ: ${t.pj || 0}</span>
@@ -485,7 +488,7 @@ function fillTeamData(teamName, leagueCode, type) {
         <span>DG: ${dg >= 0 ? '+' + dg : dg || 0}</span>
       </div>
     </div>
-    <div class="stat-section" data-testid="local-${type.toLowerCase()}">
+    <div class="stat-section">
       <span class="section-title">Rendimiento de Local</span>
       <div class="stat-metrics">
         <span>PJ: ${t.pjHome || 0}</span>
@@ -493,7 +496,7 @@ function fillTeamData(teamName, leagueCode, type) {
         <span>DG: ${dgHome >= 0 ? '+' + dgHome : dgHome || 0}</span>
       </div>
     </div>
-    <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
+    <div class="stat-section">
       <span class="section-title">Rendimiento de Visitante</span>
       <div class="stat-metrics">
         <span>PJ: ${t.pjAway || 0}</span>
@@ -501,25 +504,18 @@ function fillTeamData(teamName, leagueCode, type) {
         <span>DG: ${dgAway >= 0 ? '+' + dgAway : dgAway || 0}</span>
       </div>
     </div>
-    <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
   `;
 
     if (type === 'Home') {
-        $('posHome').value = t.pos || 0;
-        $('gfHome').value = formatDec(lambda);
-        $('gaHome').value = formatDec(gaAvg);
-        $('winRateHome').value = formatPct(t.pjHome ? t.winsHome / t.pjHome : 0);
-        $('formHomeTeam').innerHTML = t.logoUrl
-            ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> Local: ${t.name}`
-            : `Local: ${t.name}`;
+        $('posHome').textContent = t.pos || '--';
+        $('gfHome').textContent = formatDec(lambda);
+        $('gaHome').textContent = formatDec(gaAvg);
+        $('winRateHome').textContent = formatPct(t.pjHome ? t.winsHome / t.pjHome : 0);
     } else {
-        $('posAway').value = t.pos || 0;
-        $('gfAway').value = formatDec(lambda);
-        $('gaAway').value = formatDec(gaAvg);
-        $('winRateAway').value = formatPct(t.pjAway ? t.winsAway / t.pjAway : 0);
-        $('formAwayTeam').innerHTML = t.logoUrl
-            ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> Visitante: ${t.name}`
-            : `Visitante: ${t.name}`;
+        $('posAway').textContent = t.pos || '--';
+        $('gfAway').textContent = formatDec(lambda);
+        $('gaAway').textContent = formatDec(gaAvg);
+        $('winRateAway').textContent = formatPct(t.pjAway ? t.winsAway / t.pjAway : 0);
     }
 }
 
@@ -622,18 +618,18 @@ function calculateAll() {
     const { finalHome, finalDraw, finalAway, pBTTSH, pO25H, rho } = dixonColesProbabilities(tH, tA, league);
 
     const detailsText = `
-        <p><strong>Ventaja Local:</strong> El equipo local tiene una ventaja histórica en el rendimiento de casa. (${formatDec(tH.gfHome / (tH.pjHome || 1))} vs ${formatDec(tA.gaAway / (tA.pjAway || 1))} Goles)</p>
-        <p><strong>Fuerza Relativa:</strong> La diferencia de posición en la tabla (${tH.pos} vs ${tA.pos}) y la forma reciente de los equipos influyen en el resultado.</p>
-        <p><strong>Factor Dixon-Coles:</strong> El ajuste de Dixon-Coles (rho = ${formatDec(rho)}) ayuda a modelar la tendencia a los empates en esta liga. </p>
+        **Ventaja Local:** Factor de ataque local vs defensa visitante.
+        **Fuerza Relativa:** Comparación de la posición en la tabla.
+        **Factor Dixon-Coles:** Ajuste por tendencia al empate (${formatDec(rho)}).
     `;
     $('details').innerHTML = detailsText;
 
     const probabilities = [
-        { label: 'Local', value: finalHome, id: 'pHome', color: '#ff6b6b', bet: 'Apostar a la victoria de Local' },
-        { label: 'Empate', value: finalDraw, id: 'pDraw', color: '#ffd166', bet: 'Apostar al Empate' },
-        { label: 'Visitante', value: finalAway, id: 'pAway', color: '#4ecdc4', bet: 'Apostar a la victoria de Visitante' },
-        { label: 'Ambos Anotan', value: pBTTSH, id: 'pBTTS', color: '#5e60ce', bet: 'Apostar a que ambos equipos anotan' },
-        { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', color: '#ff69b4', bet: 'Apostar a Más de 2.5 goles' }
+        { label: 'Local', value: finalHome, id: 'pHome', bet: 'Apostar a la victoria de Local' },
+        { label: 'Empate', value: finalDraw, id: 'pDraw', bet: 'Apostar al Empate' },
+        { label: 'Visitante', value: finalAway, id: 'pAway', bet: 'Apostar a la victoria de Visitante' },
+        { label: 'Ambos Anotan', value: pBTTSH, id: 'pBTTS', bet: 'Apostar a que ambos equipos anotan' },
+        { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', bet: 'Apostar a Más de 2.5 goles' }
     ];
 
     let maxProb = 0;
@@ -652,12 +648,4 @@ function calculateAll() {
 
     const suggestionText = maxProb > 0.5 ? `¡Tu apuesta estelar es **${bestBet}** con una probabilidad del ${formatPct(maxProb)}!` : 'Las probabilidades están muy parejas. Analiza más a fondo o busca una apuesta de valor en otro mercado.';
     $('suggestion').innerHTML = suggestionText;
-    
-    // Asignar los factores de corrección
-    const homeAdvantageFactor = (tH.gfHome / (tH.pjHome || 1)) / (tA.gaAway / (tA.pjAway || 1));
-    const strengthFactor = (tH.gf / (tH.pj || 1)) / (tA.gf / (tA.pj || 1));
-    
-    $('homeAdvantageFactor').textContent = `${formatDec(homeAdvantageFactor)}x`;
-    $('strengthFactor').textContent = `${formatDec(strengthFactor)}x`;
-    $('dixonColesFactor').textContent = `${formatDec(rho)}`;
 }
