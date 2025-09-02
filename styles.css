@@ -7,9 +7,10 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 20px auto;
     padding: 10px;
+    box-sizing: border-box;
 }
 
 .header {
@@ -496,7 +497,6 @@ input[type="number"] {
     flex-wrap: nowrap;
     gap: 12px;
     justify-content: space-between;
-    overflow-x: auto;
     padding-bottom: 10px;
 }
 
@@ -516,6 +516,7 @@ input[type="number"] {
     transition: box-shadow 0.3s ease, transform 0.3s ease;
     min-width: 160px;
     max-width: 220px;
+    box-sizing: border-box;
 }
 
 #selected-league-events .event-box:hover {
@@ -527,7 +528,7 @@ input[type="number"] {
     font-size: 14px;
     color: #00f2fe;
     font-weight: 700;
-    text-shadow: 0 0 4px rgba(0, 242, 254, 0.6);
+    text-shadow: 0 0 4px rgba(0, 242, 254, 0.8);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -536,7 +537,7 @@ input[type="number"] {
 #selected-league-events .event-box span {
     font-size: 11px;
     color: #ff00ff;
-    text-shadow: 0 0 3px rgba(255, 0, 255, 0.5);
+    text-shadow: 0 0 4px rgba(255, 0, 255, 0.7);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -545,7 +546,7 @@ input[type="number"] {
 #selected-league-events .event-box small {
     font-size: 10px;
     color: #34ff34;
-    text-shadow: 0 0 3px rgba(52, 255, 52, 0.5);
+    text-shadow: 0 0 4px rgba(52, 255, 52, 0.7);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -562,12 +563,14 @@ input[type="number"] {
 
 @media (max-width: 600px) {
     body {
-        padding: 10px;
+        padding: 8px;
     }
 
     .container {
         margin: 10px auto;
         padding: 8px;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     .header {
@@ -615,7 +618,7 @@ input[type="number"] {
     #selected-league-events {
         flex-direction: column;
         gap: 10px;
-        overflow-x: visible;
+        padding-bottom: 8px;
     }
 
     #selected-league-events .event-box {
@@ -623,18 +626,22 @@ input[type="number"] {
         max-width: 100%;
         padding: 10px;
         font-size: 11px;
+        box-sizing: border-box;
     }
 
     #selected-league-events .event-box strong {
         font-size: 13px;
+        text-shadow: 0 0 5px rgba(0, 242, 254, 0.9);
     }
 
     #selected-league-events .event-box span {
         font-size: 10px;
+        text-shadow: 0 0 5px rgba(255, 0, 255, 0.8);
     }
 
     #selected-league-events .event-box small {
         font-size: 9px;
+        text-shadow: 0 0 5px rgba(52, 255, 52, 0.8);
     }
 }
 
