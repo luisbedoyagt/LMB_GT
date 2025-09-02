@@ -3,241 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pronósticos Deportivos</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2 {
-            color: #444;
-            text-align: center;
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .controls select {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            width: 100%;
-            max-width: 300px;
-            margin: auto;
-        }
-        .cards-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .team-card, .results-card {
-            background: #fafafa;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        .team-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .team-logo {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: contain;
-        }
-        .team-name {
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-        .team-stats {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-top: 15px;
-            text-align: left;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-        .team-stats div {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.9em;
-        }
-        .results-card h3 {
-            margin-top: 0;
-        }
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        .result-item {
-            background: #f0f0f5;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .result-item span {
-            display: block;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-        .suggestions {
-            margin-top: 20px;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-        }
-        .suggestions ul {
-            list-style: none;
-            padding: 0;
-        }
-        .suggestions li {
-            background: #e9f5ff;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        @media (min-width: 768px) {
-            .cards-container {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-    </style>
+    <title>Análisis de Partidos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Pronósticos Deportivos</h1>
+        <header class="app-header">
+            <h1>Análisis de Partidos</h1>
+            <p>Selecciona un partido para un pronóstico instantáneo.</p>
+        </header>
         
-        <div class="controls">
-            <select id="leagueSelect">
-                <option value="">Selecciona una liga</option>
-            </select>
-        </div>
+        <main class="main-grid">
+            <section class="card event-card">
+                <header class="card-header">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Próximos Eventos</h3>
+                </header>
+                <div class="card-body">
+                    <div class="control-group">
+                        <label for="leagueSelect">Selecciona una Liga:</label>
+                        <select id="leagueSelect"></select>
+                    </div>
+                    <div class="control-group">
+                        <label>Selecciona un Evento:</label>
+                        <div id="selected-league-events" class="event-list">
+                            <div class="event-item placeholder"><span>Selecciona una liga para ver eventos próximos.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="cards-container">
-            <div id="card-home" class="team-card">
-                <div class="team-header">
-                    <img id="homeLogo" src="https://via.placeholder.com/60?text=Logo" alt="Logo Local" class="team-logo">
-                    <h2 id="homeName" class="team-name">Local</h2>
+            <section class="card team-card" id="card-home">
+                <header class="card-header">
+                    <i class="fas fa-home"></i>
+                    <h3>Local</h3>
+                </header>
+                <div class="card-body">
+                    <div class="control-group">
+                        <label for="teamHome">Selecciona el Equipo Local:</label>
+                        <select id="teamHome"></select>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-label">Posición</span>
+                            <span class="stat-value" id="posHome">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Goles a Favor</span>
+                            <span class="stat-value" id="gfHome">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Goles en Contra</span>
+                            <span class="stat-value" id="gaHome">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">% de Victorias</span>
+                            <span class="stat-value" id="winRateHome">--</span>
+                        </div>
+                    </div>
+                    <div id="formHomeBox">
+                        </div>
                 </div>
-                <div class="team-stats">
-                    <div>
-                        <span class="label">Posición</span>
-                        <span id="homeRank">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Goles a Favor</span>
-                        <span id="homeGoalsFor">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Goles en Contra</span>
-                        <span id="homeGoalsAgainst">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Victorias</span>
-                        <span id="homeWins">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Empates</span>
-                        <span id="homeTies">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Derrotas</span>
-                        <span id="homeLosses">--</span>
-                    </div>
-                </div>
-            </div>
+            </section>
 
-            <div id="card-away" class="team-card">
-                <div class="team-header">
-                    <img id="awayLogo" src="https://via.placeholder.com/60?text=Logo" alt="Logo Visitante" class="team-logo">
-                    <h2 id="awayName" class="team-name">Visitante</h2>
+            <section class="card team-card" id="card-away">
+                <header class="card-header">
+                    <i class="fas fa-plane-departure"></i>
+                    <h3>Visitante</h3>
+                </header>
+                <div class="card-body">
+                    <div class="control-group">
+                        <label for="teamAway">Selecciona el Equipo Visitante:</label>
+                        <select id="teamAway"></select>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-label">Posición</span>
+                            <span class="stat-value" id="posAway">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Goles a Favor</span>
+                            <span class="stat-value" id="gfAway">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Goles en Contra</span>
+                            <span class="stat-value" id="gaAway">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">% de Victorias</span>
+                            <span class="stat-value" id="winRateAway">--</span>
+                        </div>
+                    </div>
+                    <div id="formAwayBox">
+                        </div>
                 </div>
-                <div class="team-stats">
-                    <div>
-                        <span class="label">Posición</span>
-                        <span id="awayRank">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Goles a Favor</span>
-                        <span id="awayGoalsFor">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Goles en Contra</span>
-                        <span id="awayGoalsAgainst">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Victorias</span>
-                        <span id="awayWins">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Empates</span>
-                        <span id="awayTies">--</span>
-                    </div>
-                    <div>
-                        <span class="label">Derrotas</span>
-                        <span id="awayLosses">--</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="results-card">
-            <h3>Resultados y Probabilidades</h3>
-            <div class="results-grid">
-                <div class="result-item">
-                    Victoria Local
-                    <span id="pHome">N/A</span>
+            <section class="card result-card">
+                <header class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Resultados y Probabilidades</h3>
+                </header>
+                <div class="card-body">
+                    <div id="details">
+                        Detalles del Pronóstico
+                    </div>
+                    <div class="probabilities-grid">
+                        <div class="probability-tile">
+                            <span class="label">Local</span>
+                            <span class="value" id="pHome">--</span>
+                        </div>
+                        <div class="probability-tile">
+                            <span class="label">Empate</span>
+                            <span class="value" id="pDraw">--</span>
+                        </div>
+                        <div class="probability-tile">
+                            <span class="label">Visitante</span>
+                            <span class="value" id="pAway">--</span>
+                        </div>
+                        <div class="probability-tile">
+                            <span class="label">Ambos Anotan</span>
+                            <span class="value" id="pBTTS">--</span>
+                        </div>
+                        <div class="probability-tile">
+                            <span class="label">Más de 2.5 Goles</span>
+                            <span class="value" id="pO25">--</span>
+                        </div>
+                    </div>
+                    <div class="recommendation-box">
+                        <h4 class="rec-title">Nuestra Sugerencia</h4>
+                        <div class="rec-suggestion" id="suggestion">
+                            <p>Esperando datos...</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="result-item">
-                    Empate
-                    <span id="pDraw">N/A</span>
-                </div>
-                <div class="result-item">
-                    Victoria Visitante
-                    <span id="pAway">N/A</span>
-                </div>
-                <div class="result-item">
-                    Ambos Anotan
-                    <span id="pBTTS">N/A</span>
-                </div>
-                <div class="result-item">
-                    Más de 2.5 Goles
-                    <span id="pO25">N/A</span>
-                </div>
-            </div>
-            
-            <div class="suggestions">
-                <h4>Recomendaciones</h4>
-                <div id="suggestion">
-                    <p>Esperando datos...</p>
-                </div>
-            </div>
-        </div>
+            </section>
+        </main>
+
+        <footer class="reset-container">
+            <button class="btn btn-secondary" id="reset">Resetear Todo</button>
+        </footer>
     </div>
-    
-    <script src="tu_script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
