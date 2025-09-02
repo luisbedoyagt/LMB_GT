@@ -661,7 +661,7 @@ function calculateAll() {
 
     if (!teamHome || !teamAway || !league) {
         $('details').innerHTML = '<div class="warning"><strong>Advertencia:</strong> Selecciona una liga y ambos equipos.</div>';
-        $('suggestion').innerHTML = 'Esperando datos...';
+        $('suggestion').innerHTML = '<p>Esperando datos...</p>';
         return;
     }
 
@@ -670,11 +670,11 @@ function calculateAll() {
 
     if (!tH || !tA) {
         $('details').innerHTML = '<div class="error"><strong>Error:</strong> No se encontraron datos para uno o ambos equipos.</div>';
-        $('suggestion').innerHTML = 'Esperando datos...';
+        $('suggestion').innerHTML = '<p>Esperando datos...</p>';
         return;
     }
 
-    const { finalHome, finalDraw, finalAway, pBTTSH, pO25H, rho } = dixonColesProbabilities(tH, tA, league);
+    const { finalHome, finalDraw, finalAway, pBTTSH, pO25H } = dixonColesProbabilities(tH, tA, league);
 
     const probabilities = [
         { label: 'Local', value: finalHome, id: 'pHome', type: 'Resultado' },
@@ -696,8 +696,7 @@ function calculateAll() {
                                           .slice(0, 3);
 
     // Muestra los detalles y las recomendaciones
-    const detailsText = `<p><strong>Factor Dixon-Coles:</strong> Ajuste por tendencia al empate (${formatDec(rho)}).</p>`;
-    $('details').innerHTML = detailsText;
+    $('details').innerHTML = `<p><strong>Detalles del pronóstico:</strong></p>`;
 
     if (recommendations.length > 0) {
         let suggestionHTML = '<ul>';
