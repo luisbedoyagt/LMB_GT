@@ -436,6 +436,12 @@ function clearTeamData(type) {
         $('gaAway').textContent = '--';
         $('winRateAway').textContent = '--';
     }
+    // Ocultar logo si se borra la data
+    const cardHeader = $(type === 'Home' ? 'card-home' : 'card-away').querySelector('.card-header');
+    const logoImg = cardHeader ? cardHeader.querySelector('.team-logo') : null;
+    if (logoImg) {
+        logoImg.style.display = 'none';
+    }
 }
 
 function clearAll() {
