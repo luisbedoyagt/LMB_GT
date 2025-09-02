@@ -3,178 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora para Pronósticos de Fútbol / LMB</title>
+    <title>Calculadora de Pronósticos Bet365 Style</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body>
+<body class="theme-dark">
     <div class="container">
-        <div class="header">
-            <h1>Calculadora para Pronósticos de Fútbol / LMB</h1>
-            <p class="small">Datos en tiempo real de ligas y estadísticas avanzadas.</p>
-        </div>
+        <header class="app-header">
+            <h1>Calculadora de Pronósticos</h1>
+            <p>Datos y análisis de fútbol inspirados en Bet365</p>
+        </header>
 
-        <div class="top-row grid-container">
-            <div class="card neon-card">
-                <h3 class="neon-title">Eventos Próximos de la Liga Seleccionada</h3>
-                <ul id="selected-league-events" class="events-list">
-                    <li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h3>Selecciona Liga</h3>
-                <label for="leagueSelect">Liga:</label>
-                <select id="leagueSelect"></select>
-            </div>
-        </div>
-
-        <div class="team-row grid-container">
-            <div class="card">
-                <h3>Equipo Local</h3>
-                <label for="teamHome">Equipo:</label>
-                <select id="teamHome"></select>
-                <div class="sep"></div>
-                <div class="stat-card">
-                    <h3>Rendimiento</h3>
-                    <div class="stat-title" id="formHomeTeam">—</div>
-                    <div class="stat-values" id="formHomeBox">
-                        <div class="stat-section" data-testid="general-home">
-                            <span class="section-title">General</span>
-                            <div class="stat-metrics">
-                                <span>PJ: 0</span>
-                                <span>Puntos: 0</span>
-                                <span>DG: 0</span>
-                            </div>
-                        </div>
-                        <div class="stat-section" data-testid="local-home">
-                            <span class="section-title">Local</span>
-                            <div class="stat-metrics">
-                                <span>PJ: 0</span>
-                                <span>PG: 0</span>
-                                <span>DG: 0</span>
-                            </div>
-                        </div>
-                        <div class="stat-section" data-testid="visitante-home">
-                            <span class="section-title">Visitante</span>
-                            <div class="stat-metrics">
-                                <span>PJ: 0</span>
-                                <span>PG: 0</span>
-                                <span>DG: 0</span>
-                            </div>
-                        </div>
-                        <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
+        <section class="main-grid">
+            <div class="card event-card">
+                <div class="card-header">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Próximos Partidos</h3>
+                </div>
+                <div class="card-body">
+                    <div class="control-group">
+                        <label for="leagueSelect">Selecciona Liga:</label>
+                        <select id="leagueSelect"></select>
                     </div>
-                    <div class="stat-legend">
-                        <div>Posición: <input readonly id="posHome" value="0" class="small"></div>
-                        <div>Goles a favor: <input readonly id="gfHome" value="0" class="small"></div>
-                        <div>Goles en contra: <input readonly id="gaHome" value="0" class="small"></div>
-                        <div>Win Rate Local (%): <input readonly id="winRateHome" value="0%" class="small"></div>
+                    <div class="event-list" id="selected-league-events">
+                        <div class="event-item placeholder">
+                            <span>Selecciona una liga para ver eventos próximos.</span>
+                        </div>
                     </div>
+                </div>
+            </div>
+            
+            <div class="card team-card">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Equipo Local</h3>
+                </div>
+                <div class="card-body">
+                    <div class="control-group">
+                        <label for="teamHome">Equipo:</label>
+                        <select id="teamHome"></select>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-label">Posición</span>
+                            <span class="stat-value" id="posHome">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Goles a favor</span>
+                            <span class="stat-value" id="gfHome">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Goles en contra</span>
+                            <span class="stat-value" id="gaHome">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Win Rate Local (%)</span>
+                            <span class="stat-value" id="winRateHome">--</span>
+                        </div>
+                    </div>
+                    <div class="team-details" id="formHomeBox">
+                        </div>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>Equipo Visitante</h3>
-                <label for="teamAway">Equipo:</label>
-                <select id="teamAway"></select>
-                <div class="sep"></div>
-                <div class="stat-card">
-                    <h3>Rendimiento</h3>
-                    <div class="stat-title" id="formAwayTeam">—</div>
-                    <div class="stat-values" id="formAwayBox">
-                        <div class="stat-section" data-testid="general-away">
-                            <span class="section-title">General</span>
-                            <div class="stat-metrics">
-                                <span>PJ: 0</span>
-                                <span>Puntos: 0</span>
-                                <span>DG: 0</span>
-                            </div>
-                        </div>
-                        <div class="stat-section" data-testid="local-away">
-                            <span class="section-title">Local</span>
-                            <div class="stat-metrics">
-                                <span>PJ: 0</span>
-                                <span>PG: 0</span>
-                                <span>DG: 0</span>
-                            </div>
-                        </div>
-                        <div class="stat-section" data-testid="visitante-away">
-                            <span class="section-title">Visitante</span>
-                            <div class="stat-metrics">
-                                <span>PJ: 0</span>
-                                <span>PG: 0</span>
-                                <span>DG: 0</span>
-                            </div>
-                        </div>
-                        <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
+            <div class="card team-card">
+                <div class="card-header">
+                    <i class="fas fa-globe-americas"></i>
+                    <h3>Equipo Visitante</h3>
+                </div>
+                <div class="card-body">
+                    <div class="control-group">
+                        <label for="teamAway">Equipo:</label>
+                        <select id="teamAway"></select>
                     </div>
-                    <div class="stat-legend">
-                        <div>Posición: <input readonly id="posAway" value="0" class="small"></div>
-                        <div>Goles a favor: <input readonly id="gfAway" value="0" class="small"></div>
-                        <div>Goles en contra: <input readonly id="gaAway" value="0" class="small"></div>
-                        <div>Win Rate Visit. (%): <input readonly id="winRateAway" value="0%" class="small"></div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-label">Posición</span>
+                            <span class="stat-value" id="posAway">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Goles a favor</span>
+                            <span class="stat-value" id="gfAway">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Goles en contra</span>
+                            <span class="stat-value" id="gaAway">--</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Win Rate Visit. (%)</span>
+                            <span class="stat-value" id="winRateAway">--</span>
+                        </div>
+                    </div>
+                    <div class="team-details" id="formAwayBox">
+                        </div>
+                </div>
+            </div>
+            
+            <div class="card result-card">
+                <div class="card-header">
+                    <i class="fas fa-calculator"></i>
+                    <h3>Probabilidades y Recomendación</h3>
+                </div>
+                <div class="card-body">
+                    <div class="control-group action-buttons">
+                        <button id="recalc" class="btn btn-green" disabled>Calcular</button>
+                        <button id="reset" class="btn btn-secondary">Resetear</button>
+                    </div>
+                    <div class="probabilities-grid">
+                        <div class="probability-tile">
+                            <span class="label">Local</span>
+                            <span class="value" id="pHome">--</span>
+                        </div>
+                        <div class="probability-tile">
+                            <span class="label">Empate</span>
+                            <span class="value" id="pDraw">--</span>
+                        </div>
+                        <div class="probability-tile">
+                            <span class="label">Visitante</span>
+                            <span class="value" id="pAway">--</span>
+                        </div>
+                        <div class="probability-tile">
+                            <span class="label">Ambos anotan</span>
+                            <span class="value" id="pBTTS">--</span>
+                        </div>
+                        <div class="probability-tile">
+                            <span class="label">Más de 2.5 goles</span>
+                            <span class="value" id="pO25">--</span>
+                        </div>
+                    </div>
+                    <div class="recommendation-box">
+                        <h4 id="details" class="rec-title">Detalles del Pronóstico</h4>
+                        <p class="rec-suggestion" id="suggestion">Esperando datos...</p>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card">
-            <h3>Factores de Corrección y Acciones</h3>
-            <div class="correction-factors">
-                <div class="correction-factor">
-                    <span class="label">Ventaja local:</span>
-                    <span class="value" id="homeAdvantageFactor">—</span>
-                </div>
-                <div class="correction-factor">
-                    <span class="label">Fuerza relativa:</span>
-                    <span class="value" id="strengthFactor">—</span>
-                </div>
-                <div class="correction-factor">
-                    <span class="label">Dixon-Coles:</span>
-                    <span class="value" id="dixonColesFactor">—</span>
-                </div>
-            </div>
-            <div class="sep"></div>
-            <div class="table-like">
-                <button id="recalc" class="btn" disabled>Calcular</button>
-                <button id="reset" class="btn">Resetear</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Pronósticos</h3>
-            <div class="kpis">
-                <div class="kpis-row">
-                    <div class="tile">
-                        <strong id="pHome">—</strong>
-                        <div class="small">Probabilidad: Local</div>
-                    </div>
-                    <div class="tile">
-                        <strong id="pDraw">—</strong>
-                        <div class="small">Probabilidad: Empate</div>
-                    </div>
-                    <div class="tile">
-                        <strong id="pAway">—</strong>
-                        <div class="small">Probabilidad: Visitante</div>
-                    </div>
-                </div>
-                <div class="kpis-row">
-                    <div class="tile">
-                        <strong id="pBTTS">—</strong>
-                        <div class="small">Probabilidad: Ambos anotan</div>
-                    </div>
-                    <div class="tile">
-                        <strong id="pO25">—</strong>
-                        <div class="small">Probabilidad: Más de 2.5 goles</div>
-                    </div>
-                </div>
-            </div>
-            <div class="sep"></div>
-            <h3>Recomendación</h3>
-            <div class="recs" id="details">—</div>
-            <div class="bet-slip" id="suggestion">Esperando datos para tu apuesta estelar...</div>
-        </div>
+        </section>
     </div>
     <script src="script.js"></script>
 </body>
