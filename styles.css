@@ -105,7 +105,7 @@ input[type="number"] {
     background: #4dabf7;
     color: #fff;
     font-size: 14px;
-    cursor: pointer;
+    cursor: handle;
     margin-bottom: 14px;
     transition: background 0.2s ease, transform 0.2s ease;
 }
@@ -496,12 +496,14 @@ input[type="number"] {
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 12px;
-    justify-content: space-between;
+    justify-content: flex-start;
+    overflow-x: auto;
     padding-bottom: 10px;
+    scroll-behavior: smooth;
 }
 
 #selected-league-events .event-box {
-    flex: 1;
+    flex: 0 0 auto;
     background: linear-gradient(135deg, #1e2a38, #2a3a4a);
     padding: 12px;
     border-radius: 8px;
@@ -558,13 +560,32 @@ input[type="number"] {
     text-overflow: ellipsis;
 }
 
+#selected-league-events .event-box.event-soon {
+    border-image: linear-gradient(45deg, #00ffcc, #ff33cc) 1;
+    box-shadow: 0 0 16px rgba(0, 255, 204, 0.7), 0 0 12px rgba(255, 51, 204, 0.5);
+    animation: neonPulseSoon 1.5s ease-in-out infinite;
+}
+
+#selected-league-events .event-box.event-soon:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.9), 0 0 16px rgba(255, 51, 204, 0.7);
+}
+
+#selected-league-events .event-box .soon-indicator {
+    color: #00ffcc;
+    font-weight: bold;
+    font-size: 10px;
+    margin-left: 4px;
+    text-shadow: 0 0 4px rgba(0, 255, 204, 0.8);
+}
+
 @keyframes neonPulse {
     0%, 100% { box-shadow: 0 0 12px rgba(0, 242, 254, 0.5), 0 0 8px rgba(255, 0, 255, 0.3); }
     50% { box-shadow: 0 0 18px rgba(0, 242, 254, 0.8), 0 0 12px rgba(255, 0, 255, 0.6); }
 }
 
-#selected-league-events .event-box {
-    animation: neonPulse 2s ease-in-out infinite;
+@keyframes neonPulseSoon {
+    0%, 100% { box-shadow: 0 0 16px rgba(0, 255, 204, 0.7), 0 0 12px rgba(255, 51, 204, 0.5); }
+    50% { box-shadow: 0 0 22px rgba(0, 255, 204, 0.9), 0 0 16px rgba(255, 51, 204, 0.7); }
 }
 
 @media (max-width: 600px) {
@@ -625,6 +646,7 @@ input[type="number"] {
         flex-direction: column;
         gap: 10px;
         padding-bottom: 8px;
+        overflow-x: visible;
     }
 
     #selected-league-events .event-box {
@@ -648,6 +670,14 @@ input[type="number"] {
     #selected-league-events .event-box small {
         font-size: 9px;
         text-shadow: 0 0 5px rgba(52, 255, 52, 0.8);
+    }
+
+    #selected-league-events .event-box.event-soon {
+        box-shadow: 0 0 18px rgba(0, 255, 204, 0.8), 0 0 14px rgba(255, 51, 204, 0.6);
+    }
+
+    #selected-league-events .event-box .soon-indicator {
+        font-size: 9px;
     }
 }
 
