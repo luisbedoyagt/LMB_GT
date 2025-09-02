@@ -173,66 +173,11 @@ body {
     padding: 1.5rem;
 }
 
-/* Contenedor principal de la grilla */
+/* Contenedor principal de la grilla (Diseño para móviles por defecto) */
 .main-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
-}
-
-/* Estilos de la versión de escritorio */
-@media (min-width: 768px) {
-    .main-grid {
-        display: grid;
-        grid-template-columns: 1.2fr 1fr 1fr;
-        gap: 2.5rem;
-    }
-
-    .event-card {
-        grid-area: initial;
-        order: initial;
-    }
-
-    #card-home {
-        grid-area: initial;
-        order: initial;
-    }
-
-    #card-away {
-        grid-area: initial;
-        order: initial;
-    }
-
-    .result-card {
-        grid-column: 1 / span 3;
-        grid-row: 2;
-        order: initial;
-    }
-
-    .reset-container {
-        grid-column: 1 / span 3;
-        grid-row: 3;
-        order: initial;
-    }
-
-    .team-card { margin-bottom: 0; }
-
-    .stat-metrics {
-        gap: 1.5rem;
-    }
-
-    /* Reglas específicas para la versión de escritorio en las probabilidades */
-    .probabilities-grid {
-        flex-direction: row;
-        justify-content: center;
-        gap: 1rem;
-        flex-wrap: nowrap;
-    }
-    .probability-tile {
-        flex: 1 1 0;
-        min-width: unset;
-        max-width: unset;
-    }
 }
 
 /* Eventos y controles */
@@ -337,7 +282,7 @@ select:focus {
 /* Estadísticas de equipos */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas en móviles para los stats */
     gap: 1.2rem;
     margin-top: 1.5rem;
 }
@@ -422,13 +367,6 @@ select:focus {
     font-weight: 500;
 }
 
-@media (min-width: 768px) {
-    .stat-metrics {
-        gap: 1.5rem;
-    }
-}
-/* --- Fin Ficha de Rendimiento --- */
-
 /* Estilos de los logos */
 .team-logo {
     width: 50px;
@@ -437,14 +375,6 @@ select:focus {
     vertical-align: middle;
     object-fit: contain;
     filter: drop-shadow(0 0 5px rgba(0, 224, 255, 0.3));
-}
-
-@media (min-width: 768px) {
-    .team-logo {
-        width: 60px;
-        height: 60px;
-        margin-right: 20px;
-    }
 }
 
 /* Botones */
@@ -457,12 +387,6 @@ select:focus {
     justify-content: center;
     align-items: center;
     padding: 2rem 0;
-}
-
-@media (min-width: 768px) {
-    .reset-container {
-        grid-area: initial;
-    }
 }
 
 .btn {
@@ -576,30 +500,25 @@ select:focus {
 }
 
 /* --- AJUSTES PARA PANTALLAS MÓVILES --- */
-@media (max-width: 768px) {
-    .probabilities-grid {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.5rem;
-    }
+.probabilities-grid {
+    gap: 0.5rem;
+}
 
-    .probability-tile {
-        flex: 1 1 30%;
-        max-width: 32%;
-    }
+.probability-tile {
+    flex: 1 1 30%;
+    max-width: 32%;
+}
 
-    .probability-tile:nth-child(n+4) {
-        flex: 1 1 45%;
-        max-width: 48%;
-    }
+.probability-tile:nth-child(n+4) {
+    flex: 1 1 45%;
+    max-width: 48%;
+}
 
-    .probability-tile .label {
-        font-size: 0.7rem;
-    }
-    .probability-tile .value {
-        font-size: 1.3rem;
-    }
+.probability-tile .label {
+    font-size: 0.7rem;
+}
+.probability-tile .value {
+    font-size: 1.3rem;
 }
 
 .recommendation-box {
@@ -766,4 +685,72 @@ select:focus {
     padding: 0;
     margin: 0;
     font-style: normal;
+}
+
+
+/* --- Media Queries (ajustes para escritorio) --- */
+@media (min-width: 768px) {
+    .main-grid {
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 2.5rem;
+    }
+
+    .event-card {
+        grid-area: initial;
+        order: initial;
+    }
+
+    #card-home {
+        grid-area: initial;
+        order: initial;
+    }
+
+    #card-away {
+        grid-area: initial;
+        order: initial;
+    }
+
+    .result-card {
+        grid-column: 1 / span 3;
+        grid-row: 2;
+        order: initial;
+    }
+
+    .reset-container {
+        grid-column: 1 / span 3;
+        grid-row: 3;
+        order: initial;
+    }
+    
+    .ia-card {
+        grid-column: 1 / span 3;
+        grid-row: 4;
+        order: initial;
+    }
+
+    .team-card { margin-bottom: 0; }
+
+    .stat-metrics {
+        gap: 1.5rem;
+    }
+
+    .team-logo {
+        width: 60px;
+        height: 60px;
+        margin-right: 20px;
+    }
+
+    /* Reglas para la cuadrícula de probabilidades en escritorio */
+    .probabilities-grid {
+        flex-direction: row;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: nowrap;
+    }
+    .probability-tile {
+        flex: 1 1 0;
+        min-width: unset;
+        max-width: unset;
+    }
+
 }
