@@ -532,11 +532,7 @@ select:focus {
     position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.4);
-    animation: none;
-}
-
-#pHome, #pDraw, #pAway {
-    animation: pulse-border 2s infinite ease-out;
+    animation: pulse-border 2s infinite ease-out; /* Animación aplicada a todos los cuadros */
 }
 
 @keyframes pulse-border {
@@ -567,7 +563,6 @@ select:focus {
     color: var(--highlight-blue);
     text-shadow: 0 0 10px rgba(0, 224, 255, 0.7);
 }
-
 
 /* --- A JUSTES PARA PANTALLAS MÓVILES (SOLUCIÓN FINAL) --- */
 @media (max-width: 768px) {
