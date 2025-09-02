@@ -139,6 +139,7 @@ async function fetchAllData() {
         teamsByLeague = normalized;
 
         localStorage.setItem('allData', JSON.stringify(allData));
+        console.log('Datos cargados:', allData); // Depuración
         return allData;
     } catch (err) {
         console.error('Error en fetchAllData:', err);
@@ -155,17 +156,20 @@ async function fetchAllData() {
 function isEventUpcoming(event, currentTime) {
     try {
         const eventTime = new Date(event.fecha);
-        if (isNaN(eventTime.getTime())) return false;
+        if (isNaN(eventTime.getTime())) {
+            console.warn(`Fecha inválida para el evento: ${event.local} vs. ${event.visitante}`);
+            return false;
+        }
 
         // Considerar un partido en curso si la hora actual está dentro de las 2 horas desde el inicio
         const matchDuration = 2 * 60 * 60 * 1000; // 2 horas en milisegundos
         const isInProgress = currentTime >= eventTime && currentTime <= new Date(eventTime.getTime() + matchDuration);
 
-        // Considerar un partido próximo si está dentro de la próxima hora
-        const oneHourWindow = 60 * 60 * 1000; // 1 hora en milisegundos
-        const isWithinOneHour = eventTime > currentTime && eventTime <= new Date(currentTime.getTime() + oneHourWindow);
+        // Considerar un partido próximo si está en el futuro
+        const isFuture = eventTime > currentTime;
 
-        return !isInProgress && (isWithinOneHour || eventTime > currentTime);
+        console.log(`Evento: ${event.local} vs. ${event.visitante}, Fecha: ${eventTime}, En curso: ${isInProgress}, Futuro: ${isFuture}`); // Depuración
+        return !isInProgress && isFuture;
     } catch (err) {
         console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
         return false;
@@ -180,16 +184,21 @@ function displaySelectedLeagueEvents(leagueCode) {
     const prevPageBtn = $('prevPage');
     const nextPageBtn = $('nextPage');
     const pageIndicator = $('pageIndicator');
-    if (!selectedEventsList || !prevPageBtn || !nextPageBtn || !pageIndicator) return;
+    if (!selectedEventsList || !prevPageBtn || !nextPageBtn || !pageIndicator) {
+        console.error('Elementos de la UI no encontrados');
+        return;
+    }
 
     selectedEventsList.innerHTML = '';
     currentPage = 0; // Reiniciar a la primera página
+    filteredEvents = []; // Reiniciar eventos filtrados
 
     if (!leagueCode || !allData.calendario) {
         selectedEventsList.innerHTML = '<li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>';
         prevPageBtn.disabled = true;
         nextPageBtn.disabled = true;
         pageIndicator.textContent = 'Página 1 de 1';
+        console.log('No hay liga seleccionada o calendario vacío');
         return;
     }
 
@@ -199,11 +208,14 @@ function displaySelectedLeagueEvents(leagueCode) {
         parsedDate: new Date(event.fecha)
     }));
 
+    console.log(`Eventos para la liga ${ligaName}:`, events); // Depuración
+
     if (events.length === 0) {
         selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos para esta liga.</li>';
         prevPageBtn.disabled = true;
         nextPageBtn.disabled = true;
         pageIndicator.textContent = 'Página 1 de 1';
+        console.log('No hay eventos para la liga seleccionada');
         return;
     }
 
@@ -211,21 +223,25 @@ function displaySelectedLeagueEvents(leagueCode) {
     const currentTime = new Date();
     currentTime.setTime(currentTime.getTime() - 6 * 60 * 60 * 1000); // Ajustar a CST (UTC-6)
 
-    // Filtrar eventos próximos (dentro de 1 hora o futuros, no en curso)
+    // Filtrar eventos próximos (futuros, no en curso)
     filteredEvents = events
         .filter(event => isEventUpcoming(event, currentTime))
         .sort((a, b) => a.parsedDate - b.parsedDate); // Ordenar por fecha ascendente
 
+    console.log(`Eventos filtrados (${filteredEvents.length}):`, filteredEvents); // Depuración
+
     if (filteredEvents.length === 0) {
-        selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos en la próxima hora para esta liga.</li>';
+        selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos para esta liga.</li>';
         prevPageBtn.disabled = true;
         nextPageBtn.disabled = true;
         pageIndicator.textContent = 'Página 1 de 1';
+        console.log('No hay eventos próximos después de filtrar');
         return;
     }
 
     // Calcular el número total de páginas
     totalPages = Math.ceil(filteredEvents.length / 3);
+    console.log(`Total de páginas: ${totalPages}, Página actual: ${currentPage + 1}`); // Depuración
 
     // Asegurar que currentPage esté dentro de los límites
     if (currentPage >= totalPages) currentPage = totalPages - 1;
@@ -233,8 +249,10 @@ function displaySelectedLeagueEvents(leagueCode) {
 
     // Obtener los eventos para la página actual
     const startIndex = currentPage * 3;
-    const endIndex = startIndex + 3;
+    const endIndex = Math.min(startIndex + 3, filteredEvents.length);
     const currentEvents = filteredEvents.slice(startIndex, endIndex);
+
+    console.log(`Mostrando eventos de la página ${currentPage + 1} (índices ${startIndex} a ${endIndex}):`, currentEvents); // Depuración
 
     // Mostrar los eventos de la página actual
     currentEvents.forEach(event => {
@@ -284,8 +302,9 @@ function displaySelectedLeagueEvents(leagueCode) {
 
     // Actualizar los controles de paginación
     prevPageBtn.disabled = currentPage === 0;
-    nextPageBtn.disabled = currentPage === totalPages - 1;
+    nextPageBtn.disabled = currentPage >= totalPages - 1;
     pageIndicator.textContent = `Página ${currentPage + 1} de ${totalPages}`;
+    console.log(`Botones actualizados: Atrás=${prevPageBtn.disabled}, Adelante=${nextPageBtn.disabled}`); // Depuración
 }
 
 // ----------------------
@@ -294,14 +313,20 @@ function displaySelectedLeagueEvents(leagueCode) {
 function goToPreviousPage() {
     if (currentPage > 0) {
         currentPage--;
+        console.log(`Navegando a página anterior: ${currentPage + 1}`); // Depuración
         displaySelectedLeagueEvents($('leagueSelect').value);
+    } else {
+        console.log('No se puede ir a página anterior: ya en página 1');
     }
 }
 
 function goToNextPage() {
     if (currentPage < totalPages - 1) {
         currentPage++;
+        console.log(`Navegando a página siguiente: ${currentPage + 1}`); // Depuración
         displaySelectedLeagueEvents($('leagueSelect').value);
+    } else {
+        console.log('No se puede ir a página siguiente: ya en última página');
     }
 }
 
