@@ -81,6 +81,10 @@ body {
     font-weight: 700;
 }
 
+.card-header .fas {
+    font-size: 1.25rem;
+}
+
 .card-body {
     padding: 1rem;
 }
