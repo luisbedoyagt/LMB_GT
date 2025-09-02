@@ -534,7 +534,7 @@ function fillTeamData(teamName, leagueCode, type) {
                 logoImg = document.createElement('img');
                 logoImg.className = 'team-logo';
                 logoImg.alt = `Logo de ${t.name}`;
-                h3.insertAdjacentElement('afterbegin', logoImg);
+                h3.insertAdjacentElement('beforebegin', logoImg);
             }
             if (t.logoUrl) {
                 logoImg.src = t.logoUrl;
