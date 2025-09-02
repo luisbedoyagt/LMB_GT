@@ -31,7 +31,7 @@ function factorial(n) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS Y API
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
 const GROK_API_URL = "https://api.x.ai/v1/chat/completions";
 const GROK_API_KEY = "xai-yfaqau6cmN5bRELdR4nAbiDbqrCChFrpM8QRDYF5EhVyMiaY8nLyBlyTM1VaSaGtu75YTkhCjWt3Gzg1";
 
@@ -671,3 +671,4 @@ function dixonColesProbabilitiesLocal(tH, tA, league) {
         rho
     };
 }
+
