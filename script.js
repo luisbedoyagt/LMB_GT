@@ -30,7 +30,7 @@ function factorial(n) {
 }
 
 // ----------------------
-// CONFIGURACIÓN DE LIGAS (sin cambios)
+// CONFIGURACIÓN DE LIGAS
 // ----------------------
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
 let teamsByLeague = {};
@@ -77,7 +77,7 @@ const leagueCodeToName = {
 };
 
 // ----------------------
-// NORMALIZACIÓN DE DATOS (sin cambios)
+// NORMALIZACIÓN DE DATOS
 // ----------------------
 function normalizeTeam(raw) {
     if (!raw) return null;
@@ -109,7 +109,7 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// FETCH DATOS COMPLETOS (sin cambios)
+// FETCH DATOS COMPLETOS
 // ----------------------
 async function fetchAllData() {
     const leagueSelect = $('leagueSelect');
@@ -145,7 +145,7 @@ async function fetchAllData() {
 }
 
 // ----------------------
-// MUESTRA DE EVENTOS FUTUROS (sin cambios)
+// MUESTRA DE EVENTOS FUTUROS
 // ----------------------
 function displayUpcomingEvents() {
     const upcomingEventsList = $('upcoming-events-list');
@@ -277,16 +277,14 @@ function displaySelectedLeagueEvents(leagueCode) {
 }
 
 // ----------------------
-// INICIALIZACIÓN (sin cambios)
+// INICIALIZACIÓN
 // ----------------------
 async function init() {
     clearTeamData('Home');
     clearTeamData('Away');
-    updateCalcButton();
-
+    
     await fetchAllData();
-    displayUpcomingEvents();
-
+    
     const leagueSelect = $('leagueSelect');
     const teamHomeSelect = $('teamHome');
     const teamAwaySelect = $('teamAway');
@@ -309,7 +307,6 @@ async function init() {
         displaySelectedLeagueEvents(leagueSelect.value);
     });
     
-    // El cálculo se activa al seleccionar un evento, no manualmente
     teamHomeSelect.addEventListener('change', () => {
         if (restrictSameTeam()) {
             fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
@@ -340,7 +337,6 @@ function onLeagueChange() {
     if (!code || !teamsByLeague[code] || teamsByLeague[code].length === 0) {
         clearTeamData('Home');
         clearTeamData('Away');
-        updateCalcButton();
         $('details').innerHTML = '<div class="warning"><strong>Advertencia:</strong> No hay datos disponibles para esta liga.</div>';
         return;
     }
@@ -375,7 +371,6 @@ function onLeagueChange() {
 
     clearTeamData('Home');
     clearTeamData('Away');
-    updateCalcButton();
 }
 
 // Nueva función para seleccionar un evento
@@ -413,14 +408,6 @@ function selectEvent(homeTeamName, awayTeamName) {
 }
 
 
-function updateCalcButton() {
-    const teamHome = $('teamHome').value;
-    const teamAway = $('teamAway').value;
-    const leagueCode = $('leagueSelect').value;
-    // El botón está oculto, por lo que esta función ya no es necesaria
-    // $('recalc').disabled = !(leagueCode && teamHome && teamAway && teamHome !== teamAway);
-}
-
 function restrictSameTeam() {
     const teamHome = $('teamHome').value;
     const teamAway = $('teamAway').value;
@@ -433,7 +420,6 @@ function restrictSameTeam() {
             $('teamAway').value = '';
             clearTeamData('Away');
         }
-        updateCalcButton();
         return false;
     }
     return true;
@@ -495,17 +481,16 @@ function clearAll() {
         const el = $(id);
         if (el) el.textContent = '--';
     });
-    $('details').textContent = 'Detalles del Pronóstico';
-    $('suggestion').textContent = 'Esperando datos...';
+    $('details').innerHTML = 'Detalles del Pronóstico';
+    $('suggestion').innerHTML = '<p>Esperando datos...</p>';
     
     clearTeamData('Home');
     clearTeamData('Away');
-    updateCalcButton();
     displaySelectedLeagueEvents('');
 }
 
 // ----------------------
-// BÚSQUEDA Y LLENADO DE EQUIPO (CORREGIDO)
+// BÚSQUEDA Y LLENADO DE EQUIPO
 // ----------------------
 function findTeam(leagueCode, teamName) {
     if (!teamsByLeague[leagueCode]) return null;
@@ -667,14 +652,16 @@ function dixonColesProbabilities(tH, tA, league) {
 }
 
 // ----------------------
-// CÁLCULO PRINCIPAL (CORREGIDO)
+// CÁLCULO PRINCIPAL
 // ----------------------
 function calculateAll() {
     const teamHome = $('teamHome').value;
     const teamAway = $('teamAway').value;
     const league = $('leagueSelect').value;
+
     if (!teamHome || !teamAway || !league) {
-        $('details').innerHTML = '<div class="error"><strong>Error:</strong> Selecciona una liga y ambos equipos.</div>';
+        $('details').innerHTML = '<div class="warning"><strong>Advertencia:</strong> Selecciona una liga y ambos equipos.</div>';
+        $('suggestion').innerHTML = 'Esperando datos...';
         return;
     }
 
@@ -683,40 +670,48 @@ function calculateAll() {
 
     if (!tH || !tA) {
         $('details').innerHTML = '<div class="error"><strong>Error:</strong> No se encontraron datos para uno o ambos equipos.</div>';
+        $('suggestion').innerHTML = 'Esperando datos...';
         return;
     }
 
     const { finalHome, finalDraw, finalAway, pBTTSH, pO25H, rho } = dixonColesProbabilities(tH, tA, league);
 
-    const detailsText = `
-        <p><strong>Ventaja Local:</strong> Factor de ataque local vs defensa visitante.</p>
-        <p><strong>Fuerza Relativa:</strong> Comparación de la posición en la tabla.</p>
-        <p><strong>Factor Dixon-Coles:</strong> Ajuste por tendencia al empate (${formatDec(rho)}).</p>
-    `;
-    $('details').innerHTML = detailsText;
-
     const probabilities = [
-        { label: 'Local', value: finalHome, id: 'pHome', bet: 'Apostar a la victoria de Local' },
-        { label: 'Empate', value: finalDraw, id: 'pDraw', bet: 'Apostar al Empate' },
-        { label: 'Visitante', value: finalAway, id: 'pAway', bet: 'Apostar a la victoria de Visitante' },
-        { label: 'Ambos Anotan', value: pBTTSH, id: 'pBTTS', bet: 'Apostar a que ambos equipos anotan' },
-        { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', bet: 'Apostar a Más de 2.5 goles' }
+        { label: 'Local', value: finalHome, id: 'pHome', type: 'Resultado' },
+        { label: 'Empate', value: finalDraw, id: 'pDraw', type: 'Resultado' },
+        { label: 'Visitante', value: finalAway, id: 'pAway', type: 'Resultado' },
+        { label: 'Ambos Anotan', value: pBTTSH, id: 'pBTTS', type: 'Mercado' },
+        { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', type: 'Mercado' }
     ];
 
-    let maxProb = 0;
-    let bestBet = '';
-
+    // Actualiza los valores en los cuadros de probabilidad
     probabilities.forEach(p => {
         const el = $(p.id);
-        if (el) {
-            el.textContent = formatPct(p.value);
-            if (p.value > maxProb) {
-                maxProb = p.value;
-                bestBet = p.bet;
-            }
-        }
+        if (el) el.textContent = formatPct(p.value);
     });
 
-    const suggestionText = maxProb > 0.5 ? `¡Tu apuesta estelar es **${bestBet}** con una probabilidad del ${formatPct(maxProb)}!` : 'Las probabilidades están muy parejas. Analiza más a fondo o busca una apuesta de valor en otro mercado.';
-    $('suggestion').innerHTML = suggestionText;
+    // Filtra y ordena las 3 mejores recomendaciones
+    const recommendations = probabilities.filter(p => p.value >= 0.3)
+                                          .sort((a, b) => b.value - a.value)
+                                          .slice(0, 3);
+
+    // Muestra los detalles y las recomendaciones
+    const detailsText = `<p><strong>Factor Dixon-Coles:</strong> Ajuste por tendencia al empate (${formatDec(rho)}).</p>`;
+    $('details').innerHTML = detailsText;
+
+    if (recommendations.length > 0) {
+        let suggestionHTML = '<ul>';
+        recommendations.forEach((rec, index) => {
+            const rank = index + 1;
+            suggestionHTML += `<li class="rec-item">
+                                 <span class="rec-rank">${rank}.</span>
+                                 <span class="rec-bet">${rec.label}</span>
+                                 <span class="rec-prob">${formatPct(rec.value)}</span>
+                               </li>`;
+        });
+        suggestionHTML += '</ul>';
+        $('suggestion').innerHTML = suggestionHTML;
+    } else {
+        $('suggestion').innerHTML = '<p>No se encontraron recomendaciones con una probabilidad superior al 30%. Analiza otros mercados.</p>';
+    }
 }
