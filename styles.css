@@ -1,416 +1,366 @@
+/* Variables y estilos globales */
 :root {
-    --bg-color: #1a1a2e;
-    --card-bg: #22253c;
-    --text-color: #e0e0e0;
-    --primary-color: #8c7ae6;
-    --accent-color: #4a69bd;
-    --neon-blue: #00e5ff;
-    --neon-purple: #ae00ff;
-    --neon-pink: #ff007f;
-    --border-color: #3e4265;
-    --shadow-color: rgba(0, 0, 0, 0.4);
+    --primary-bg: #1A1A1A;
+    --secondary-bg: #222222;
+    --card-bg: #2C2C2C;
+    --highlight-green: #38A169;
+    --dark-green: #2B7A4B;
+    --text-color: #E0E0E0;
+    --label-color: #B0B0B0;
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --font-main: 'Roboto', sans-serif;
+    --font-heading: 'Oswald', sans-serif;
+}
+
+/* Reset y tipografía */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--bg-color);
+    font-family: var(--font-main);
+    background-color: var(--primary-bg);
     color: var(--text-color);
     line-height: 1.6;
-    margin: 0;
-    padding: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
     padding: 1rem;
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
-/* Header */
-.header {
+/* Encabezado de la app */
+.app-header {
     text-align: center;
-    padding: 1rem 0;
-    color: var(--neon-blue);
-    text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue);
+    padding: 2rem 0;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
 }
 
-.header h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+.app-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: var(--highlight-green);
     letter-spacing: 1px;
 }
 
-.header .small {
-    font-size: 0.8rem;
-    color: var(--primary-color);
-    letter-spacing: 0.5px;
-    font-family: 'Roboto Mono', monospace;
+.app-header p {
+    font-size: 0.9rem;
+    color: var(--label-color);
+    margin-top: 0.5rem;
 }
 
-/* Cards */
+/* Estilos de las "fichas" o tarjetas */
 .card {
     background-color: var(--card-bg);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 8px 16px var(--shadow-color);
     border: 1px solid var(--border-color);
-    margin-bottom: 1rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    margin-bottom: 1.5rem;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px var(--shadow-color);
+.card-header {
+    background-color: var(--secondary-bg);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--highlight-green);
 }
 
-.card h3 {
+.card-header h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.card-header .fas {
     font-size: 1.25rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 0.5rem;
 }
 
-/* Nuevas clases para los contenedores de grilla */
-.grid-container {
+.card-body {
+    padding: 1rem;
+}
+
+/* Contenedor principal de la grilla */
+.main-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
-/* Media Query para PC */
 @media (min-width: 768px) {
-    /* Las dos filas de cards ocupan el mismo espacio */
-    .top-row {
-        grid-template-columns: 1.5fr 1fr; /* Eventos mas anchos que liga */
-        grid-template-columns: repeat(2, 1fr); /* Alternativa: tamaño igual */
+    .main-grid {
+        grid-template-areas:
+            "events team-home team-away"
+            "results results results";
+        grid-template-columns: 1.25fr 1fr 1fr;
     }
-    .team-row {
-        grid-template-columns: 1fr 1fr;
+    .event-card { grid-area: events; }
+    .team-card:nth-of-type(1) { grid-area: team-home; }
+    .team-card:nth-of-type(2) { grid-area: team-away; }
+    .result-card { grid-area: results; }
+
+    /* Estilo para las fichas de equipo en escritorio */
+    .team-card {
+        margin-bottom: 0;
     }
 }
 
-/* Form Elements */
-label {
+/* Eventos y controles */
+.control-group {
+    margin-bottom: 1rem;
+}
+
+.control-group label {
     display: block;
+    font-size: 0.85rem;
+    color: var(--label-color);
     margin-bottom: 0.5rem;
-    color: var(--primary-color);
-    font-weight: 600;
 }
 
 select {
     width: 100%;
     padding: 0.75rem;
-    background-color: var(--bg-color);
+    background-color: var(--secondary-bg);
     color: var(--text-color);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: border-color 0.3s ease;
+    border-radius: 4px;
+    font-size: 0.9rem;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
 }
 
 select:focus {
     outline: none;
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 5px var(--neon-blue);
+    border-color: var(--highlight-green);
 }
 
-/* Stat Cards */
-.stat-card {
-    background-color: var(--bg-color);
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-.stat-card h3 {
-    font-size: 1rem;
-    color: var(--neon-pink);
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: 0.5rem;
-    text-shadow: 0 0 3px var(--neon-pink);
-}
-
-.stat-title {
-    font-weight: 700;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-}
-
-.stat-values {
+.event-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
-.stat-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem;
-    border-radius: 6px;
-    background-color: var(--card-bg);
+.event-item {
+    background-color: var(--secondary-bg);
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.event-item strong {
+    font-weight: 500;
+    color: var(--highlight-green);
+    display: block;
+}
+
+.event-item span {
+    font-size: 0.8rem;
+    color: var(--label-color);
+    display: block;
+}
+
+.event-item.placeholder {
+    font-style: italic;
+    color: var(--label-color);
+}
+
+/* Estadísticas de equipos */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-box {
+    background-color: var(--secondary-bg);
+    padding: 0.75rem;
+    border-radius: 4px;
+    text-align: center;
     border: 1px solid var(--border-color);
 }
 
-.stat-section .section-title {
-    font-weight: 600;
-    color: var(--primary-color);
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--label-color);
+    text-transform: uppercase;
 }
 
-.stat-metrics {
+.stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--highlight-green);
+    margin-top: 0.25rem;
+}
+
+.team-details {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--secondary-bg);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.team-details .stat-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.team-details .stat-section:last-child {
+    border-bottom: none;
+}
+
+.team-details .stat-section span {
+    font-size: 0.9rem;
+}
+
+.team-details .stat-section .stat-metrics {
     display: flex;
     gap: 1rem;
-    font-size: 0.9rem;
-    font-family: 'Roboto Mono', monospace;
-}
-
-/* Adaptación de métricas para móvil */
-@media (max-width: 767px) {
-    .stat-metrics {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-}
-
-.stat-legend {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    margin-top: 1rem;
     font-size: 0.85rem;
-}
-
-.stat-legend div {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.stat-legend-text {
-    font-size: 0.75rem;
-    color: #a0a0a0;
-    margin-top: 0.5rem;
-    text-align: center;
-}
-
-.small {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 0.9rem;
+    color: var(--label-color);
 }
 
 .team-logo {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     margin-right: 8px;
     vertical-align: middle;
 }
 
-/* Eventos Próximos - Estilo Neón */
-.neon-card {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(45deg, var(--card-bg), #2a2c4e);
-}
-
-.neon-title {
-    color: var(--neon-blue);
-    text-shadow: 0 0 8px var(--neon-blue), 0 0 15px var(--neon-blue);
-    animation: pulse 1.5s infinite alternate;
-}
-
-.events-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.event-box {
-    background-color: rgba(74, 105, 189, 0.15);
-    border: 1px solid var(--neon-blue);
-    border-radius: 8px;
-    padding: 1rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
-    z-index: 1;
-}
-
-.event-box:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 15px var(--neon-blue), inset 0 0 8px var(--neon-blue);
-    background-color: rgba(74, 105, 189, 0.3);
-}
-
-.event-box strong {
-    display: block;
-    font-size: 1.1rem;
-    color: var(--neon-pink);
-}
-
-.event-box span {
-    display: block;
-    font-size: 0.9rem;
-    color: var(--primary-color);
-}
-
-.event-box small {
-    display: block;
-    font-size: 0.8rem;
-    color: #909090;
-    font-family: 'Roboto Mono', monospace;
-    margin-top: 0.25rem;
-}
-
-/* Botones y Inputs */
-.btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    width: 100%;
-}
-
-/* Media Query para PC */
-@media (min-width: 768px) {
-    .btn {
-        width: auto;
-    }
-}
-
-#recalc {
-    background-color: var(--neon-purple);
-    color: #fff;
-    box-shadow: 0 0 8px var(--neon-purple);
-}
-
-#recalc:disabled {
-    background-color: #555;
-    color: #bbb;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-#recalc:enabled:hover {
-    background-color: #8327c9;
-    transform: scale(1.05);
-}
-
-#reset {
-    background-color: #444;
-    color: var(--text-color);
-}
-
-#reset:hover {
-    background-color: #666;
-    transform: scale(1.05);
-}
-
-.table-like {
+/* Botones */
+.action-buttons {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    justify-content: center;
-    padding: 1rem 0;
 }
 
-/* Media Query para PC */
 @media (min-width: 768px) {
-    .table-like {
+    .action-buttons {
         flex-direction: row;
     }
 }
 
-/* KPIs y recomendaciones */
-.kpis {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding-bottom: 1rem;
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
 }
 
-.kpis-row {
+.btn-green {
+    background-color: var(--highlight-green);
+    color: var(--primary-bg);
+}
+
+.btn-green:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+.btn-green:enabled:hover {
+    background-color: #4CAF6C;
+}
+
+.btn-secondary {
+    background-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background-color: #555;
+}
+
+/* Probabilidades y recomendaciones */
+.probabilities-grid {
     display: grid;
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+    margin-top: 1.5rem;
 }
 
-/* Media Query para PC */
 @media (min-width: 768px) {
-    .kpis-row {
+    .probabilities-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-.tile {
-    background-color: var(--card-bg);
+.probability-tile {
+    background-color: var(--secondary-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 1rem;
     text-align: center;
-    transition: transform 0.3s ease;
 }
 
-.tile:hover {
-    transform: translateY(-5px);
-    border-color: var(--neon-pink);
-    box-shadow: 0 0 10px var(--neon-pink);
-}
-
-.tile strong {
-    font-size: 2rem;
-    color: var(--neon-pink);
-    text-shadow: 0 0 5px var(--neon-pink);
+.probability-tile .label {
+    font-size: 0.8rem;
+    color: var(--label-color);
+    text-transform: uppercase;
     display: block;
-    margin-bottom: 0.25rem;
 }
 
-.recs {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: var(--neon-blue);
-    text-shadow: 0 0 5px var(--neon-blue);
-    text-align: center;
+.probability-tile .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--highlight-green);
+    display: block;
+    margin-top: 0.25rem;
 }
 
-.bet-slip {
-    background-color: var(--bg-color);
+.recommendation-box {
+    background-color: var(--secondary-bg);
+    border: 1px dashed var(--highlight-green);
+    border-radius: 4px;
     padding: 1rem;
-    border-radius: 8px;
-    border: 1px dashed var(--primary-color);
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     text-align: center;
-    font-family: 'Roboto Mono', monospace;
+}
+
+.rec-title {
+    font-size: 1rem;
+    color: var(--highlight-green);
+    margin-bottom: 0.5rem;
+}
+
+.rec-suggestion {
+    font-size: 0.9rem;
+    color: var(--label-color);
     font-style: italic;
-    color: #aaa;
 }
 
-.sep {
-    height: 1px;
-    background-color: var(--border-color);
-    margin: 1rem 0;
+.rec-suggestion strong {
+    color: #fff;
+    font-weight: 700;
 }
 
-/* Animaciones */
-@keyframes pulse {
-    from {
-        text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
-    }
-    to {
-        text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 30px var(--neon-blue);
-    }
+.error, .warning {
+    color: #ff6347;
+    background-color: #331f1a;
+    border: 1px solid #ff6347;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
 }
