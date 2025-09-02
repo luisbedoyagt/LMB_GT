@@ -2,8 +2,8 @@
  * @fileoverview Script mejorado para interfaz web que muestra estadísticas de fútbol y calcula probabilidades de partidos
  * usando datos de una API de Google Apps Script. Usa un modelo basado en la distribución de Poisson
  * con el ajuste de Dixon y Coles y "shrinkage" para una mejor predicción de empates y resultados realistas.
- * Incluye funcionalidad para autocompletar equipos al seleccionar un evento próximo y muestra solo los eventos
- * más cercanos (próxima hora) o los siguientes si hay más de tres eventos, excluyendo los que están en curso.
+ * Incluye funcionalidad para autocompletar equipos al seleccionar un evento próximo y muestra eventos en grupos de tres
+ * con paginación para ligas con más de tres eventos, excluyendo los que están en curso y priorizando los más próximos.
  */
 
 // ----------------------
@@ -37,6 +37,9 @@ function factorial(n) {
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
 let teamsByLeague = {};
 let allData = {};
+let currentPage = 0;
+let totalPages = 1;
+let filteredEvents = [];
 
 const leagueNames = {
     "esp.1": "LaLiga España",
@@ -147,71 +150,6 @@ async function fetchAllData() {
 }
 
 // ----------------------
-// MUESTRA DE EVENTOS FUTUROS
-// ----------------------
-function displayUpcomingEvents() {
-    const upcomingEventsList = $('upcoming-events-list');
-    if (!upcomingEventsList) return;
-
-    const allEvents = [];
-    if (allData.calendario) {
-        for (const liga in allData.calendario) {
-            allData.calendario[liga].forEach(event => {
-                let eventDateTime;
-                try {
-                    const parsedDate = new Date(event.fecha);
-                    if (isNaN(parsedDate.getTime())) {
-                        throw new Error("Fecha inválida");
-                    }
-                    const dateOptions = {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        timeZone: 'America/Guatemala'
-                    };
-                    const timeOptions = {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                        timeZone: 'America/Guatemala'
-                    };
-                    const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
-                    const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
-                    eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
-                } catch (err) {
-                    console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
-                    eventDateTime = `${event.fecha} (Hora no disponible)`;
-                }
-
-                allEvents.push({
-                    liga: event.liga,
-                    teams: `${event.local} vs. ${event.visitante}`,
-                    estadio: event.estadio || 'Por confirmar',
-                    date: eventDateTime,
-                });
-            });
-        }
-    }
-
-    if (allEvents.length > 0) {
-        upcomingEventsList.innerHTML = '';
-        allEvents.forEach(event => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-        <strong>${event.liga}</strong>: ${event.teams}
-        <span>Estadio: ${event.estadio}</span>
-        <small>${event.date}</small>
-      `;
-            upcomingEventsList.appendChild(li);
-        });
-    } else {
-        upcomingEventsList.innerHTML = '<li>No hay eventos próximos disponibles.</li>';
-    }
-
-    displaySelectedLeagueEvents('');
-}
-
-// ----------------------
 // FUNCIÓN AUXILIAR PARA FILTRAR EVENTOS
 // ----------------------
 function isEventUpcoming(event, currentTime) {
@@ -239,12 +177,19 @@ function isEventUpcoming(event, currentTime) {
 // ----------------------
 function displaySelectedLeagueEvents(leagueCode) {
     const selectedEventsList = $('selected-league-events');
-    if (!selectedEventsList) return;
+    const prevPageBtn = $('prevPage');
+    const nextPageBtn = $('nextPage');
+    const pageIndicator = $('pageIndicator');
+    if (!selectedEventsList || !prevPageBtn || !nextPageBtn || !pageIndicator) return;
 
     selectedEventsList.innerHTML = '';
+    currentPage = 0; // Reiniciar a la primera página
 
     if (!leagueCode || !allData.calendario) {
         selectedEventsList.innerHTML = '<li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>';
+        prevPageBtn.disabled = true;
+        nextPageBtn.disabled = true;
+        pageIndicator.textContent = 'Página 1 de 1';
         return;
     }
 
@@ -256,6 +201,9 @@ function displaySelectedLeagueEvents(leagueCode) {
 
     if (events.length === 0) {
         selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos para esta liga.</li>';
+        prevPageBtn.disabled = true;
+        nextPageBtn.disabled = true;
+        pageIndicator.textContent = 'Página 1 de 1';
         return;
     }
 
@@ -264,17 +212,32 @@ function displaySelectedLeagueEvents(leagueCode) {
     currentTime.setTime(currentTime.getTime() - 6 * 60 * 60 * 1000); // Ajustar a CST (UTC-6)
 
     // Filtrar eventos próximos (dentro de 1 hora o futuros, no en curso)
-    const upcomingEvents = events
+    filteredEvents = events
         .filter(event => isEventUpcoming(event, currentTime))
-        .sort((a, b) => a.parsedDate - b.parsedDate) // Ordenar por fecha ascendente
-        .slice(0, 3); // Tomar los 3 más cercanos
+        .sort((a, b) => a.parsedDate - b.parsedDate); // Ordenar por fecha ascendente
 
-    if (upcomingEvents.length === 0) {
+    if (filteredEvents.length === 0) {
         selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos en la próxima hora para esta liga.</li>';
+        prevPageBtn.disabled = true;
+        nextPageBtn.disabled = true;
+        pageIndicator.textContent = 'Página 1 de 1';
         return;
     }
 
-    upcomingEvents.forEach(event => {
+    // Calcular el número total de páginas
+    totalPages = Math.ceil(filteredEvents.length / 3);
+
+    // Asegurar que currentPage esté dentro de los límites
+    if (currentPage >= totalPages) currentPage = totalPages - 1;
+    if (currentPage < 0) currentPage = 0;
+
+    // Obtener los eventos para la página actual
+    const startIndex = currentPage * 3;
+    const endIndex = startIndex + 3;
+    const currentEvents = filteredEvents.slice(startIndex, endIndex);
+
+    // Mostrar los eventos de la página actual
+    currentEvents.forEach(event => {
         let eventDateTime;
         let isSoon = false;
         try {
@@ -311,13 +274,35 @@ function displaySelectedLeagueEvents(leagueCode) {
         li.setAttribute('data-local', event.local);
         li.setAttribute('data-visitante', event.visitante);
         li.innerHTML = `
-      <strong>${event.local} vs. ${event.visitante}</strong>
-      <span>Estadio: ${event.estadio || 'Por confirmar'}</span>
-      <small>${eventDateTime}${isSoon ? ' <span class="soon-indicator">¡Próximo!</span>' : ''}</small>
-    `;
+            <strong>${event.local} vs. ${event.visitante}</strong>
+            <span>Estadio: ${event.estadio || 'Por confirmar'}</span>
+            <small>${eventDateTime}${isSoon ? ' <span class="soon-indicator">¡Próximo!</span>' : ''}</small>
+        `;
         li.addEventListener('click', () => handleEventClick(event.local, event.visitante, leagueCode));
         selectedEventsList.appendChild(li);
     });
+
+    // Actualizar los controles de paginación
+    prevPageBtn.disabled = currentPage === 0;
+    nextPageBtn.disabled = currentPage === totalPages - 1;
+    pageIndicator.textContent = `Página ${currentPage + 1} de ${totalPages}`;
+}
+
+// ----------------------
+// FUNCIONES DE PAGINACIÓN
+// ----------------------
+function goToPreviousPage() {
+    if (currentPage > 0) {
+        currentPage--;
+        displaySelectedLeagueEvents($('leagueSelect').value);
+    }
+}
+
+function goToNextPage() {
+    if (currentPage < totalPages - 1) {
+        currentPage++;
+        displaySelectedLeagueEvents($('leagueSelect').value);
+    }
 }
 
 // ----------------------
@@ -368,13 +353,14 @@ async function init() {
     updateCalcButton();
 
     await fetchAllData();
-    displayUpcomingEvents();
 
     const leagueSelect = $('leagueSelect');
     const teamHomeSelect = $('teamHome');
     const teamAwaySelect = $('teamAway');
+    const prevPageBtn = $('prevPage');
+    const nextPageBtn = $('nextPage');
 
-    if (!leagueSelect || !teamHomeSelect || !teamAwaySelect) {
+    if (!leagueSelect || !teamHomeSelect || !teamAwaySelect || !prevPageBtn || !nextPageBtn) {
         $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema con la interfaz HTML.</div>';
         return;
     }
@@ -403,7 +389,8 @@ async function init() {
             updateCalcButton();
         }
     });
-
+    prevPageBtn.addEventListener('click', goToPreviousPage);
+    nextPageBtn.addEventListener('click', goToNextPage);
     $('recalc').addEventListener('click', calculateAll);
     $('reset').addEventListener('click', clearAll);
 }
@@ -488,44 +475,44 @@ function restrictSameTeam() {
 function clearTeamData(type) {
     const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
     box.innerHTML = `
-    <div class="stat-section" data-testid="general-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento General</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>Puntos: 0</span>
-        <span>DG: 0</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="local-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Local</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>PG: 0</span>
-        <span>DG: 0</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Visitante</span>
-      <div class="stat-metrics">
-        <span>PJ: 0</span>
-        <span>PG: 0</span>
-        <span>DG: 0</span>
-      </div>
-    </div>
-    <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
-  `;
+        <div class="stat-section" data-testid="general-${type.toLowerCase()}">
+            <span class="section-title">General</span>
+            <div class="stat-metrics">
+                <span>PJ: 0</span>
+                <span>Puntos: 0</span>
+                <span>DG: 0</span>
+            </div>
+        </div>
+        <div class="stat-section" data-testid="local-${type.toLowerCase()}">
+            <span class="section-title">Local</span>
+            <div class="stat-metrics">
+                <span>PJ: 0</span>
+                <span>PG: 0</span>
+                <span>DG: 0</span>
+            </div>
+        </div>
+        <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
+            <span class="section-title">Visitante</span>
+            <div class="stat-metrics">
+                <span>PJ: 0</span>
+                <span>PG: 0</span>
+                <span>DG: 0</span>
+            </div>
+        </div>
+        <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
+    `;
     if (type === 'Home') {
         $('posHome').value = '0';
         $('gfHome').value = '0';
         $('gaHome').value = '0';
         $('winRateHome').value = '0%';
-        $('formHomeTeam').innerHTML = 'Local: —';
+        $('formHomeTeam').innerHTML = '—';
     } else {
         $('posAway').value = '0';
         $('gfAway').value = '0';
         $('gaAway').value = '0';
         $('winRateAway').value = '0%';
-        $('formAwayTeam').innerHTML = 'Visitante: —';
+        $('formAwayTeam').innerHTML = '—';
     }
 }
 
@@ -536,7 +523,7 @@ function clearAll() {
         const el = $(id);
         if (el) el.textContent = '—';
     });
-    ['formHomeTeam', 'formAwayTeam'].forEach(id => $(id).innerHTML = id.includes('Home') ? 'Local: —' : 'Visitante: —');
+    ['formHomeTeam', 'formAwayTeam'].forEach(id => $(id).innerHTML = '—');
     clearTeamData('Home');
     clearTeamData('Away');
     updateCalcButton();
@@ -567,32 +554,32 @@ function fillTeamData(teamName, leagueCode, type) {
 
     const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
     box.innerHTML = `
-    <div class="stat-section" data-testid="general-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento General</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pj || 0}</span>
-        <span>Puntos: ${t.points || 0}</span>
-        <span>DG: ${dg >= 0 ? '+' + dg : dg || 0}</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="local-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Local</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pjHome || 0}</span>
-        <span>PG: ${t.winsHome || 0}</span>
-        <span>DG: ${dgHome >= 0 ? '+' + dgHome : dgHome || 0}</span>
-      </div>
-    </div>
-    <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
-      <span class="section-title">Rendimiento de Visitante</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pjAway || 0}</span>
-        <span>PG: ${t.winsAway || 0}</span>
-        <span>DG: ${dgAway >= 0 ? '+' + dgAway : dgAway || 0}</span>
-      </div>
-    </div>
-    <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
-  `;
+        <div class="stat-section" data-testid="general-${type.toLowerCase()}">
+            <span class="section-title">General</span>
+            <div class="stat-metrics">
+                <span>PJ: ${t.pj || 0}</span>
+                <span>Puntos: ${t.points || 0}</span>
+                <span>DG: ${dg >= 0 ? '+' + dg : dg || 0}</span>
+            </div>
+        </div>
+        <div class="stat-section" data-testid="local-${type.toLowerCase()}">
+            <span class="section-title">Local</span>
+            <div class="stat-metrics">
+                <span>PJ: ${t.pjHome || 0}</span>
+                <span>PG: ${t.winsHome || 0}</span>
+                <span>DG: ${dgHome >= 0 ? '+' + dgHome : dgHome || 0}</span>
+            </div>
+        </div>
+        <div class="stat-section" data-testid="visitante-${type.toLowerCase()}">
+            <span class="section-title">Visitante</span>
+            <div class="stat-metrics">
+                <span>PJ: ${t.pjAway || 0}</span>
+                <span>PG: ${t.winsAway || 0}</span>
+                <span>DG: ${dgAway >= 0 ? '+' + dgAway : dgAway || 0}</span>
+            </div>
+        </div>
+        <div class="stat-legend-text">PJ: Partidos Jugados, Puntos: Puntos Totales, PG: Partidos Ganados, DG: Diferencia de Goles</div>
+    `;
 
     if (type === 'Home') {
         $('posHome').value = t.pos || 0;
@@ -600,16 +587,16 @@ function fillTeamData(teamName, leagueCode, type) {
         $('gaHome').value = formatDec(gaAvg);
         $('winRateHome').value = formatPct(t.pjHome ? t.winsHome / t.pjHome : 0);
         $('formHomeTeam').innerHTML = t.logoUrl
-            ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> Local: ${t.name}`
-            : `Local: ${t.name}`;
+            ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> ${t.name}`
+            : `${t.name}`;
     } else {
         $('posAway').value = t.pos || 0;
         $('gfAway').value = formatDec(lambda);
         $('gaAway').value = formatDec(gaAvg);
         $('winRateAway').value = formatPct(t.pjAway ? t.winsAway / t.pjAway : 0);
         $('formAwayTeam').innerHTML = t.logoUrl
-            ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> Visitante: ${t.name}`
-            : `Visitante: ${t.name}`;
+            ? `<img src="${t.logoUrl}" alt="${t.name} logo" class="team-logo"> ${t.name}`
+            : `${t.name}`;
     }
 }
 
