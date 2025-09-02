@@ -74,13 +74,14 @@ body {
     padding-bottom: 0.5rem;
 }
 
-/* Grid Layout */
+/* Grid Layout (Se adapta a móvil y escritorio) */
 .grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
 }
 
+/* Media Query para escritorio */
 @media (min-width: 768px) {
     .grid {
         grid-template-columns: 1fr 1fr;
@@ -164,6 +165,14 @@ select:focus {
     gap: 1rem;
     font-size: 0.9rem;
     font-family: 'Roboto Mono', monospace;
+}
+
+/* Adaptación de métricas para móvil */
+@media (max-width: 767px) {
+    .stat-metrics {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 }
 
 .stat-legend {
@@ -268,6 +277,14 @@ select:focus {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.1s ease;
+    width: 100%; /* Botones ocupan todo el ancho en móvil */
+}
+
+/* Media Query para escritorio */
+@media (min-width: 768px) {
+    .btn {
+        width: auto;
+    }
 }
 
 #recalc {
@@ -300,9 +317,17 @@ select:focus {
 
 .table-like {
     display: flex;
+    flex-direction: column; /* Botones apilados en móvil */
     gap: 1rem;
     justify-content: center;
     padding: 1rem 0;
+}
+
+/* Media Query para escritorio */
+@media (min-width: 768px) {
+    .table-like {
+        flex-direction: row;
+    }
 }
 
 /* KPIs y recomendaciones */
@@ -319,6 +344,7 @@ select:focus {
     gap: 1rem;
 }
 
+/* Media Query para escritorio */
 @media (min-width: 768px) {
     .kpis-row {
         grid-template-columns: repeat(3, 1fr);
