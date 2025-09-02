@@ -1,18 +1,16 @@
 /* Variables y estilos globales */
 :root {
-    --primary-bg: #121212; /* Fondo aún más oscuro */
-    --secondary-bg: #1e1e1e; /* Fondo de las secciones principales */
-    --card-bg: #2a2a2a; /* Fondo de las tarjetas individuales */
-    --highlight-blue: #00e0ff; /* Azul neón para el brillo y detalles */
-    --dark-blue: #005668; /* Azul oscuro para sombras */
+    --primary-bg: #121212;
+    --secondary-bg: #1e1e1e;
+    --card-bg: #2a2a2a;
+    --highlight-blue: #00e0ff;
+    --dark-blue: #005668;
     --text-color: #e0e0e0;
     --label-color: #a0a0a0;
-    --border-color: #444; /* Borde más prominente */
+    --border-color: #444;
     --shadow-color: rgba(0, 0, 0, 0.7);
-    --font-main: 'Roboto', sans-serif; /* Fuentes limpias */
+    --font-main: 'Roboto', sans-serif;
     --font-heading: 'Oswald', sans-serif;
-
-    /* Nuevas variables para el efecto metálico */
     --metal-gradient-light: linear-gradient(to bottom, #4c4c4c, #333333);
     --metal-gradient-dark: linear-gradient(to bottom, #333333, #1c1c1c);
     --screw-color: #888;
@@ -34,25 +32,25 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM0NDQ0NDQiIGZpbGwtb3BhY2l0eT0iMC4xMiI+PHBhdGggZD0iTTAgNDBoNEwxNiAyOHg0TDM2IDQwSDQwVjMzTDIwIDEyIDAgMzNWNDB6TTEwIDQwSDRsMTYtMjBMNC4yIDBoLTQuMkwyMCAyMiAzNS44IDBoLTQuMkwyMCAyMiAxMCA0MHoiLz48L2c+PC9nPjwvc3ZnPg=='); /* Textura sutil de rejilla */
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM0NDQ0NDQiIGZpbGwtb3BhY2l0eT0iMC4xMiI+PHBhdGggZD0iTTAgNDBoNEwxNiAyOHg0TDM2IDQwSDQwVjMzTDIwIDEyIDAgMzNWNDB6TTEwIDQwSDRsMTYtMjBMNC4yIDBoLTQuMkwyMCAyMiAzNS44IDBoLTQuMkwyMCAyMiAxMCA0MHoiLz48L2c+PC9nPjwvc3ZnPg==');
     background-size: 20px 20px;
     background-blend-mode: overlay;
 }
 
 .container {
     padding: 1rem;
-    max-width: 1200px;
+    max-width: 1400px; /* Aumenta el ancho máximo del contenedor */
     margin: 0 auto;
 }
 
 /* Encabezado de la app */
 .app-header {
     text-align: center;
-    padding: 2.5rem 0 2rem; /* Más espacio arriba */
+    padding: 2.5rem 0 2rem;
     border-bottom: 2px solid var(--border-color);
     margin-bottom: 2rem;
     position: relative;
-    overflow: hidden; /* Para contener la sombra del metal */
+    overflow: hidden;
     border-radius: 8px 8px 0 0;
     background: var(--metal-gradient-dark);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
@@ -72,11 +70,11 @@ body {
 
 .app-header h1 {
     font-family: var(--font-heading);
-    font-size: 3rem; /* Más grande */
+    font-size: 3rem;
     font-weight: 700;
     color: var(--highlight-blue);
     letter-spacing: 2px;
-    text-shadow: 0 0 15px var(--highlight-blue), 0 0 25px rgba(0, 224, 255, 0.5); /* Efecto neón */
+    text-shadow: 0 0 15px var(--highlight-blue), 0 0 25px rgba(0, 224, 255, 0.5);
 }
 
 .app-header p {
@@ -91,11 +89,10 @@ body {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    box-shadow: 0 6px 15px var(--shadow-color), inset 0 0 0 1px rgba(255, 255, 255, 0.05); /* Sombra externa e interna */
-    margin-bottom: 2rem; /* Más espacio entre tarjetas */
+    box-shadow: 0 6px 15px var(--shadow-color), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    margin-bottom: 2rem;
     position: relative;
-    overflow: hidden; /* Para el efecto de borde */
-    /* Efecto metálico sutil */
+    overflow: hidden;
     background: var(--metal-gradient-dark);
     border: 1px solid #555;
 }
@@ -113,7 +110,7 @@ body {
 }
 
 .card-header {
-    background: var(--metal-gradient-light); /* Gradiente metálico para el encabezado */
+    background: var(--metal-gradient-light);
     padding: 1.2rem;
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -122,13 +119,13 @@ body {
     color: var(--highlight-blue);
     text-shadow: 0 0 8px rgba(0, 224, 255, 0.7), 0 1px 2px rgba(0, 0, 0, 0.8);
     transition: background 0.3s ease;
-    position: relative; /* Para los tornillos */
+    position: relative;
     border-radius: 8px 8px 0 0;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
 .card-header:hover {
-    background: linear-gradient(to bottom, #5c5c5c, #404040); /* Un poco más claro al pasar el ratón */
+    background: linear-gradient(to bottom, #5c5c5c, #404040);
 }
 
 .card-header h3 {
@@ -168,7 +165,7 @@ body {
 .event-card .card-header::after,
 .result-card .card-header::before,
 .result-card .card-header::after {
-    content: ''; /* Aseguramos que se generen */
+    content: '';
 }
 
 /* Tornillos en la parte inferior si se desea */
@@ -180,7 +177,7 @@ body {
 .main-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem; /* Más espacio */
+    gap: 2rem;
 }
 
 /* Ajustes específicos para móviles */
@@ -192,18 +189,37 @@ body {
 
 @media (min-width: 768px) {
     .main-grid {
-        grid-template-areas:
-            "events home away"
-            "results results results"
-            "reset reset reset";
-        grid-template-columns: 1.25fr 1fr 1fr;
-        gap: 2rem;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr; /* Nueva distribución de columnas */
+        gap: 2.5rem; /* Más espacio entre columnas y filas */
     }
-    .event-card { grid-area: events; order: initial; }
-    #card-home { grid-area: home; order: initial; }
-    #card-away { grid-area: away; order: initial; }
-    .result-card { grid-area: results; order: initial; }
-    .reset-container { grid-area: reset; order: initial; }
+
+    .event-card {
+        grid-area: initial;
+        order: initial;
+    }
+
+    #card-home {
+        grid-area: initial;
+        order: initial;
+    }
+
+    #card-away {
+        grid-area: initial;
+        order: initial;
+    }
+
+    .result-card {
+        grid-column: 1 / span 3; /* Ocupa las 3 columnas */
+        grid-row: 2;
+        order: initial;
+    }
+
+    .reset-container {
+        grid-column: 1 / span 3;
+        grid-row: 3;
+        order: initial;
+    }
 
     .team-card { margin-bottom: 0; }
 }
@@ -224,11 +240,11 @@ body {
 
 select {
     width: 100%;
-    padding: 0.85rem; /* Un poco más grande */
+    padding: 0.85rem;
     background-color: var(--secondary-bg);
     color: var(--text-color);
     border: 1px solid var(--border-color);
-    border-radius: 6px; /* Bordes más suaves */
+    border-radius: 6px;
     font-size: 1rem;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -241,13 +257,13 @@ select {
 select:focus {
     outline: none;
     border-color: var(--highlight-blue);
-    box-shadow: 0 0 0 2px rgba(0, 224, 255, 0.4); /* Resplandor al enfocar */
+    box-shadow: 0 0 0 2px rgba(0, 224, 255, 0.4);
 }
 
 .event-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem; /* Más espacio */
+    gap: 1rem;
 }
 
 .event-item {
@@ -310,13 +326,13 @@ select:focus {
 /* Estadísticas de equipos */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Más flexible */
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1.2rem;
     margin-top: 1.5rem;
 }
 
 .stat-box {
-    background-color: #1a1a1a; /* Fondo más oscuro para el stat */
+    background-color: #1a1a1a;
     padding: 0.9rem;
     border-radius: 6px;
     text-align: center;
@@ -344,7 +360,7 @@ select:focus {
 /* --- Ficha de Rendimiento Unificada --- */
 .team-details {
     margin-top: 1.5rem;
-    background: var(--metal-gradient-light); /* Fondo metálico */
+    background: var(--metal-gradient-light);
     border-radius: 8px;
     border: 1px solid #555;
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.4);
@@ -357,7 +373,7 @@ select:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgba(30, 30, 30, 0.7); /* Fondo semi-transparente para las secciones */
+    background-color: rgba(30, 30, 30, 0.7);
     transition: background-color 0.2s ease;
 }
 
@@ -380,11 +396,11 @@ select:focus {
     display: flex;
     font-size: 0.9rem;
     color: var(--label-color);
-    gap: 0.75rem; /* Ajuste para móviles */
+    gap: 0.75rem;
 }
 
 .stat-metrics span {
-    background: #333; /* Fondo más oscuro para las métricas */
+    background: #333;
     padding: 0.3rem 0.7rem;
     border-radius: 5px;
     border: 1px solid #666;
@@ -397,19 +413,19 @@ select:focus {
 
 @media (min-width: 768px) {
     .stat-metrics {
-        gap: 1.5rem; /* Aumento del espacio horizontal en escritorio */
+        gap: 1.5rem;
     }
 }
 /* --- Fin Ficha de Rendimiento --- */
 
 /* Estilos de los logos */
 .team-logo {
-    width: 50px; /* Un poco más grande */
+    width: 50px;
     height: 50px;
     margin-right: 15px;
     vertical-align: middle;
     object-fit: contain;
-    filter: drop-shadow(0 0 5px rgba(0, 224, 255, 0.3)); /* Resplandor sutil */
+    filter: drop-shadow(0 0 5px rgba(0, 224, 255, 0.3));
 }
 
 @media (min-width: 768px) {
@@ -429,17 +445,17 @@ select:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2rem 0; /* Más padding */
+    padding: 2rem 0;
 }
 
 @media (min-width: 768px) {
     .reset-container {
-        grid-area: reset;
+        grid-area: initial;
     }
 }
 
 .btn {
-    padding: 1rem 2rem; /* Más grande */
+    padding: 1rem 2rem;
     border: none;
     border-radius: 6px;
     font-size: 1.1rem;
@@ -452,7 +468,7 @@ select:focus {
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-.btn-green { /* Usamos highlight-blue para mantener consistencia */
+.btn-green {
     background: linear-gradient(to right, var(--highlight-blue), #00a0e0);
     color: var(--primary-bg);
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
@@ -472,9 +488,9 @@ select:focus {
 }
 
 .btn-secondary {
-    background: var(--metal-gradient-dark); /* Botón con textura metálica */
+    background: var(--metal-gradient-dark);
     color: var(--text-color);
-    max-width: 220px; /* Un poco más ancho */
+    max-width: 220px;
     border: 1px solid #666;
 }
 
@@ -489,15 +505,15 @@ select:focus {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1rem; /* Más espacio */
+    gap: 1rem;
     margin-top: 2rem;
 }
 
 .probability-tile {
     flex: 1 1 auto;
     min-width: 110px;
-    max-width: 19%; /* Ajustado para 5 columnas */
-    background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); /* Gradiente oscuro */
+    max-width: 19%;
+    background: linear-gradient(to bottom, #2a2a2a, #1a1a1a);
     border: 1px solid #555;
     border-radius: 6px;
     padding: 0.9rem 0.6rem;
@@ -505,10 +521,9 @@ select:focus {
     position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.4);
-    animation: none; /* Desactivar animación de pulso por defecto */
+    animation: none;
 }
 
-/* Animación de pulso solo para los tiles de resultado principal */
 #pHome, #pDraw, #pAway {
     animation: pulse-border 2s infinite ease-out;
 }
@@ -536,12 +551,11 @@ select:focus {
 
 .probability-tile .value {
     display: block;
-    font-size: 1.7rem; /* Más grande */
+    font-size: 1.7rem;
     font-weight: 700;
     color: var(--highlight-blue);
     text-shadow: 0 0 10px rgba(0, 224, 255, 0.7);
 }
-
 
 /* Ajuste para pantallas más pequeñas para que se vean bien */
 @media (max-width: 768px) {
@@ -555,8 +569,8 @@ select:focus {
 }
 
 .recommendation-box {
-    background: linear-gradient(to bottom, #2a3a4a, #1a1a1a); /* Fondo más oscuro y con gradiente */
-    border: 1px solid var(--highlight-blue); /* Borde azul brillante */
+    background: linear-gradient(to bottom, #2a3a4a, #1a1a1a);
+    border: 1px solid var(--highlight-blue);
     border-radius: 8px;
     padding: 1.5rem;
     margin-top: 2rem;
@@ -565,7 +579,7 @@ select:focus {
     position: relative;
 }
 
-.recommendation-box::before { /* Brillo superior */
+.recommendation-box::before {
     content: '';
     position: absolute;
     top: 0;
@@ -602,17 +616,17 @@ select:focus {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Más espacio */
+    gap: 12px;
 }
 
 .rec-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(90deg, #005668, #0090a0); /* Gradiente más profundo */
+    background: linear-gradient(90deg, #005668, #0090a0);
     color: #fff;
     padding: 12px 18px;
-    border-radius: 10px; /* Bordes más redondeados */
+    border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 3px rgba(255,255,255,0.1);
     font-weight: bold;
     font-size: 1.2em;
@@ -626,9 +640,9 @@ select:focus {
 }
 
 .rec-rank {
-    background-color: rgba(0, 224, 255, 0.2); /* Fondo semitransparente con color de resaltado */
+    background-color: rgba(0, 224, 255, 0.2);
     border-radius: 50%;
-    width: 30px; /* Más grande */
+    width: 30px;
     height: 30px;
     display: flex;
     justify-content: center;
@@ -642,20 +656,20 @@ select:focus {
 .rec-bet {
     flex-grow: 1;
     text-align: left;
-    margin-left: 20px; /* Más espacio */
+    margin-left: 20px;
     text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
 .rec-prob {
     font-family: var(--font-heading);
-    font-size: 1.4em; /* Más grande */
+    font-size: 1.4em;
     color: #fff;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     flex-shrink: 0;
 }
 
 .error, .warning {
-    color: #ff8c00; /* Naranja más tenue para warning */
+    color: #ff8c00;
     background-color: #33281a;
     border: 1px solid #ff8c00;
     padding: 0.9rem;
@@ -667,7 +681,7 @@ select:focus {
 }
 
 .error {
-    color: #ff4500; /* Rojo vibrante para errores */
+    color: #ff4500;
     background-color: #401f1a;
     border-color: #ff4500;
 }
