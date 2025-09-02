@@ -683,6 +683,9 @@ function calculateAll() {
         { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', type: 'Mercado' }
     ];
 
+    // Eliminar la clase 'pulse' de todos los cuadros antes de actualizar
+    document.querySelectorAll('.probability-tile').forEach(el => el.classList.remove('pulse'));
+
     // Actualiza los valores en los cuadros de probabilidad
     probabilities.forEach(p => {
         const el = $(p.id);
@@ -693,6 +696,15 @@ function calculateAll() {
     const recommendations = probabilities.filter(p => p.value >= 0.3)
                                           .sort((a, b) => b.value - a.value)
                                           .slice(0, 3);
+    
+    // Si hay recomendaciones, agrega la animación al cuadro más probable
+    if (recommendations.length > 0) {
+        const bestBetId = recommendations[0].id;
+        const bestBetTile = $(bestBetId).closest('.probability-tile');
+        if (bestBetTile) {
+            bestBetTile.classList.add('pulse');
+        }
+    }
 
     // Muestra los detalles y las recomendaciones
     $('details').innerHTML = `<p><strong>Detalles del pronóstico:</strong></p>`;
