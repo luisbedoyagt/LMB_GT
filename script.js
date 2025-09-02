@@ -32,7 +32,7 @@ function factorial(n) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbywL8LaPixvQ3O-xjMp1I7eoAG7J-rLML1aH7RPuV1QeFN_Rl0CXvYxwuaekIcy9AnTmQ/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxhm6qAh0wNfIUTluhnrzBhQOcPc8e0lHFPKRV08URDwukJGKfgZI3_CENnHfOmw6V1VA/exec";
 let teamsByLeague = {};
 let allData = {};
 
@@ -584,10 +584,11 @@ function calculateAll() {
     const ligaName = leagueCodeToName[league];
     const event = (allData.calendario[ligaName] || []).find(e => e.local === teamHome && e.visitante === teamAway);
 
-    // Actualizar el contenedor del pronóstico detallado
+    // --- CORRECCIÓN CRÍTICA ---
+    // Se ha cambiado 'Pronóstico IA' por 'pronostico' para que coincida con la clave del JSON
     const detailedPredictionBox = $('detailed-prediction');
-    if (event && event['Pronóstico IA']) {
-        const formattedPrediction = event['Pronóstico IA'].replace(/\n/g, '<br>').replace(/###\s*(.*)/g, '<h4>$1</h4>');
+    if (event && event['pronostico']) {
+        const formattedPrediction = event['pronostico'].replace(/\n/g, '<br>').replace(/###\s*(.*)/g, '<h4>$1</h4>');
         detailedPredictionBox.innerHTML = `<h3>Análisis del Calendario</h3><div class="ia-prediction">${formattedPrediction}</div>`;
     } else {
         detailedPredictionBox.innerHTML = `<p>No hay un pronóstico detallado disponible para este partido en la hoja de cálculo.</p>`;
@@ -631,4 +632,3 @@ function calculateAll() {
         $('suggestion').innerHTML = '<p>No se encontraron recomendaciones con una probabilidad superior al 30%. Analiza otros mercados.</p>';
     }
 }
-
