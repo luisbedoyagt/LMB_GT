@@ -39,7 +39,7 @@ body {
 
 .container {
     padding: 1rem;
-    max-width: 1400px; /* Aumenta el ancho máximo del contenedor */
+    max-width: 1400px;
     margin: 0 auto;
 }
 
@@ -180,18 +180,12 @@ body {
     gap: 2rem;
 }
 
-/* Ajustes específicos para móviles */
-.main-grid .event-card { order: 1; }
-.main-grid #card-home { order: 2; }
-.main-grid #card-away { order: 3; }
-.main-grid .result-card { order: 4; }
-.main-grid .reset-container { order: 5; }
-
+/* Estilos de la versión de escritorio */
 @media (min-width: 768px) {
     .main-grid {
         display: grid;
-        grid-template-columns: 1.2fr 1fr 1fr; /* Nueva distribución de columnas */
-        gap: 2.5rem; /* Más espacio entre columnas y filas */
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 2.5rem;
     }
 
     .event-card {
@@ -210,7 +204,7 @@ body {
     }
 
     .result-card {
-        grid-column: 1 / span 3; /* Ocupa las 3 columnas */
+        grid-column: 1 / span 3;
         grid-row: 2;
         order: initial;
     }
@@ -222,6 +216,23 @@ body {
     }
 
     .team-card { margin-bottom: 0; }
+
+    .stat-metrics {
+        gap: 1.5rem;
+    }
+
+    /* Reglas específicas para la versión de escritorio en las probabilidades */
+    .probabilities-grid {
+        flex-direction: row;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: nowrap;
+    }
+    .probability-tile {
+        flex: 1 1 0;
+        min-width: unset;
+        max-width: unset;
+    }
 }
 
 /* Eventos y controles */
@@ -557,14 +568,40 @@ select:focus {
     text-shadow: 0 0 10px rgba(0, 224, 255, 0.7);
 }
 
+
 /* Ajuste para pantallas más pequeñas para que se vean bien */
 @media (max-width: 768px) {
     .probabilities-grid {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row; /* Hacemos que se coloquen en una fila */
+        justify-content: space-between; /* Distribución uniforme */
+        gap: 0.5rem; /* Espacio mínimo */
     }
+
     .probability-tile {
-        max-width: 90%;
+        flex: 1; /* Ocupan el espacio equitativamente */
+        min-width: 30%; /* Para que quepan 3 en una fila */
+        max-width: unset;
+        font-size: 0.9em;
+    }
+
+    /* Contenedor específico para las opciones de "Ambos Anotan" y "Más de 2.5" */
+    .secondary-probabilities {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .secondary-probabilities .probability-tile {
+        flex: 1;
+        min-width: 45%; /* Para que quepan 2 en una fila */
+    }
+
+    /* Ocultar el grid original en móviles para usar la nueva estructura */
+    .result-card .card-body > .probabilities-grid {
+        display: none;
     }
 }
 
