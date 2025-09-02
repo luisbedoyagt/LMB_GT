@@ -571,37 +571,44 @@ select:focus {
 
 /* Ajuste para pantallas más pequeñas para que se vean bien */
 @media (max-width: 768px) {
-    .probabilities-grid {
-        flex-direction: row; /* Hacemos que se coloquen en una fila */
-        justify-content: space-between; /* Distribución uniforme */
-        gap: 0.5rem; /* Espacio mínimo */
+    /* Nueva estructura para móviles */
+    .probabilities-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
-    .probability-tile {
-        flex: 1; /* Ocupan el espacio equitativamente */
-        min-width: 30%; /* Para que quepan 3 en una fila */
-        max-width: unset;
-        font-size: 0.9em;
+    .main-probabilities {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
     }
 
-    /* Contenedor específico para las opciones de "Ambos Anotan" y "Más de 2.5" */
     .secondary-probabilities {
         display: flex;
         justify-content: center;
         gap: 1rem;
-        margin-top: 1rem;
-        width: 100%;
         flex-wrap: wrap;
+    }
+
+    .main-probabilities .probability-tile {
+        flex: 1;
+        min-width: 30%;
+        max-width: unset;
     }
 
     .secondary-probabilities .probability-tile {
         flex: 1;
-        min-width: 45%; /* Para que quepan 2 en una fila */
+        min-width: 45%;
+        max-width: unset;
     }
 
-    /* Ocultar el grid original en móviles para usar la nueva estructura */
-    .result-card .card-body > .probabilities-grid {
-        display: none;
+    .probability-tile .label {
+        font-size: 0.75rem; /* Hacemos la etiqueta un poco más pequeña */
+    }
+
+    .probability-tile .value {
+        font-size: 1.4rem; /* Hacemos el valor más pequeño */
     }
 }
 
