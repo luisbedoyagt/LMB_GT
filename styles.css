@@ -374,53 +374,39 @@ select:focus {
 
 /* Probabilidades y recomendaciones */
 .probabilities-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 1rem;
+    display: flex; /* Cambiado a flex para alineación horizontal */
+    flex-wrap: wrap; /* Permitir que se envuelvan en pantallas pequeñas */
+    justify-content: center; /* Centrar los elementos horizontalmente */
+    gap: 0.75rem; /* Espacio reducido entre los cuadros */
     margin-top: 1.5rem;
 }
 
-@media (min-width: 768px) {
-    .probabilities-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
 .probability-tile {
+    flex: 1 1 auto; /* Permitir que los elementos se estiren y encojan */
+    min-width: 100px; /* Ancho mínimo para cada cuadro */
+    max-width: 18%; /* Ajuste para que quepan 5 en una fila, ~20% - gap */
     background-color: #2a2a2a;
     border: 1px solid #3a3a3a;
     border-radius: 4px;
-    padding: 0.75rem;
+    padding: 0.75rem 0.5rem; /* Padding ajustado */
     text-align: center;
     position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: pulse-border 1.5s infinite; /* Aplicar la animación a todos por defecto */
 }
 
-.probability-tile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+/* Ajuste para pantallas más pequeñas para que se vean bien */
+@media (max-width: 768px) {
+    .probabilities-grid {
+        flex-direction: column; /* Apilar en columnas en móviles */
+        align-items: center; /* Centrar los cuadros */
+    }
+    .probability-tile {
+        max-width: 90%; /* Ancho completo en móviles */
+    }
 }
 
-.probability-tile .label {
-    font-size: 0.7rem;
-    color: var(--label-color);
-    text-transform: uppercase;
-    display: block;
-}
-
-.probability-tile .value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--highlight-blue);
-    display: block;
-    margin-top: 0.25rem;
-}
-
-/* Animación de pulsación */
-.pulse {
-    animation: pulse-border 1.5s infinite;
-}
-
+/* Animación de pulsación (sin cambios) */
 @keyframes pulse-border {
     0% {
         box-shadow: 0 0 0 0 rgba(77, 171, 247, 0.4);
