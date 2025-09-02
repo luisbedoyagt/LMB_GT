@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora para Pronósticos de Fútbol / LMB</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -13,14 +14,9 @@
             <p class="small">Datos en tiempo real de ligas y estadísticas avanzadas.</p>
         </div>
 
-        <div class="card">
-            <h3>Eventos Próximos de la Liga Seleccionada</h3>
-            <div class="pagination-controls">
-                <button id="prevPage" class="btn pagination-btn" disabled>Atrás</button>
-                <span id="pageIndicator" class="page-indicator">Página 1 de 1</span>
-                <button id="nextPage" class="btn pagination-btn" disabled>Adelante</button>
-            </div>
-            <ul id="selected-league-events">
+        <div class="card neon-card">
+            <h3 class="neon-title">Eventos Próximos de la Liga Seleccionada</h3>
+            <ul id="selected-league-events" class="events-list">
                 <li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>
             </ul>
         </div>
