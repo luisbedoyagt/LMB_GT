@@ -1,5 +1,5 @@
 // Variables globales y mapeo de ligas
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwqoG_50S-eUo1g_0N-QxM2-Wl5_Lz4p2g/exec"; // Reemplaza con tu URL
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx3cn3uePzJefsPoFGBHf69rrxxF7owARRLe-VDmy92npCaIa5nIrbqo6HatLInMQnJ4A/exec"; // Reemplaza con tu URL
 let allData = {
     ligas: {},
     calendario: {}
@@ -390,3 +390,4 @@ function clearResults() {
 document.addEventListener('DOMContentLoaded', () => {
     fetchAllData();
 });
+
