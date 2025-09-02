@@ -14,20 +14,22 @@
             <p class="small">Datos en tiempo real de ligas y estadísticas avanzadas.</p>
         </div>
 
-        <div class="card neon-card">
-            <h3 class="neon-title">Eventos Próximos de la Liga Seleccionada</h3>
-            <ul id="selected-league-events" class="events-list">
-                <li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>
-            </ul>
+        <div class="top-row grid-container">
+            <div class="card neon-card">
+                <h3 class="neon-title">Eventos Próximos de la Liga Seleccionada</h3>
+                <ul id="selected-league-events" class="events-list">
+                    <li class="event-box">Selecciona una liga para ver sus próximos eventos.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Selecciona Liga</h3>
+                <label for="leagueSelect">Liga:</label>
+                <select id="leagueSelect"></select>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>Selecciona Liga</h3>
-            <label for="leagueSelect">Liga:</label>
-            <select id="leagueSelect"></select>
-        </div>
-
-        <div class="grid">
+        <div class="team-row grid-container">
             <div class="card">
                 <h3>Equipo Local</h3>
                 <label for="teamHome">Equipo:</label>
