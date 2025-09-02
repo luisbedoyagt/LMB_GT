@@ -592,23 +592,21 @@ select:focus {
     }
 
     .main-probabilities .probability-tile {
-        flex: 1;
-        min-width: 30%;
+        flex: 1 1 30%; /* Ahora son más flexibles y ocupan el espacio */
         max-width: unset;
     }
 
     .secondary-probabilities .probability-tile {
-        flex: 1;
-        min-width: 45%;
+        flex: 1 1 45%;
         max-width: unset;
     }
 
     .probability-tile .label {
-        font-size: 0.75rem; /* Hacemos la etiqueta un poco más pequeña */
+        font-size: 0.75rem;
     }
 
     .probability-tile .value {
-        font-size: 1.4rem; /* Hacemos el valor más pequeño */
+        font-size: 1.4rem;
     }
 }
 
