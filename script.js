@@ -1,8 +1,9 @@
 /**
  * @fileoverview Script mejorado para interfaz web que muestra estadísticas de fútbol y calcula probabilidades de partidos
- * usando datos de una API de Google Apps Script. Ahora usa un modelo basado en la distribución de Poisson
+ * usando datos de una API de Google Apps Script. Usa un modelo basado en la distribución de Poisson
  * con el ajuste de Dixon y Coles y "shrinkage" para una mejor predicción de empates y resultados realistas.
- * Incluye funcionalidad para autocompletar equipos al seleccionar un evento próximo.
+ * Incluye funcionalidad para autocompletar equipos al seleccionar un evento próximo y muestra solo los eventos
+ * más cercanos (próxima hora) o los siguientes si hay más de tres eventos, excluyendo los que están en curso.
  */
 
 // ----------------------
@@ -211,6 +212,29 @@ function displayUpcomingEvents() {
 }
 
 // ----------------------
+// FUNCIÓN AUXILIAR PARA FILTRAR EVENTOS
+// ----------------------
+function isEventUpcoming(event, currentTime) {
+    try {
+        const eventTime = new Date(event.fecha);
+        if (isNaN(eventTime.getTime())) return false;
+
+        // Considerar un partido en curso si la hora actual está dentro de las 2 horas desde el inicio
+        const matchDuration = 2 * 60 * 60 * 1000; // 2 horas en milisegundos
+        const isInProgress = currentTime >= eventTime && currentTime <= new Date(eventTime.getTime() + matchDuration);
+
+        // Considerar un partido próximo si está dentro de la próxima hora
+        const oneHourWindow = 60 * 60 * 1000; // 1 hora en milisegundos
+        const isWithinOneHour = eventTime > currentTime && eventTime <= new Date(currentTime.getTime() + oneHourWindow);
+
+        return !isInProgress && (isWithinOneHour || eventTime > currentTime);
+    } catch (err) {
+        console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
+        return false;
+    }
+}
+
+// ----------------------
 // MUESTRA DE EVENTOS DE LA LIGA SELECCIONADA
 // ----------------------
 function displaySelectedLeagueEvents(leagueCode) {
@@ -225,17 +249,36 @@ function displaySelectedLeagueEvents(leagueCode) {
     }
 
     const ligaName = leagueCodeToName[leagueCode];
-    const events = (allData.calendario[ligaName] || []).slice(0, 3);
+    const events = (allData.calendario[ligaName] || []).map(event => ({
+        ...event,
+        parsedDate: new Date(event.fecha)
+    }));
 
     if (events.length === 0) {
         selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos para esta liga.</li>';
         return;
     }
 
-    events.forEach(event => {
+    // Obtener la hora actual en zona horaria CST (America/Guatemala)
+    const currentTime = new Date();
+    currentTime.setTime(currentTime.getTime() - 6 * 60 * 60 * 1000); // Ajustar a CST (UTC-6)
+
+    // Filtrar eventos próximos (dentro de 1 hora o futuros, no en curso)
+    const upcomingEvents = events
+        .filter(event => isEventUpcoming(event, currentTime))
+        .sort((a, b) => a.parsedDate - b.parsedDate) // Ordenar por fecha ascendente
+        .slice(0, 3); // Tomar los 3 más cercanos
+
+    if (upcomingEvents.length === 0) {
+        selectedEventsList.innerHTML = '<li class="event-box">No hay eventos próximos en la próxima hora para esta liga.</li>';
+        return;
+    }
+
+    upcomingEvents.forEach(event => {
         let eventDateTime;
+        let isSoon = false;
         try {
-            const parsedDate = new Date(event.fecha);
+            const parsedDate = event.parsedDate;
             if (isNaN(parsedDate.getTime())) {
                 throw new Error("Fecha inválida");
             }
@@ -254,19 +297,23 @@ function displaySelectedLeagueEvents(leagueCode) {
             const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
             const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
             eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
+
+            // Marcar como "próximo" si está dentro de la próxima hora
+            const oneHourWindow = 60 * 60 * 1000;
+            isSoon = parsedDate > currentTime && parsedDate <= new Date(currentTime.getTime() + oneHourWindow);
         } catch (err) {
             console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
             eventDateTime = `${event.fecha} (Hora no disponible)`;
         }
 
         const li = document.createElement('li');
-        li.className = 'event-box';
+        li.className = `event-box ${isSoon ? 'event-soon' : ''}`;
         li.setAttribute('data-local', event.local);
         li.setAttribute('data-visitante', event.visitante);
         li.innerHTML = `
       <strong>${event.local} vs. ${event.visitante}</strong>
       <span>Estadio: ${event.estadio || 'Por confirmar'}</span>
-      <small>${eventDateTime}</small>
+      <small>${eventDateTime}${isSoon ? ' <span class="soon-indicator">¡Próximo!</span>' : ''}</small>
     `;
         li.addEventListener('click', () => handleEventClick(event.local, event.visitante, leagueCode));
         selectedEventsList.appendChild(li);
