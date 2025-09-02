@@ -32,7 +32,7 @@ function factorial(n) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxhm6qAh0wNfIUTluhnrzBhQOcPc8e0lHFPKRV08URDwukJGKfgZI3_CENnHfOmw6V1VA/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzMXtZ3R0V-Pv6kZrEju4WO9ADXjydZWahWGjVAFxIYIaH4gtwPzOfZhyIvYcWedJgMcQ/exec";
 let teamsByLeague = {};
 let allData = {};
 
@@ -52,8 +52,12 @@ const leagueNames = {
     "bra.1": "Brasileirão Brasil",
     "gua.1": "Liga Nacional Guatemala",
     "crc.1": "Liga Promerica Costa Rica",
-    "hon.1": "Liga Nacional Honduras",
-    "ksa.1": "Pro League Arabia Saudita"
+    "hon.1": "Liga Nacional Honduras","ksa.1": 
+    "Arabia_Saudi_ProLeague",
+    "fifa.worldq.conmebol": "Eliminatorias CONMEBOL",
+    "fifa.worldq.concacaf": "Eliminatorias CONCACAF",
+    "fifa.worldq.uefa": "Eliminatorias UEFA"
+    
 };
 
 const leagueCodeToName = {
@@ -73,7 +77,10 @@ const leagueCodeToName = {
     "gua.1": "Guatemala_LigaNacional",
     "crc.1": "CostaRica_LigaPromerica",
     "hon.1": "Honduras_LigaNacional",
-    "ksa.1": "Arabia_Saudi_ProLeague"
+    "ksa.1": "Arabia_Saudi_ProLeague",
+    "fifa.worldq.conmebol": "Eliminatorias_CONMEBOL",
+    "fifa.worldq.concacaf": "Eliminatorias_CONCACAF",
+    "fifa.worldq.uefa": "Eliminatorias_UEFA"
 };
 
 // ----------------------
@@ -632,3 +639,4 @@ function calculateAll() {
         $('suggestion').innerHTML = '<p>No se encontraron recomendaciones con una probabilidad superior al 30%. Analiza otros mercados.</p>';
     }
 }
+
