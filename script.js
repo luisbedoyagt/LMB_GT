@@ -32,7 +32,7 @@ function factorial(n) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyoxXAt1eMt01tzaWG4GVJvMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec"; // Asegúrate de que esta URL sea correcta si la has actualizado
 let teamsByLeague = {};
 let allData = {};
 
@@ -148,7 +148,9 @@ async function fetchAllData() {
 // MUESTRA DE EVENTOS FUTUROS
 // ----------------------
 function displayUpcomingEvents() {
-    const upcomingEventsList = $('upcoming-events-list');
+    // Esta función no se usa directamente en el nuevo diseño de eventos en el card.
+    // Se mantiene por si se quiere un listado de todos los eventos en otro lugar.
+    const upcomingEventsList = $('upcoming-events-list'); // Asume que existe este ID si quieres mostrar todos los eventos
     if (!upcomingEventsList) return;
 
     const allEvents = [];
@@ -205,8 +207,6 @@ function displayUpcomingEvents() {
     } else {
         upcomingEventsList.innerHTML = '<li>No hay eventos próximos disponibles.</li>';
     }
-
-    displaySelectedLeagueEvents('');
 }
 
 // ----------------------
@@ -224,7 +224,7 @@ function displaySelectedLeagueEvents(leagueCode) {
     }
 
     const ligaName = leagueCodeToName[leagueCode];
-    const events = (allData.calendario[ligaName] || []).slice(0, 3);
+    const events = (allData.calendario[ligaName] || []).slice(0, 3); // Limita a los 3 primeros eventos
 
     if (events.length === 0) {
         selectedEventsList.innerHTML = '<div class="event-item placeholder"><span>No hay eventos próximos para esta liga.</span></div>';
@@ -683,9 +683,6 @@ function calculateAll() {
         { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', type: 'Mercado' }
     ];
 
-    // Eliminar la clase 'pulse' de todos los cuadros antes de actualizar
-    document.querySelectorAll('.probability-tile').forEach(el => el.classList.remove('pulse'));
-
     // Actualiza los valores en los cuadros de probabilidad
     probabilities.forEach(p => {
         const el = $(p.id);
@@ -697,15 +694,6 @@ function calculateAll() {
                                           .sort((a, b) => b.value - a.value)
                                           .slice(0, 3);
     
-    // Si hay recomendaciones, agrega la animación al cuadro más probable
-    if (recommendations.length > 0) {
-        const bestBetId = recommendations[0].id;
-        const bestBetTile = $(bestBetId).closest('.probability-tile');
-        if (bestBetTile) {
-            bestBetTile.classList.add('pulse');
-        }
-    }
-
     // Muestra los detalles y las recomendaciones
     $('details').innerHTML = `<p><strong>Detalles del pronóstico:</strong></p>`;
 
