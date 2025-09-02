@@ -103,17 +103,55 @@ body {
     gap: 1.5rem;
 }
 
+/* Ajustes específicos para móviles */
+.main-grid .event-card {
+    order: 1;
+}
+
+.main-grid #card-home {
+    order: 2;
+}
+
+.main-grid #card-away {
+    order: 3;
+}
+
+.main-grid .result-card {
+    order: 4;
+}
+
+.main-grid .reset-container {
+    order: 5;
+}
+
 @media (min-width: 768px) {
     .main-grid {
         grid-template-areas:
             "events home away"
-            "results results results";
+            "results results results"
+            "reset reset reset";
         grid-template-columns: 1.25fr 1fr 1fr;
     }
-    .event-card { grid-area: events; }
-    #card-home { grid-area: home; }
-    #card-away { grid-area: away; }
-    .result-card { grid-area: results; }
+    .event-card {
+        grid-area: events;
+        order: initial;
+    }
+    #card-home {
+        grid-area: home;
+        order: initial;
+    }
+    #card-away {
+        grid-area: away;
+        order: initial;
+    }
+    .result-card {
+        grid-area: results;
+        order: initial;
+    }
+    .reset-container {
+        grid-area: reset;
+        order: initial;
+    }
 
     /* Estilo para las fichas de equipo en escritorio */
     .team-card {
@@ -165,7 +203,7 @@ select:focus {
     border-radius: 4px;
     border: 1px solid var(--border-color);
     font-size: 0.9rem;
-    cursor: pointer; /* Agrega cursor para indicar que es clickeable */
+    cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
@@ -253,42 +291,36 @@ select:focus {
 
 /* Estilos de los logos */
 .team-logo {
-    width: 45px; /* Tamaño para móviles */
+    width: 45px;
     height: 45px;
     margin-right: 12px;
     vertical-align: middle;
     object-fit: contain;
 }
 
-/* Aumentar el tamaño del logo un 20% en pantallas más grandes (escritorio) */
 @media (min-width: 768px) {
     .team-logo {
-        width: 54px; /* 45px * 1.20 = 54px */
+        width: 54px;
         height: 54px;
-        margin-right: 15px; /* Ajuste del margen para mantener el espaciado */
+        margin-right: 15px;
     }
 }
 
 /* Botones */
 .action-buttons {
-    display: none; /* Ocultar el contenedor de botones ya que el cálculo es automático */
+    display: none;
 }
 
-/* Nuevo contenedor para el botón de reseteo */
 .reset-container {
-    grid-area: reset;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding-bottom: 1.5rem; /* Espacio para que el botón no quede pegado al fondo */
 }
 
 @media (min-width: 768px) {
-    .main-grid {
-        grid-template-areas:
-            "events home away"
-            "results results results"
-            "reset reset reset"; /* Nueva área para el botón de reset */
-        grid-template-columns: 1.25fr 1fr 1fr;
+    .reset-container {
+        grid-area: reset;
     }
 }
 
@@ -320,7 +352,7 @@ select:focus {
 .btn-secondary {
     background-color: var(--border-color);
     color: var(--text-color);
-    max-width: 200px; /* Limita el ancho para que no se vea tan grande en desktop */
+    max-width: 200px;
 }
 
 .btn-secondary:hover {
