@@ -2,6 +2,7 @@
  * @fileoverview Script mejorado para interfaz web que muestra estadísticas de fútbol y calcula probabilidades de partidos
  * usando datos de una API de Google Apps Script. Ahora usa un modelo basado en la distribución de Poisson
  * con el ajuste de Dixon y Coles y "shrinkage" para una mejor predicción de empates y resultados realistas.
+ * Incluye funcionalidad para autocompletar equipos al seleccionar un evento próximo.
  */
 
 // ----------------------
@@ -30,7 +31,7 @@ function factorial(n) {
 }
 
 // ----------------------
-// CONFIGURACIÓN DE LIGAS (sin cambios)
+// CONFIGURACIÓN DE LIGAS
 // ----------------------
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
 let teamsByLeague = {};
@@ -77,7 +78,7 @@ const leagueCodeToName = {
 };
 
 // ----------------------
-// NORMALIZACIÓN DE DATOS (sin cambios)
+// NORMALIZACIÓN DE DATOS
 // ----------------------
 function normalizeTeam(raw) {
     if (!raw) return null;
@@ -109,7 +110,7 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// FETCH DATOS COMPLETOS (sin cambios)
+// FETCH DATOS COMPLETOS
 // ----------------------
 async function fetchAllData() {
     const leagueSelect = $('leagueSelect');
@@ -145,7 +146,7 @@ async function fetchAllData() {
 }
 
 // ----------------------
-// MUESTRA DE EVENTOS FUTUROS (sin cambios)
+// MUESTRA DE EVENTOS FUTUROS
 // ----------------------
 function displayUpcomingEvents() {
     const upcomingEventsList = $('upcoming-events-list');
@@ -210,7 +211,7 @@ function displayUpcomingEvents() {
 }
 
 // ----------------------
-// MUESTRA DE EVENTOS DE LA LIGA SELECCIONADA (sin cambios)
+// MUESTRA DE EVENTOS DE LA LIGA SELECCIONADA
 // ----------------------
 function displaySelectedLeagueEvents(leagueCode) {
     const selectedEventsList = $('selected-league-events');
@@ -260,17 +261,59 @@ function displaySelectedLeagueEvents(leagueCode) {
 
         const li = document.createElement('li');
         li.className = 'event-box';
+        li.setAttribute('data-local', event.local);
+        li.setAttribute('data-visitante', event.visitante);
         li.innerHTML = `
       <strong>${event.local} vs. ${event.visitante}</strong>
       <span>Estadio: ${event.estadio || 'Por confirmar'}</span>
       <small>${eventDateTime}</small>
     `;
+        li.addEventListener('click', () => handleEventClick(event.local, event.visitante, leagueCode));
         selectedEventsList.appendChild(li);
     });
 }
 
 // ----------------------
-// INICIALIZACIÓN (sin cambios)
+// MANEJADOR DE CLIC EN EVENTO
+// ----------------------
+function handleEventClick(localTeam, visitanteTeam, leagueCode) {
+    const leagueSelect = $('leagueSelect');
+    const teamHomeSelect = $('teamHome');
+    const teamAwaySelect = $('teamAway');
+
+    // Establecer la liga seleccionada
+    leagueSelect.value = leagueCode;
+    onLeagueChange(); // Actualizar los selectores de equipos
+
+    // Esperar a que los selectores de equipos se llenen
+    setTimeout(() => {
+        // Seleccionar el equipo local
+        if (teamHomeSelect.querySelector(`option[value="${localTeam}"]`)) {
+            teamHomeSelect.value = localTeam;
+            fillTeamData(localTeam, leagueCode, 'Home');
+        } else {
+            console.warn(`Equipo local ${localTeam} no encontrado en la liga ${leagueCode}`);
+        }
+
+        // Seleccionar el equipo visitante
+        if (teamAwaySelect.querySelector(`option[value="${visitanteTeam}"]`)) {
+            teamAwaySelect.value = visitanteTeam;
+            fillTeamData(visitanteTeam, leagueCode, 'Away');
+        } else {
+            console.warn(`Equipo visitante ${visitanteTeam} no encontrado en la liga ${leagueCode}`);
+        }
+
+        // Actualizar el botón de calcular
+        updateCalcButton();
+
+        // Disparar eventos de cambio para asegurar que la UI se actualice
+        teamHomeSelect.dispatchEvent(new Event('change'));
+        teamAwaySelect.dispatchEvent(new Event('change'));
+    }, 100); // Pequeño retraso para asegurar que los selectores estén poblados
+}
+
+// ----------------------
+// INICIALIZACIÓN
 // ----------------------
 async function init() {
     clearTeamData('Home');
@@ -320,7 +363,7 @@ async function init() {
 document.addEventListener('DOMContentLoaded', init);
 
 // ----------------------
-// FUNCIONES AUXILIARES (sin cambios)
+// FUNCIONES AUXILIARES
 // ----------------------
 function onLeagueChange() {
     const code = $('leagueSelect').value;
@@ -454,7 +497,7 @@ function clearAll() {
 }
 
 // ----------------------
-// BÚSQUEDA Y LLENADO DE EQUIPO (sin cambios)
+// BÚSQUEDA Y LLENADO DE EQUIPO
 // ----------------------
 function findTeam(leagueCode, teamName) {
     if (!teamsByLeague[leagueCode]) return null;
@@ -681,5 +724,3 @@ function calculateAll() {
     suggestionEl.classList.add('pulse');
     setTimeout(() => suggestionEl.classList.remove('pulse'), 1000);
 }
-
-
