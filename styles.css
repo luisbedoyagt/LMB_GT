@@ -16,6 +16,11 @@
     --screw-color: #888;
     --screw-highlight: #ccc;
     --screw-shadow: #222;
+
+    /* Nuevos colores para los efectos de pulso */
+    --pulse-blue: rgba(0, 224, 255, 0.6);
+    --pulse-red: rgba(255, 69, 0, 0.6); /* Naranja rojizo */
+    --pulse-yellow: rgba(255, 200, 0, 0.6); /* Amarillo cálido */
 }
 
 /* Reset y tipografía */
@@ -523,7 +528,7 @@ select:focus {
 .probability-tile {
     flex: 1 1 auto;
     min-width: 110px;
-    max-width: 19%;
+    max-width: 19%; /* Para escritorio */
     background: linear-gradient(to bottom, #2a2a2a, #1a1a1a);
     border: 1px solid #555;
     border-radius: 6px;
@@ -532,24 +537,36 @@ select:focus {
     position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.4);
-    animation: none;
+    /* Animación por defecto (azul) para todos los tiles */
+    animation: pulse-border-blue 2s infinite ease-out;
 }
 
-#pHome, #pDraw, #pAway {
-    animation: pulse-border 2s infinite ease-out;
+/* Definición de animaciones de pulso con diferentes colores */
+@keyframes pulse-border-blue {
+    0% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 0 var(--pulse-blue); }
+    70% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 15px rgba(0, 224, 255, 0); }
+    100% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 0 var(--pulse-blue); }
 }
 
-@keyframes pulse-border {
-    0% {
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 0 rgba(0, 224, 255, 0.4);
-    }
-    70% {
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 15px rgba(0, 224, 255, 0);
-    }
-    100% {
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 0 rgba(0, 224, 255, 0);
-    }
+@keyframes pulse-border-red {
+    0% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 0 var(--pulse-red); }
+    70% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 15px rgba(255, 69, 0, 0); }
+    100% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 0 var(--pulse-red); }
 }
+
+@keyframes pulse-border-yellow {
+    0% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 0 var(--pulse-yellow); }
+    70% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 15px rgba(255, 200, 0, 0); }
+    100% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 0 var(--pulse-yellow); }
+}
+
+/* Aplicar animaciones específicas a cada tile, con retrasos si se desean */
+#pHome { animation: pulse-border-blue 2s infinite ease-out; }
+#pDraw { animation: pulse-border-red 2s infinite ease-out 0.3s; /* Ligero retraso */ }
+#pAway { animation: pulse-border-yellow 2s infinite ease-out 0.6s; /* Ligero retraso */ }
+#pBTTS { animation: pulse-border-red 2s infinite ease-out 0.9s; }
+#pOver { animation: pulse-border-blue 2s infinite ease-out 1.2s; }
+
 
 .probability-tile .label {
     font-size: 0.85rem;
