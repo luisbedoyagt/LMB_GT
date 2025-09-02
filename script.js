@@ -1,5 +1,5 @@
 /**
- * @fileoverview Script mejorado para interfaz web que muestra estadísticas de fútbol y calcula probabilidades de partidos
+ * @fileoverview Script para interfaz web que muestra estadísticas de fútbol y calcula probabilidades de partidos
  * usando datos de una API de Google Apps Script. Integra la API de Grok para predicciones avanzadas con IA, activada por un botón.
  */
 
@@ -31,7 +31,7 @@ function factorial(n) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS Y API
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
 const GROK_API_URL = "https://api.x.ai/v1/chat/completions";
 const GROK_API_KEY = "xai-yfaqau6cmN5bRELdR4nAbiDbqrCChFrpM8QRDYF5EhVyMiaY8nLyBlyTM1VaSaGtu75YTkhCjWt3Gzg1";
 
@@ -119,10 +119,13 @@ async function fetchAllData() {
 
     try {
         const res = await fetch(`${WEBAPP_URL}?tipo=todo&update=false`);
-        if (!res.ok) throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
+        }
         allData = await res.json();
 
-        if (!allData.calendario || !allData.ligas) throw new Error('Estructura de datos inválida');
+        if (!allData.calendario || !allData.ligas) throw new Error('Estructura de datos inválida: faltan "calendario" o "ligas"');
         
         const normalized = {};
         for (const key in allData.ligas) {
@@ -135,7 +138,8 @@ async function fetchAllData() {
         return allData;
     } catch (err) {
         console.error('Error en fetchAllData:', err);
-        $('details').innerHTML = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos. ${err.message}</div>`;
+        const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
+        $('details').innerHTML = errorMsg;
         if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
         return {};
     }
@@ -239,6 +243,9 @@ async function init() {
     const calcButton = $('calculateAI');
     if (calcButton) {
         calcButton.addEventListener('click', calculateAll);
+    } else {
+        console.error('Botón calculateAI no encontrado en el DOM');
+        $('details').innerHTML = '<div class="error"><strong>Error:</strong> Botón "Calcular con IA" no encontrado. Verifica el HTML.</div>';
     }
 }
 document.addEventListener('DOMContentLoaded', init);
@@ -512,6 +519,7 @@ async function calculateAll() {
     Devuelve un JSON con: { "home": prob_local, "draw": prob_empate, "away": prob_visitante, "btts": prob_ambos_anotan, "over25": prob_mas_2.5_goles }`;
 
     try {
+        $('details').innerHTML = '<div class="loading"><strong>Cargando:</strong> Calculando con IA...</div>';
         const response = await fetch(GROK_API_URL, {
             method: 'POST',
             headers: {
@@ -526,7 +534,7 @@ async function calculateAll() {
             })
         });
 
-        if (!response.ok) throw new Error(`Error en API de Grok: ${response.statusText}`);
+        if (!response.ok) throw new Error(`Error en API de Grok: ${response.statusText} (Código: ${response.status})`);
 
         const data = await response.json();
         const resultText = data.choices[0].message.content;
@@ -534,7 +542,7 @@ async function calculateAll() {
         try {
             probabilities = JSON.parse(resultText);
         } catch (e) {
-            throw new Error('Respuesta de Grok no es un JSON válido');
+            throw new Error('Respuesta de Grok no es un JSON válido: ' + resultText);
         }
 
         const { home: finalHome, draw: finalDraw, away: finalAway, btts: pBTTSH, over25: pO25H } = probabilities;
@@ -671,4 +679,3 @@ function dixonColesProbabilitiesLocal(tH, tA, league) {
         rho
     };
 }
-
