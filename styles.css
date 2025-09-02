@@ -99,13 +99,13 @@ body {
 @media (min-width: 768px) {
     .main-grid {
         grid-template-areas:
-            "events team-home team-away"
+            "events home away"
             "results results results";
         grid-template-columns: 1.25fr 1fr 1fr;
     }
     .event-card { grid-area: events; }
-    .team-card:nth-of-type(1) { grid-area: team-home; }
-    .team-card:nth-of-type(2) { grid-area: team-away; }
+    #card-home { grid-area: home; }
+    #card-away { grid-area: away; }
     .result-card { grid-area: results; }
 
     /* Estilo para las fichas de equipo en escritorio */
