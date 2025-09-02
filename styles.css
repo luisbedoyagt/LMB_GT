@@ -239,9 +239,9 @@ select:focus {
 }
 
 .team-logo {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
+    width: 45px;
+    height: 45px;
+    margin-right: 12px;
     vertical-align: middle;
     object-fit: contain;
 }
