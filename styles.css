@@ -569,43 +569,33 @@ select:focus {
 }
 
 
-/* --- A JUSTES PARA PANTALLAS MÓVILES --- */
+/* --- A JUSTES PARA PANTALLAS MÓVILES (SOLUCIÓN FINAL) --- */
 @media (max-width: 768px) {
-    .probabilities-container {
+    .probabilities-grid {
         display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .main-probabilities {
-        display: flex;
-        justify-content: space-between;
-        gap: 0.5rem;
-    }
-
-    .main-probabilities .probability-tile {
-        flex: 1 1 32%; /* Un poco menos del 33.3% para dejar espacio para el gap */
-        max-width: 32%; /* Fuerza el tamaño máximo */
-    }
-
-    .secondary-probabilities {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
         flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem; /* Espacio entre los elementos */
     }
 
-    .secondary-probabilities .probability-tile {
-        flex: 1 1 45%;
-        max-width: unset;
+    .probability-tile {
+        flex: 1 1 30%; /* Da a cada uno de los primeros 3 un tercio del espacio */
+        max-width: 32%; /* Fuerza un ancho máximo para asegurar el espacio */
     }
 
+    /* Solamente los últimos dos elementos (Ambos Anotan y Más de 2.5 Goles)
+       necesitan un estilo diferente. Usamos :nth-child(n+4) para seleccionarlos */
+    .probability-tile:nth-child(n+4) {
+        flex: 1 1 45%; /* Les da a estos dos elementos una mitad del espacio */
+        max-width: 48%; /* Fuerza el ancho para que quepan dos por línea */
+    }
+
+    /* Ajustes de tipografía para móviles */
     .probability-tile .label {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
-
     .probability-tile .value {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
     }
 }
 
