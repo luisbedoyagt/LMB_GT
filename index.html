@@ -3,154 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análisis de Partidos</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <title>Calculadora de Probabilidades</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header class="app-header">
-            <h1>Análisis de Partidos</h1>
-            <p>Selecciona un partido para un pronóstico instantáneo.</p>
-        </header>
+    <header class="header">
+        <h1>Análisis de Partidos de Fútbol</h1>
+    </header>
+
+    <main class="container">
+        <section class="card team-selection-card">
+            <header class="card-header">
+                <i class="fas fa-futbol"></i>
+                <h3>Selecciona el Partido</h3>
+            </header>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="leagueSelect">Liga:</label>
+                    <select id="leagueSelect" class="custom-select"></select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group team-group">
+                        <label for="teamHome">Equipo Local:</label>
+                        <select id="teamHome" class="custom-select"></select>
+                    </div>
+                    <div class="form-group team-group">
+                        <label for="teamAway">Equipo Visitante:</label>
+                        <select id="teamAway" class="custom-select"></select>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button id="reset" class="btn btn-secondary">Limpiar</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="team-cards-container">
+            <section id="card-home" class="card team-card">
+                <header class="card-header">
+                    <h3 id="teamNameHome">Local</h3>
+                </header>
+                <div class="card-body" id="formHomeBox">
+                    <div class="team-details">
+                        <div class="stat-section">
+                            <span class="section-title">General</span>
+                            <div class="stat-metrics">
+                                <span>PJ: 0</span>
+                                <span>Puntos: 0</span>
+                                <span>DG: 0</span>
+                            </div>
+                        </div>
+                        <div class="stat-section">
+                            <span class="section-title">Local</span>
+                            <div class="stat-metrics">
+                                <span>PJ: 0</span>
+                                <span>PG: 0</span>
+                                <span>DG: 0</span>
+                            </div>
+                        </div>
+                        <div class="stat-section">
+                            <span class="section-title">Visitante</span>
+                            <div class="stat-metrics">
+                                <span>PJ: 0</span>
+                                <span>PG: 0</span>
+                                <span>DG: 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="card-away" class="card team-card">
+                <header class="card-header">
+                    <h3 id="teamNameAway">Visitante</h3>
+                </header>
+                <div class="card-body" id="formAwayBox">
+                    <div class="team-details">
+                        <div class="stat-section">
+                            <span class="section-title">General</span>
+                            <div class="stat-metrics">
+                                <span>PJ: 0</span>
+                                <span>Puntos: 0</span>
+                                <span>DG: 0</span>
+                            </div>
+                        </div>
+                        <div class="stat-section">
+                            <span class="section-title">Local</span>
+                            <div class="stat-metrics">
+                                <span>PJ: 0</span>
+                                <span>PG: 0</span>
+                                <span>DG: 0</span>
+                            </div>
+                        </div>
+                        <div class="stat-section">
+                            <span class="section-title">Visitante</span>
+                            <div class="stat-metrics">
+                                <span>PJ: 0</span>
+                                <span>PG: 0</span>
+                                <span>DG: 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="card upcoming-events-card">
+            <header class="card-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Próximos Eventos</h3>
+            </header>
+            <div class="card-body">
+                <div id="selected-league-events" class="events-list">
+                    <div class="event-item placeholder">
+                        <span>Selecciona una liga para ver eventos próximos.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card result-card">
+            <header class="card-header">
+                <i class="fas fa-chart-line"></i>
+                <h3>Resultados y Probabilidades</h3>
+            </header>
+            <div class="card-body">
+                <div id="details">
+                    Detalles del Pronóstico
+                </div>
+                <div class="probabilities-grid">
+                    <div class="probability-box">
+                        <span class="probability-label">Local</span>
+                        <span id="pHome" class="stat-value">--</span>
+                    </div>
+                    <div class="probability-box">
+                        <span class="probability-label">Empate</span>
+                        <span id="pDraw" class="stat-value">--</span>
+                    </div>
+                    <div class="probability-box">
+                        <span class="probability-label">Visitante</span>
+                        <span id="pAway" class="stat-value">--</span>
+                    </div>
+                    <div class="probability-box">
+                        <span class="probability-label">Ambos Anotan</span>
+                        <span id="pBTTS" class="stat-value">--</span>
+                    </div>
+                    <div class="probability-box">
+                        <span class="probability-label">Más de 2.5 Goles</span>
+                        <span id="pO25" class="stat-value">--</span>
+                    </div>
+                </div>
+                <div class="recommendation-box">
+                    <p class="suggestion-title">Nuestra Sugerencia</p>
+                    <div id="suggestion">
+                        <p>Esperando datos...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
         
-        <main class="main-grid">
-            <section class="card event-card">
-                <header class="card-header">
-                    <i class="fas fa-calendar-alt"></i>
-                    <h3>Próximos Eventos</h3>
-                </header>
-                <div class="card-body">
-                    <div class="control-group">
-                        <label for="leagueSelect">Selecciona una Liga:</label>
-                        <select id="leagueSelect"></select>
-                    </div>
-                    <div class="control-group">
-                        <label>Selecciona un Evento:</label>
-                        <div id="selected-league-events" class="event-list">
-                            <div class="event-item placeholder"><span>Selecciona una liga para ver eventos próximos.</span></div>
-                        </div>
-                    </div>
+        <section class="card ia-card">
+            <header class="card-header">
+                <i class="fas fa-robot"></i>
+                <h3>Análisis de la IA</h3>
+            </header>
+            <div class="card-body">
+                <div id="detailed-prediction">
+                    <p>Esperando pronóstico detallado...</p>
                 </div>
-            </section>
-
-            <section class="card team-card" id="card-home">
-                <header class="card-header">
-                    <i class="fas fa-home"></i>
-                    <h3>Local</h3>
-                </header>
-                <div class="card-body">
-                    <div class="control-group">
-                        <label for="teamHome">Selecciona el Equipo Local:</label>
-                        <select id="teamHome"></select>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-box">
-                            <span class="stat-label">Posición</span>
-                            <span class="stat-value" id="posHome">--</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-label">Goles a Favor</span>
-                            <span class="stat-value" id="gfHome">--</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-label">Goles en Contra</span>
-                            <span class="stat-value" id="gaHome">--</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-label">% de Victorias</span>
-                            <span class="stat-value" id="winRateHome">--</span>
-                        </div>
-                    </div>
-                    <div id="formHomeBox">
-                        </div>
-                </div>
-            </section>
-
-            <section class="card team-card" id="card-away">
-                <header class="card-header">
-                    <i class="fas fa-plane-departure"></i>
-                    <h3>Visitante</h3>
-                </header>
-                <div class="card-body">
-                    <div class="control-group">
-                        <label for="teamAway">Selecciona el Equipo Visitante:</label>
-                        <select id="teamAway"></select>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-box">
-                            <span class="stat-label">Posición</span>
-                            <span class="stat-value" id="posAway">--</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-label">Goles a Favor</span>
-                            <span class="stat-value" id="gfAway">--</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-label">Goles en Contra</span>
-                            <span class="stat-value" id="gaAway">--</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-label">% de Victorias</span>
-                            <span class="stat-value" id="winRateAway">--</span>
-                        </div>
-                    </div>
-                    <div id="formAwayBox">
-                        </div>
-                </div>
-            </section>
-
-            <section class="card result-card">
-                <header class="card-header">
-                    <i class="fas fa-chart-line"></i>
-                    <h3>Resultados y Probabilidades</h3>
-                </header>
-                <div class="card-body">
-                    <div id="detailed-prediction">
-                        <p>Esperando pronóstico detallado...</p>
-                    </div>
-                    <div id="details">
-                        Detalles del Pronóstico
-                    </div>
-                    <div class="probabilities-grid">
-                        <div class="probability-tile">
-                            <span class="label">Local</span>
-                            <span class="value" id="pHome">--</span>
-                        </div>
-                        <div class="probability-tile">
-                            <span class="label">Empate</span>
-                            <span class="value" id="pDraw">--</span>
-                        </div>
-                        <div class="probability-tile">
-                            <span class="label">Visitante</span>
-                            <span class="value" id="pAway">--</span>
-                        </div>
-                        <div class="probability-tile">
-                            <span class="label">Ambos Anotan</span>
-                            <span class="value" id="pBTTS">--</span>
-                        </div>
-                        <div class="probability-tile">
-                            <span class="label">Más de 2.5 Goles</span>
-                            <span class="value" id="pO25">--</span>
-                        </div>
-                    </div>
-                    <div class="recommendation-box">
-                        <h4 class="rec-title">Nuestra Sugerencia</h4>
-                        <div class="rec-suggestion" id="suggestion">
-                            <p>Esperando datos...</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            </div>
+        </section>
         </main>
 
-        <footer class="reset-container">
-            <button class="btn btn-secondary" id="reset">Resetear Todo</button>
-        </footer>
-    </div>
     <script src="script.js"></script>
 </body>
 </html>
