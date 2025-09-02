@@ -320,7 +320,7 @@ async function init() {
 document.addEventListener('DOMContentLoaded', init);
 
 // ----------------------
-// FUNCIONES AUXILIARES (sin cambios)
+// FUNCIONES AUXILIARES (CORREGIDAS)
 // ----------------------
 function onLeagueChange() {
     const code = $('leagueSelect').value;
@@ -430,13 +430,11 @@ function clearTeamData(type) {
         $('gfHome').textContent = '--';
         $('gaHome').textContent = '--';
         $('winRateHome').textContent = '--';
-        $('formHomeTeam').innerHTML = 'Local: --';
     } else {
         $('posAway').textContent = '--';
         $('gfAway').textContent = '--';
         $('gaAway').textContent = '--';
         $('winRateAway').textContent = '--';
-        $('formAwayTeam').innerHTML = 'Visitante: --';
     }
 }
 
@@ -457,7 +455,7 @@ function clearAll() {
 }
 
 // ----------------------
-// BÚSQUEDA Y LLENADO DE EQUIPO (sin cambios)
+// BÚSQUEDA Y LLENADO DE EQUIPO (CORREGIDO)
 // ----------------------
 function findTeam(leagueCode, teamName) {
     if (!teamsByLeague[leagueCode]) return null;
@@ -596,7 +594,7 @@ function dixonColesProbabilities(tH, tA, league) {
 }
 
 // ----------------------
-// CÁLCULO PRINCIPAL
+// CÁLCULO PRINCIPAL (CORREGIDO)
 // ----------------------
 function calculateAll() {
     const teamHome = $('teamHome').value;
@@ -618,9 +616,9 @@ function calculateAll() {
     const { finalHome, finalDraw, finalAway, pBTTSH, pO25H, rho } = dixonColesProbabilities(tH, tA, league);
 
     const detailsText = `
-        **Ventaja Local:** Factor de ataque local vs defensa visitante.
-        **Fuerza Relativa:** Comparación de la posición en la tabla.
-        **Factor Dixon-Coles:** Ajuste por tendencia al empate (${formatDec(rho)}).
+        <p><strong>Ventaja Local:</strong> Factor de ataque local vs defensa visitante.</p>
+        <p><strong>Fuerza Relativa:</strong> Comparación de la posición en la tabla.</p>
+        <p><strong>Factor Dixon-Coles:</strong> Ajuste por tendencia al empate (${formatDec(rho)}).</p>
     `;
     $('details').innerHTML = detailsText;
 
