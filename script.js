@@ -1,649 +1,366 @@
-/**
- * @fileoverview Script mejorado para interfaz web que muestra estadísticas de fútbol y calcula probabilidades de partidos
- * usando datos de una API de Google Apps Script. Ahora usa un modelo basado en la distribución de Poisson
- * con el ajuste de Dixon y Coles y "shrinkage" para una mejor predicción de empates y resultados realistas.
- */
-
-// ----------------------
-// UTILIDADES
-// ----------------------
-const $ = id => document.getElementById(id);
-const formatPct = x => (100 * (isFinite(x) ? x : 0)).toFixed(1) + '%';
-const formatDec = x => (isFinite(x) ? x.toFixed(2) : '0.00');
-const parseNumberString = val => {
-    const s = String(val || '').replace(/,/g, '.');
-    const n = Number(s);
-    return isFinite(n) ? n : 0;
-};
-
-// Funciones auxiliares para Poisson y Dixon-Coles
-function poissonProbability(lambda, k) {
-    if (lambda <= 0 || k < 0) return 0;
-    return (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
+/* Variables y estilos globales */
+:root {
+    --primary-bg: #1A1A1A;
+    --secondary-bg: #222222;
+    --card-bg: #2C2C2C;
+    --highlight-green: #38A169;
+    --dark-green: #2B7A4B;
+    --text-color: #E0E0E0;
+    --label-color: #B0B0B0;
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --font-main: 'Roboto', sans-serif;
+    --font-heading: 'Oswald', sans-serif;
 }
 
-function factorial(n) {
-    if (n === 0 || n === 1) return 1;
-    let res = 1;
-    for (let i = 2; i <= n; i++) res *= i;
-    return res;
+/* Reset y tipografía */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-// ----------------------
-// CONFIGURACIÓN DE LIGAS (sin cambios)
-// ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyhyoxXAt1eMt01tzaWG4GVJviJuMo_CK_U6loFEV84EPvdAuZEFYMw7maBfDij4P4Z/exec";
-let teamsByLeague = {};
-let allData = {};
-
-const leagueNames = {
-    "esp.1": "LaLiga España",
-    "esp.2": "Segunda España",
-    "eng.1": "Premier League Inglaterra",
-    "eng.2": "Championship Inglaterra",
-    "ita.1": "Serie A Italia",
-    "ger.1": "Bundesliga Alemania",
-    "fra.1": "Ligue 1 Francia",
-    "ned.1": "Eredivisie Países Bajos",
-    "ned.2": "Eerste Divisie Países Bajos",
-    "por.1": "Liga Portugal",
-    "mex.1": "Liga MX México",
-    "usa.1": "MLS Estados Unidos",
-    "bra.1": "Brasileirão Brasil",
-    "gua.1": "Liga Nacional Guatemala",
-    "crc.1": "Liga Promerica Costa Rica",
-    "hon.1": "Liga Nacional Honduras",
-    "ksa.1": "Pro League Arabia Saudita"
-};
-
-const leagueCodeToName = {
-    "esp.1": "España_LaLiga",
-    "esp.2": "España_Segunda",
-    "eng.1": "Inglaterra_PremierLeague",
-    "eng.2": "Inglaterra_Championship",
-    "ita.1": "Italia_SerieA",
-    "ger.1": "Alemania_Bundesliga",
-    "fra.1": "Francia_Ligue1",
-    "ned.1": "PaísesBajos_Eredivisie",
-    "ned.2": "PaísesBajos_EersteDivisie",
-    "por.1": "Portugal_LigaPortugal",
-    "mex.1": "México_LigaMX",
-    "usa.1": "EstadosUnidos_MLS",
-    "bra.1": "Brasil_Brasileirao",
-    "gua.1": "Guatemala_LigaNacional",
-    "crc.1": "CostaRica_LigaPromerica",
-    "hon.1": "Honduras_LigaNacional",
-    "ksa.1": "Arabia_Saudi_ProLeague"
-};
-
-// ----------------------
-// NORMALIZACIÓN DE DATOS (sin cambios)
-// ----------------------
-function normalizeTeam(raw) {
-    if (!raw) return null;
-    const r = {};
-    r.name = raw.name || '';
-    if (!r.name) return null;
-    r.pos = parseNumberString(raw.rank || 0);
-    r.gf = parseNumberString(raw.goalsFor || 0);
-    r.ga = parseNumberString(raw.goalsAgainst || 0);
-    r.pj = parseNumberString(raw.gamesPlayed || 0);
-    r.g = parseNumberString(raw.wins || 0);
-    r.e = parseNumberString(raw.ties || 0);
-    r.p = parseNumberString(raw.losses || 0);
-    r.points = parseNumberString(raw.points || (r.g * 3 + r.e) || 0);
-    r.gfHome = parseNumberString(raw.goalsForHome || 0);
-    r.gfAway = parseNumberString(raw.goalsForAway || 0);
-    r.gaHome = parseNumberString(raw.goalsAgainstHome || 0);
-    r.gaAway = parseNumberString(raw.goalsAgainstAway || 0);
-    r.pjHome = parseNumberString(raw.gamesPlayedHome || 0);
-    r.pjAway = parseNumberString(raw.gamesPlayedAway || 0);
-    r.winsHome = parseNumberString(raw.winsHome || 0);
-    r.winsAway = parseNumberString(raw.winsAway || 0);
-    r.tiesHome = parseNumberString(raw.tiesHome || 0);
-    r.tiesAway = parseNumberString(raw.tiesAway || 0);
-    r.lossesHome = parseNumberString(raw.lossesHome || 0);
-    r.lossesAway = parseNumberString(raw.lossesAway || 0);
-    r.logoUrl = raw.logoUrl || '';
-    return r;
+body {
+    font-family: var(--font-main);
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-// ----------------------
-// FETCH DATOS COMPLETOS (sin cambios)
-// ----------------------
-async function fetchAllData() {
-    const leagueSelect = $('leagueSelect');
-    if (leagueSelect) leagueSelect.innerHTML = '<option value="">Cargando datos...</option>';
+.container {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-    try {
-        const res = await fetch(`${WEBAPP_URL}?tipo=todo&update=false`);
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
-        }
-        allData = await res.json();
+/* Encabezado de la app */
+.app-header {
+    text-align: center;
+    padding: 2rem 0;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
 
-        if (!allData.calendario || !allData.ligas) {
-            throw new Error('Estructura de datos inválida: faltan "calendario" o "ligas"');
-        }
+.app-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: var(--highlight-green);
+    letter-spacing: 1px;
+}
 
-        const normalized = {};
-        for (const key in allData.ligas) {
-            normalized[key] = (allData.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
-        }
-        teamsByLeague = normalized;
+.app-header p {
+    font-size: 0.9rem;
+    color: var(--label-color);
+    margin-top: 0.5rem;
+}
 
-        localStorage.setItem('allData', JSON.stringify(allData));
-        return allData;
-    } catch (err) {
-        console.error('Error en fetchAllData:', err);
-        const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
-        $('details').innerHTML = errorMsg;
-        if (leagueSelect) leagueSelect.innerHTML = '<option value="">Error al cargar ligas</option>';
-        return {};
+/* Estilos de las "fichas" o tarjetas */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: var(--secondary-bg);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--highlight-green);
+}
+
+.card-header h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.card-header .fas {
+    font-size: 1.25rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Contenedor principal de la grilla */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .main-grid {
+        grid-template-areas:
+            "events home away"
+            "results results results";
+        grid-template-columns: 1.25fr 1fr 1fr;
+    }
+    .event-card { grid-area: events; }
+    #card-home { grid-area: home; }
+    #card-away { grid-area: away; }
+    .result-card { grid-area: results; }
+
+    /* Estilo para las fichas de equipo en escritorio */
+    .team-card {
+        margin-bottom: 0;
     }
 }
 
-// ----------------------
-// MUESTRA DE EVENTOS FUTUROS (sin cambios)
-// ----------------------
-function displayUpcomingEvents() {
-    const upcomingEventsList = $('upcoming-events-list');
-    if (!upcomingEventsList) return;
-
-    const allEvents = [];
-    if (allData.calendario) {
-        for (const liga in allData.calendario) {
-            allData.calendario[liga].forEach(event => {
-                let eventDateTime;
-                try {
-                    const parsedDate = new Date(event.fecha);
-                    if (isNaN(parsedDate.getTime())) {
-                        throw new Error("Fecha inválida");
-                    }
-                    const dateOptions = {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        timeZone: 'America/Guatemala'
-                    };
-                    const timeOptions = {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                        timeZone: 'America/Guatemala'
-                    };
-                    const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
-                    const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
-                    eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
-                } catch (err) {
-                    console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
-                    eventDateTime = `${event.fecha} (Hora no disponible)`;
-                }
-
-                allEvents.push({
-                    liga: event.liga,
-                    teams: `${event.local} vs. ${event.visitante}`,
-                    estadio: event.estadio || 'Por confirmar',
-                    date: eventDateTime,
-                });
-            });
-        }
-    }
-
-    if (allEvents.length > 0) {
-        upcomingEventsList.innerHTML = '';
-        allEvents.forEach(event => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-        <strong>${event.liga}</strong>: ${event.teams}
-        <span>Estadio: ${event.estadio}</span>
-        <small>${event.date}</small>
-      `;
-            upcomingEventsList.appendChild(li);
-        });
-    } else {
-        upcomingEventsList.innerHTML = '<li>No hay eventos próximos disponibles.</li>';
-    }
-
-    displaySelectedLeagueEvents('');
+/* Eventos y controles */
+.control-group {
+    margin-bottom: 1rem;
 }
 
-// ----------------------
-// MUESTRA DE EVENTOS DE LA LIGA SELECCIONADA (CON CAMBIOS EN CLASE)
-// ----------------------
-function displaySelectedLeagueEvents(leagueCode) {
-    const selectedEventsList = $('selected-league-events');
-    if (!selectedEventsList) return;
-
-    selectedEventsList.innerHTML = '';
-
-    if (!leagueCode || !allData.calendario) {
-        selectedEventsList.innerHTML = '<div class="event-item placeholder"><span>Selecciona una liga para ver eventos próximos.</span></div>';
-        return;
-    }
-
-    const ligaName = leagueCodeToName[leagueCode];
-    const events = (allData.calendario[ligaName] || []).slice(0, 3);
-
-    if (events.length === 0) {
-        selectedEventsList.innerHTML = '<div class="event-item placeholder"><span>No hay eventos próximos para esta liga.</span></div>';
-        return;
-    }
-
-    events.forEach(event => {
-        let eventDateTime;
-        try {
-            const parsedDate = new Date(event.fecha);
-            if (isNaN(parsedDate.getTime())) {
-                throw new Error("Fecha inválida");
-            }
-            const dateOptions = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                timeZone: 'America/Guatemala'
-            };
-            const timeOptions = {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false,
-                timeZone: 'America/Guatemala'
-            };
-            const formattedDate = parsedDate.toLocaleDateString('es-ES', dateOptions);
-            const formattedTime = parsedDate.toLocaleTimeString('es-ES', timeOptions);
-            eventDateTime = `${formattedDate} ${formattedTime} (GT)`;
-        } catch (err) {
-            console.warn(`Error parseando fecha para el evento: ${event.local} vs. ${event.visitante}`, err);
-            eventDateTime = `${event.fecha} (Hora no disponible)`;
-        }
-
-        const div = document.createElement('div');
-        div.className = 'event-item';
-        div.innerHTML = `
-            <strong>${event.local} vs. ${event.visitante}</strong>
-            <span>Estadio: ${event.estadio || 'Por confirmar'}</span>
-            <span>${eventDateTime}</span>
-        `;
-        selectedEventsList.appendChild(div);
-    });
+.control-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--label-color);
+    margin-bottom: 0.5rem;
 }
 
-// ----------------------
-// INICIALIZACIÓN (sin cambios)
-// ----------------------
-async function init() {
-    clearTeamData('Home');
-    clearTeamData('Away');
-    updateCalcButton();
-
-    await fetchAllData();
-    displayUpcomingEvents();
-
-    const leagueSelect = $('leagueSelect');
-    const teamHomeSelect = $('teamHome');
-    const teamAwaySelect = $('teamAway');
-
-    if (!leagueSelect || !teamHomeSelect || !teamAwaySelect) {
-        $('details').innerHTML = '<div class="error"><strong>Error:</strong> Problema con la interfaz HTML.</div>';
-        return;
-    }
-
-    leagueSelect.innerHTML = '<option value="">-- Selecciona liga --</option>';
-    Object.keys(teamsByLeague).sort().forEach(code => {
-        const opt = document.createElement('option');
-        opt.value = code;
-        opt.textContent = leagueNames[code] || code;
-        leagueSelect.appendChild(opt);
-    });
-
-    leagueSelect.addEventListener('change', () => {
-        onLeagueChange();
-        displaySelectedLeagueEvents(leagueSelect.value);
-    });
-    teamHomeSelect.addEventListener('change', () => {
-        if (restrictSameTeam()) {
-            fillTeamData($('teamHome').value, $('leagueSelect').value, 'Home');
-            updateCalcButton();
-        }
-    });
-    teamAwaySelect.addEventListener('change', () => {
-        if (restrictSameTeam()) {
-            fillTeamData($('teamAway').value, $('leagueSelect').value, 'Away');
-            updateCalcButton();
-        }
-    });
-
-    $('recalc').addEventListener('click', calculateAll);
-    $('reset').addEventListener('click', clearAll);
-}
-document.addEventListener('DOMContentLoaded', init);
-
-// ----------------------
-// FUNCIONES AUXILIARES (CORREGIDAS)
-// ----------------------
-function onLeagueChange() {
-    const code = $('leagueSelect').value;
-    const teamHomeSelect = $('teamHome');
-    const teamAwaySelect = $('teamAway');
-    teamHomeSelect.innerHTML = '<option value="">Cargando equipos...</option>';
-    teamAwaySelect.innerHTML = '<option value="">Cargando equipos...</option>';
-
-    if (!code || !teamsByLeague[code] || teamsByLeague[code].length === 0) {
-        clearTeamData('Home');
-        clearTeamData('Away');
-        updateCalcButton();
-        $('details').innerHTML = '<div class="warning"><strong>Advertencia:</strong> No hay datos disponibles para esta liga.</div>';
-        return;
-    }
-
-    const fragmentHome = document.createDocumentFragment();
-    const defaultOptionHome = document.createElement('option');
-    defaultOptionHome.value = '';
-    defaultOptionHome.textContent = '-- Selecciona equipo --';
-    fragmentHome.appendChild(defaultOptionHome);
-    const fragmentAway = document.createDocumentFragment();
-    const defaultOptionAway = document.createElement('option');
-    defaultOptionAway.value = '';
-    defaultOptionAway.textContent = '-- Selecciona equipo --';
-    fragmentAway.appendChild(defaultOptionAway);
-
-    teamsByLeague[code].forEach(t => {
-        const opt1 = document.createElement('option');
-        opt1.value = t.name;
-        opt1.textContent = t.name;
-        fragmentHome.appendChild(opt1);
-
-        const opt2 = document.createElement('option');
-        opt2.value = t.name;
-        opt2.textContent = t.name;
-        fragmentAway.appendChild(opt2);
-    });
-
-    teamHomeSelect.innerHTML = '';
-    teamAwaySelect.innerHTML = '';
-    teamHomeSelect.appendChild(fragmentHome);
-    teamAwaySelect.appendChild(fragmentAway);
-
-    clearTeamData('Home');
-    clearTeamData('Away');
-    updateCalcButton();
+select {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--secondary-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
 }
 
-function updateCalcButton() {
-    const teamHome = $('teamHome').value;
-    const teamAway = $('teamAway').value;
-    const leagueCode = $('leagueSelect').value;
-    $('recalc').disabled = !(leagueCode && teamHome && teamAway && teamHome !== teamAway);
+select:focus {
+    outline: none;
+    border-color: var(--highlight-green);
 }
 
-function restrictSameTeam() {
-    const teamHome = $('teamHome').value;
-    const teamAway = $('teamAway').value;
-    if (teamHome && teamAway && teamHome === teamAway) {
-        $('details').innerHTML = '<div class="error"><strong>Error:</strong> No puedes seleccionar el mismo equipo para local y visitante.</div>';
-        if (document.activeElement === $('teamHome')) {
-            $('teamHome').value = '';
-            clearTeamData('Home');
-        } else {
-            $('teamAway').value = '';
-            clearTeamData('Away');
-        }
-        updateCalcButton();
-        return false;
-    }
-    return true;
+.event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-function clearTeamData(type) {
-    const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
-    box.innerHTML = `
-    <div class="team-details">
-        <div class="stat-section">
-            <span class="section-title">Rendimiento General</span>
-            <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>Puntos: 0</span>
-                <span>DG: 0</span>
-            </div>
-        </div>
-        <div class="stat-section">
-            <span class="section-title">Rendimiento de Local</span>
-            <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>PG: 0</span>
-                <span>DG: 0</span>
-            </div>
-        </div>
-        <div class="stat-section">
-            <span class="section-title">Rendimiento de Visitante</span>
-            <div class="stat-metrics">
-                <span>PJ: 0</span>
-                <span>PG: 0</span>
-                <span>DG: 0</span>
-            </div>
-        </div>
-    </div>
-  `;
-    if (type === 'Home') {
-        $('posHome').textContent = '--';
-        $('gfHome').textContent = '--';
-        $('gaHome').textContent = '--';
-        $('winRateHome').textContent = '--';
-    } else {
-        $('posAway').textContent = '--';
-        $('gfAway').textContent = '--';
-        $('gaAway').textContent = '--';
-        $('winRateAway').textContent = '--';
+.event-item {
+    background-color: var(--secondary-bg);
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.event-item strong {
+    font-weight: 500;
+    color: var(--highlight-green);
+    display: block;
+}
+
+.event-item span {
+    font-size: 0.8rem;
+    color: var(--label-color);
+    display: block;
+}
+
+.event-item.placeholder {
+    font-style: italic;
+    color: var(--label-color);
+}
+
+/* Estadísticas de equipos */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-box {
+    background-color: var(--secondary-bg);
+    padding: 0.75rem;
+    border-radius: 4px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--label-color);
+    text-transform: uppercase;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--highlight-green);
+    margin-top: 0.25rem;
+}
+
+.team-details {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--secondary-bg);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.team-details .stat-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.team-details .stat-section:last-child {
+    border-bottom: none;
+}
+
+.team-details .stat-section span {
+    font-size: 0.9rem;
+}
+
+.team-details .stat-section .stat-metrics {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--label-color);
+}
+
+.team-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Botones */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .action-buttons {
+        flex-direction: row;
     }
 }
 
-function clearAll() {
-    document.querySelectorAll('.stat-value').forEach(el => el.textContent = '--');
-    document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-    ['pHome', 'pDraw', 'pAway', 'pBTTS', 'pO25'].forEach(id => {
-        const el = $(id);
-        if (el) el.textContent = '--';
-    });
-    $('details').textContent = 'Detalles del Pronóstico';
-    $('suggestion').textContent = 'Esperando datos...';
-    
-    clearTeamData('Home');
-    clearTeamData('Away');
-    updateCalcButton();
-    displaySelectedLeagueEvents('');
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
 }
 
-// ----------------------
-// BÚSQUEDA Y LLENADO DE EQUIPO (CORREGIDO)
-// ----------------------
-function findTeam(leagueCode, teamName) {
-    if (!teamsByLeague[leagueCode]) return null;
-    return teamsByLeague[leagueCode].find(t => t.name === teamName) || null;
+.btn-green {
+    background-color: var(--highlight-green);
+    color: var(--primary-bg);
 }
 
-function fillTeamData(teamName, leagueCode, type) {
-    const t = findTeam(leagueCode, teamName);
-    if (!t) {
-        console.error(`Equipo no encontrado: ${teamName} en liga ${leagueCode}`);
-        $('details').innerHTML = `<div class="error"><strong>Error:</strong> Equipo ${teamName} no encontrado en la liga seleccionada.</div>`;
-        return;
-    }
+.btn-green:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
 
-    const lambda = type === 'Home' ? (t.pjHome ? t.gfHome / t.pjHome : t.gf / (t.pj || 1)) : (t.pjAway ? t.gfAway / t.pjAway : t.gf / (t.pj || 1));
-    const gaAvg = type === 'Home' ? (t.pjHome ? t.gaHome / t.pjHome : t.ga / (t.pj || 1)) : (t.pjAway ? t.gaAway / t.pjAway : t.ga / (t.pj || 1));
-    const dg = t.gf - t.ga;
-    const dgHome = t.gfHome - t.gaHome;
-    const dgAway = t.gfAway - t.gaAway;
+.btn-green:enabled:hover {
+    background-color: #4CAF6C;
+}
 
-    const box = $(type === 'Home' ? 'formHomeBox' : 'formAwayBox');
-    box.innerHTML = `
-    <div class="stat-section">
-      <span class="section-title">Rendimiento General</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pj || 0}</span>
-        <span>Puntos: ${t.points || 0}</span>
-        <span>DG: ${dg >= 0 ? '+' + dg : dg || 0}</span>
-      </div>
-    </div>
-    <div class="stat-section">
-      <span class="section-title">Rendimiento de Local</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pjHome || 0}</span>
-        <span>PG: ${t.winsHome || 0}</span>
-        <span>DG: ${dgHome >= 0 ? '+' + dgHome : dgHome || 0}</span>
-      </div>
-    </div>
-    <div class="stat-section">
-      <span class="section-title">Rendimiento de Visitante</span>
-      <div class="stat-metrics">
-        <span>PJ: ${t.pjAway || 0}</span>
-        <span>PG: ${t.winsAway || 0}</span>
-        <span>DG: ${dgAway >= 0 ? '+' + dgAway : dgAway || 0}</span>
-      </div>
-    </div>
-  `;
+.btn-secondary {
+    background-color: var(--border-color);
+    color: var(--text-color);
+}
 
-    if (type === 'Home') {
-        $('posHome').textContent = t.pos || '--';
-        $('gfHome').textContent = formatDec(lambda);
-        $('gaHome').textContent = formatDec(gaAvg);
-        $('winRateHome').textContent = formatPct(t.pjHome ? t.winsHome / t.pjHome : 0);
-    } else {
-        $('posAway').textContent = t.pos || '--';
-        $('gfAway').textContent = formatDec(lambda);
-        $('gaAway').textContent = formatDec(gaAvg);
-        $('winRateAway').textContent = formatPct(t.pjAway ? t.winsAway / t.pjAway : 0);
+.btn-secondary:hover {
+    background-color: #555;
+}
+
+/* Probabilidades y recomendaciones */
+.probabilities-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .probabilities-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
-// ----------------------
-// CÁLCULO DE PROBABILIDADES CON DIXON-COLES Y SHRINKAGE
-// ----------------------
-function dixonColesProbabilities(tH, tA, league) {
-    const rho = -0.11;
-    const shrinkageFactor = 1.0;
-
-    const teams = teamsByLeague[league];
-    let totalGames = 0, totalGf = 0, totalGa = 0, totalGfHome = 0, totalGaHome = 0, totalGfAway = 0, totalGaAway = 0;
-    teams.forEach(t => {
-        totalGames += t.pj || 0;
-        totalGf += t.gf || 0;
-        totalGa += t.ga || 0;
-        totalGfHome += t.gfHome || 0;
-        totalGaHome += t.gaHome || 0;
-        totalGfAway += t.gfAway || 0;
-        totalGaAway += t.gaAway || 0;
-    });
-
-    const leagueAvgGfHome = totalGfHome / (totalGames || 1);
-    const leagueAvgGaAway = totalGaAway / (totalGames || 1);
-    const leagueAvgGfAway = totalGfAway / (totalGames || 1);
-    const leagueAvgGaHome = totalGaHome / (totalGames || 1);
-
-    const homeAttackRaw = (tH.gfHome || 0) / (tH.pjHome || 1);
-    const homeDefenseRaw = (tH.gaHome || 0) / (tH.pjHome || 1);
-    const awayAttackRaw = (tA.gfAway || 0) / (tA.pjAway || 1);
-    const awayDefenseRaw = (tA.gaAway || 0) / (tA.pjAway || 1);
-
-    const homeAttackAdj = (homeAttackRaw + (leagueAvgGfHome * shrinkageFactor)) / (1 + shrinkageFactor);
-    const homeDefenseAdj = (homeDefenseRaw + (leagueAvgGaHome * shrinkageFactor)) / (1 + shrinkageFactor);
-    const awayAttackAdj = (awayAttackRaw + (leagueAvgGfAway * shrinkageFactor)) / (1 + shrinkageFactor);
-    const awayDefenseAdj = (awayDefenseRaw + (leagueAvgGaAway * shrinkageFactor)) / (1 + shrinkageFactor);
-
-    const homeAttackStrength = homeAttackAdj / (leagueAvgGfHome || 1);
-    const homeDefenseStrength = homeDefenseAdj / (leagueAvgGaHome || 1);
-    const awayAttackStrength = awayAttackAdj / (leagueAvgGfAway || 1);
-    const awayDefenseStrength = awayDefenseAdj / (leagueAvgGaAway || 1);
-
-    const lambdaHome = homeAttackStrength * awayDefenseStrength * (leagueAvgGfHome || 1);
-    const lambdaAway = awayAttackStrength * homeDefenseStrength * (leagueAvgGfAway || 1);
-
-    const maxGoals = 6;
-    let pHome = 0, pDraw = 0, pAway = 0, pBTTS = 0, pO25 = 0;
-
-    for (let h = 0; h <= maxGoals; h++) {
-        for (let a = 0; a <= maxGoals; a++) {
-            let prob;
-            if (h === a) {
-                prob = poissonProbability(lambdaHome, h) * poissonProbability(lambdaAway, a) * (1 + rho);
-            } else {
-                prob = poissonProbability(lambdaHome, h) * poissonProbability(lambdaAway, a);
-            }
-
-            if (h > a) pHome += prob;
-            else if (h === a) pDraw += prob;
-            else pAway += prob;
-
-            if (h >= 1 && a >= 1) pBTTS += prob;
-            if (h + a > 2) pO25 += prob;
-        }
-    }
-    
-    // Normalizar probabilidades principales para que sumen 1
-    const total = pHome + pDraw + pAway;
-    const finalHome = total > 0 ? pHome / total : 0.33;
-    const finalDraw = total > 0 ? pDraw / total : 0.33;
-    const finalAway = total > 0 ? pAway / total : 0.33;
-
-    // Normalizar probabilidades de Ambos Anotan y Más de 2.5 Goles
-    const finalBTTS = pBTTS / total;
-    const finalO25 = pO25 / total;
-
-    return { finalHome, finalDraw, finalAway, pBTTSH: finalBTTS, pO25H: finalO25, rho };
+.probability-tile {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+    text-align: center;
 }
 
-// ----------------------
-// CÁLCULO PRINCIPAL (CORREGIDO)
-// ----------------------
-function calculateAll() {
-    const teamHome = $('teamHome').value;
-    const teamAway = $('teamAway').value;
-    const league = $('leagueSelect').value;
-    if (!teamHome || !teamAway || !league) {
-        $('details').innerHTML = '<div class="error"><strong>Error:</strong> Selecciona una liga y ambos equipos.</div>';
-        return;
-    }
+.probability-tile .label {
+    font-size: 0.8rem;
+    color: var(--label-color);
+    text-transform: uppercase;
+    display: block;
+}
 
-    const tH = findTeam(league, teamHome);
-    const tA = findTeam(league, teamAway);
+.probability-tile .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--highlight-green);
+    display: block;
+    margin-top: 0.25rem;
+}
 
-    if (!tH || !tA) {
-        $('details').innerHTML = '<div class="error"><strong>Error:</strong> No se encontraron datos para uno o ambos equipos.</div>';
-        return;
-    }
+.recommendation-box {
+    background-color: var(--secondary-bg);
+    border: 1px dashed var(--highlight-green);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    text-align: center;
+}
 
-    const { finalHome, finalDraw, finalAway, pBTTSH, pO25H, rho } = dixonColesProbabilities(tH, tA, league);
+.rec-title {
+    font-size: 1rem;
+    color: var(--highlight-green);
+    margin-bottom: 0.5rem;
+}
 
-    const detailsText = `
-        <p><strong>Ventaja Local:</strong> Factor de ataque local vs defensa visitante.</p>
-        <p><strong>Fuerza Relativa:</strong> Comparación de la posición en la tabla.</p>
-        <p><strong>Factor Dixon-Coles:</strong> Ajuste por tendencia al empate (${formatDec(rho)}).</p>
-    `;
-    $('details').innerHTML = detailsText;
+.rec-suggestion {
+    font-size: 0.9rem;
+    color: var(--label-color);
+    font-style: italic;
+}
 
-    const probabilities = [
-        { label: 'Local', value: finalHome, id: 'pHome', bet: 'Apostar a la victoria de Local' },
-        { label: 'Empate', value: finalDraw, id: 'pDraw', bet: 'Apostar al Empate' },
-        { label: 'Visitante', value: finalAway, id: 'pAway', bet: 'Apostar a la victoria de Visitante' },
-        { label: 'Ambos Anotan', value: pBTTSH, id: 'pBTTS', bet: 'Apostar a que ambos equipos anotan' },
-        { label: 'Más de 2.5 goles', value: pO25H, id: 'pO25', bet: 'Apostar a Más de 2.5 goles' }
-    ];
+.rec-suggestion strong {
+    color: #fff;
+    font-weight: 700;
+}
 
-    let maxProb = 0;
-    let bestBet = '';
-
-    probabilities.forEach(p => {
-        const el = $(p.id);
-        if (el) {
-            el.textContent = formatPct(p.value);
-            if (p.value > maxProb) {
-                maxProb = p.value;
-                bestBet = p.bet;
-            }
-        }
-    });
-
-    const suggestionText = maxProb > 0.5 ? `¡Tu apuesta estelar es **${bestBet}** con una probabilidad del ${formatPct(maxProb)}!` : 'Las probabilidades están muy parejas. Analiza más a fondo o busca una apuesta de valor en otro mercado.';
-    $('suggestion').innerHTML = suggestionText;
+.error, .warning {
+    color: #ff6347;
+    background-color: #331f1a;
+    border: 1px solid #ff6347;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
 }
