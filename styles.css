@@ -375,7 +375,7 @@ select:focus {
 /* Probabilidades y recomendaciones */
 .probabilities-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 1rem;
     margin-top: 1.5rem;
 }
@@ -390,23 +390,47 @@ select:focus {
     background-color: #2a2a2a;
     border: 1px solid #3a3a3a;
     border-radius: 4px;
-    padding: 1rem;
+    padding: 0.75rem;
     text-align: center;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.probability-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .probability-tile .label {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: var(--label-color);
     text-transform: uppercase;
     display: block;
 }
 
 .probability-tile .value {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--highlight-blue);
     display: block;
     margin-top: 0.25rem;
+}
+
+/* Animación de pulsación */
+.pulse {
+    animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+    0% {
+        box-shadow: 0 0 0 0 rgba(77, 171, 247, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(77, 171, 247, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(77, 171, 247, 0);
+    }
 }
 
 .recommendation-box {
