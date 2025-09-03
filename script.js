@@ -32,7 +32,7 @@ function factorial(n) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyDGpEteteiUqDg03Cdhj7Ao7Y6dPZnpOKs-0AqWWWW6CTm5vDM1jaPiuxrR6llC7svdw/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzotYN03izf9udni34MiwzmlBaaX_AP_xl5jD0M1auNTJSwjEsB9Ohh2hEsVaNmi7XrSA/exec";
 let teamsByLeague = {};
 let allData = {};
 
@@ -653,4 +653,5 @@ function calculateAll() {
         $('suggestion').innerHTML = '<p>No se encontraron recomendaciones con una probabilidad superior al 30%. Analiza otros mercados.</p>';
     }
 }
+
 
