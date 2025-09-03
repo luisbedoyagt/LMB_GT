@@ -52,8 +52,8 @@ const leagueNames = {
     "bra.1": "Brasileirão Brasil",
     "gua.1": "Liga Nacional Guatemala",
     "crc.1": "Liga Promerica Costa Rica",
-    "hon.1": "Liga Nacional Honduras","ksa.1": 
-    "Arabia_Saudi_ProLeague",
+    "hon.1": "Liga Nacional Honduras",
+    "ksa.1": "Arabia_Saudi_ProLeague",
     "fifa.worldq.conmebol": "Eliminatorias CONMEBOL",
     "fifa.worldq.concacaf": "Eliminatorias CONCACAF",
     "fifa.worldq.uefa": "Eliminatorias UEFA"
@@ -116,7 +116,7 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// FETCH DATOS COMPLETOS
+// FETCH DATOS COMPLETOS (CORREGIDO)
 // ----------------------
 async function fetchAllData() {
     const leagueSelect = $('leagueSelect');
@@ -128,20 +128,36 @@ async function fetchAllData() {
             const errorText = await res.text();
             throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
         }
-        allData = await res.json();
+        const unifiedData = await res.json();
 
-        if (!allData.calendario || !allData.ligas) {
-            throw new Error('Estructura de datos inválida: faltan "calendario" o "ligas"');
-        }
+        // Reiniciar las estructuras de datos globales
+        const normalizedTeams = {};
+        const calendarEvents = {};
 
-        const normalized = {};
-        for (const key in allData.ligas) {
-            normalized[key] = (allData.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
-        }
-        teamsByLeague = normalized;
+        // Iterar sobre la lista unificada y separar los datos
+        unifiedData.forEach(item => {
+            if (item.type === "liga") {
+                const normalized = (item.equipos || []).map(normalizeTeam).filter(t => t && t.name);
+                normalizedTeams[item.id] = normalized;
+            } else if (item.type === "partido") {
+                const ligaName = item.liga;
+                if (!calendarEvents[ligaName]) {
+                    calendarEvents[ligaName] = [];
+                }
+                calendarEvents[ligaName].push(item);
+            }
+        });
+
+        // Asignar los datos procesados a las variables globales
+        teamsByLeague = normalizedTeams;
+        allData = {
+            calendario: calendarEvents,
+            ligas: normalizedTeams // Mantener esta clave para compatibilidad
+        };
 
         localStorage.setItem('allData', JSON.stringify(allData));
         return allData;
+
     } catch (err) {
         console.error('Error en fetchAllData:', err);
         const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
@@ -591,8 +607,6 @@ function calculateAll() {
     const ligaName = leagueCodeToName[league];
     const event = (allData.calendario[ligaName] || []).find(e => e.local === teamHome && e.visitante === teamAway);
 
-    // --- CORRECCIÓN CRÍTICA ---
-    // Se ha cambiado 'Pronóstico IA' por 'pronostico' para que coincida con la clave del JSON
     const detailedPredictionBox = $('detailed-prediction');
     if (event && event['pronostico']) {
         const formattedPrediction = event['pronostico'].replace(/\n/g, '<br>').replace(/###\s*(.*)/g, '<h4>$1</h4>');
@@ -639,12 +653,3 @@ function calculateAll() {
         $('suggestion').innerHTML = '<p>No se encontraron recomendaciones con una probabilidad superior al 30%. Analiza otros mercados.</p>';
     }
 }
-
-
-
-
-
-
-
-
-
