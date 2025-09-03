@@ -32,7 +32,7 @@ function factorial(n) {
 // ----------------------
 // CONFIGURACIÓN DE LIGAS
 // ----------------------
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzotYN03izf9udni34MiwzmlBaaX_AP_xl5jD0M1auNTJSwjEsB9Ohh2hEsVaNmi7XrSA/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycby_swpA1k3VvBOLN7amCJdHJMR9KeExsLvwvJGavJwSpzqU_hzGeRu9f2-haKaJ0HCU/exec";
 let teamsByLeague = {};
 let allData = {};
 
@@ -53,11 +53,7 @@ const leagueNames = {
     "gua.1": "Liga Nacional Guatemala",
     "crc.1": "Liga Promerica Costa Rica",
     "hon.1": "Liga Nacional Honduras",
-    "ksa.1": "Arabia_Saudi_ProLeague",
-    "fifa.worldq.conmebol": "Eliminatorias CONMEBOL",
-    "fifa.worldq.concacaf": "Eliminatorias CONCACAF",
-    "fifa.worldq.uefa": "Eliminatorias UEFA"
-    
+    "ksa.1": "Pro League Arabia Saudita"
 };
 
 const leagueCodeToName = {
@@ -77,10 +73,7 @@ const leagueCodeToName = {
     "gua.1": "Guatemala_LigaNacional",
     "crc.1": "CostaRica_LigaPromerica",
     "hon.1": "Honduras_LigaNacional",
-    "ksa.1": "Arabia_Saudi_ProLeague",
-    "fifa.worldq.conmebol": "Eliminatorias_CONMEBOL",
-    "fifa.worldq.concacaf": "Eliminatorias_CONCACAF",
-    "fifa.worldq.uefa": "Eliminatorias_UEFA"
+    "ksa.1": "Arabia_Saudi_ProLeague"
 };
 
 // ----------------------
@@ -116,7 +109,7 @@ function normalizeTeam(raw) {
 }
 
 // ----------------------
-// FETCH DATOS COMPLETOS (CORREGIDO)
+// FETCH DATOS COMPLETOS
 // ----------------------
 async function fetchAllData() {
     const leagueSelect = $('leagueSelect');
@@ -128,36 +121,20 @@ async function fetchAllData() {
             const errorText = await res.text();
             throw new Error(`Error HTTP ${res.status}: ${res.statusText}. Respuesta: ${errorText}`);
         }
-        const unifiedData = await res.json();
+        allData = await res.json();
 
-        // Reiniciar las estructuras de datos globales
-        const normalizedTeams = {};
-        const calendarEvents = {};
+        if (!allData.calendario || !allData.ligas) {
+            throw new Error('Estructura de datos inválida: faltan "calendario" o "ligas"');
+        }
 
-        // Iterar sobre la lista unificada y separar los datos
-        unifiedData.forEach(item => {
-            if (item.type === "liga") {
-                const normalized = (item.equipos || []).map(normalizeTeam).filter(t => t && t.name);
-                normalizedTeams[item.id] = normalized;
-            } else if (item.type === "partido") {
-                const ligaName = item.liga;
-                if (!calendarEvents[ligaName]) {
-                    calendarEvents[ligaName] = [];
-                }
-                calendarEvents[ligaName].push(item);
-            }
-        });
-
-        // Asignar los datos procesados a las variables globales
-        teamsByLeague = normalizedTeams;
-        allData = {
-            calendario: calendarEvents,
-            ligas: normalizedTeams // Mantener esta clave para compatibilidad
-        };
+        const normalized = {};
+        for (const key in allData.ligas) {
+            normalized[key] = (allData.ligas[key] || []).map(normalizeTeam).filter(t => t && t.name);
+        }
+        teamsByLeague = normalized;
 
         localStorage.setItem('allData', JSON.stringify(allData));
         return allData;
-
     } catch (err) {
         console.error('Error en fetchAllData:', err);
         const errorMsg = `<div class="error"><strong>Error:</strong> No se pudieron cargar los datos de la API. Verifica la conexión a la hoja de Google Sheets o el endpoint de la API. Detalle: ${err.message}</div>`;
@@ -607,6 +584,8 @@ function calculateAll() {
     const ligaName = leagueCodeToName[league];
     const event = (allData.calendario[ligaName] || []).find(e => e.local === teamHome && e.visitante === teamAway);
 
+    // --- CORRECCIÓN CRÍTICA ---
+    // Se ha cambiado 'Pronóstico IA' por 'pronostico' para que coincida con la clave del JSON
     const detailedPredictionBox = $('detailed-prediction');
     if (event && event['pronostico']) {
         const formattedPrediction = event['pronostico'].replace(/\n/g, '<br>').replace(/###\s*(.*)/g, '<h4>$1</h4>');
@@ -653,5 +632,3 @@ function calculateAll() {
         $('suggestion').innerHTML = '<p>No se encontraron recomendaciones con una probabilidad superior al 30%. Analiza otros mercados.</p>';
     }
 }
-
-
